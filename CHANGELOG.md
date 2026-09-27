@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here.
 
+## [0.0.2]
+
+- A GitHub Actions CI baseline (`.github/workflows/ci.yml`): validates the manifest, the version, CHANGELOG.md's heading, the seven README translations' structure and its own local Markdown links, then runs this project's real build/test through `tools/armor_project_tool.py build-test .` (vendored from ARMOR-COMMON, alongside `tools/armor_ci_validate.py` and `tools/_armor_readme_parity.py`, which do the manifest/docs checking).
+
 ## [0.0.1] - The local network, watched
 
 - **A program that looks at the network it is on** (Python 3.11, standard library only): the devices (the system's neighbour table filled by a poke of every address, an echo to each device found, a TCP look at 17 or 44 ports twelve at a time, and what devices announce about themselves by mDNS, UPnP and NetBIOS), the maker of each from the IEEE register of 40,250 blocks (`tools/fetch_oui.py` refreshes it), a guess of what it is (kind and system) and when it was first and last seen.
