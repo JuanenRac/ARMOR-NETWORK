@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-110 -110 220 220" role="img" aria-label="ARMOR-NETWORK">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#07090C"/><stop offset="1" stop-color="#12161C"/></linearGradient>
+    <filter id="g"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect x="-110" y="-110" width="220" height="220" rx="36" fill="url(#bg)"/>
+  <g transform="scale(0.95)" filter="url(#g)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#00E5FF" stroke-width="4">
+    <path d="M0,-84 L66,-58 V4 C66,48 34,72 0,88 C-34,72 -66,48 -66,4 V-58 Z"/>
+    <g transform="scale(.78) translate(0 4)" stroke-width="4">
+    <circle cy="-30" r="10"/><circle cx="-32" cy="26" r="8"/><circle cx="32" cy="26" r="8"/><circle cy="34" r="6" opacity=".7"/>
+    <path d="M-6,-21 L-27,19 M6,-21 L27,19 M0,-20 V28" stroke-width="2.4" opacity=".8"/><path d="M-22,-46 a30,30 0 0 1 44,0 M-14,-40 a20,20 0 0 1 28,0" stroke="#FFB020" stroke-width="3"/>
+    <circle cx="-32" cy="26" r="3" fill="#FFB020" stroke="none"/>
+    </g>
+  </g>
+</svg>
