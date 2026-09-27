@@ -1,1 +1,21 @@
-{"schema_version":"1.0","ecosystem":"A.R.M.O.R.","name":"ARMOR-NETWORK","version":"0.0.1","role":"Local network monitor: the devices on the house's network, the internet's state and what changes","stack":"Python 3.11+ (standard library only)","technologies":["Python","ARP / ICMP / TCP / mDNS / SSDP","IEEE OUI register","MQTT-compatible JSON"],"deployment_target":"Any machine on the network being watched (a PC, the CM5, a Raspberry Pi); it reports to ARMOR-SERVER","maturity":"scaffolding","family":"Field Nodes","parent":"ARMOR-COMMON","native_version":"0.0.1","build":"python -m unittest discover -s tests","notes":"The scanner, the inventory and its events, the internet state machine and the message are tested on a computer against a scripted network, and every message is accepted by ARMOR-COMMON. The program has been run once on a real network that had a router and a phone on it. It only observes: it sends echoes, TCP connections to a few ports and the multicast questions of mDNS and SSDP to the private network it is on, and a few questions to public addresses to know whether the internet is there. It never configures a router or a device and does not capture packets."}
+{
+  "schema_version": "1.0",
+  "ecosystem": "A.R.M.O.R.",
+  "name": "ARMOR-NETWORK",
+  "version": "0.0.2",
+  "role": "Local network monitor: the devices on the house's network, the internet's state and what changes",
+  "stack": "Python 3.11+ (standard library only)",
+  "technologies": [
+    "Python",
+    "ARP / ICMP / TCP / mDNS / SSDP",
+    "IEEE OUI register",
+    "MQTT-compatible JSON"
+  ],
+  "deployment_target": "Any machine on the network being watched (a PC, the CM5, a Raspberry Pi); it reports to ARMOR-SERVER",
+  "maturity": "scaffolding",
+  "family": "Field Nodes",
+  "parent": "ARMOR-COMMON",
+  "native_version": "0.0.2",
+  "build": "python -m unittest discover -s tests",
+  "notes": "The scanner, the inventory and its events, the internet state machine and the message are tested on a computer against a scripted network, and every message is accepted by ARMOR-COMMON. The program has been run once on a real network that had a router and a phone on it. It only observes: it sends echoes, TCP connections to a few ports and the multicast questions of mDNS and SSDP to the private network it is on, and a few questions to public addresses to know whether the internet is there. It never configures a router or a device and does not capture packets."
+}

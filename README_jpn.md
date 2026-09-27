@@ -85,6 +85,7 @@ See the [usage](docs/USAGE.md) and the [design](docs/DESIGN.md).
 * **[ARMOR-HARDWARE](../ARMOR-HARDWARE)** - 筐体、電子部品、ベンチ受け入れマトリクス
 * **[ARMOR-DEVOPS](../ARMOR-DEVOPS)** - デプロイ、CM5 テストベンチ、バックアップ、TLS
 * **[ARMOR-SIMULATOR](../ARMOR-SIMULATOR)** - 再現可能な故障を備えたオフラインのテレメトリシミュレーター
+* **[ARMOR-UPDATER](../ARMOR-UPDATER)** - エコシステム自身のリポジトリを検出し、インストールし、更新する
 * **[ARMOR-DOCS](../ARMOR-DOCS)** - アーキテクチャ、セキュリティ基準、機能マトリクス
 
 ## 📚 ドキュメントとコミュニティ
