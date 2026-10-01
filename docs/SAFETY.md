@@ -12,6 +12,10 @@ The only traffic that leaves the private range is the internet check: a TCP conn
 
 An ICMP echo; a one-byte UDP datagram to port 9 (so the system resolves the address); a TCP connection to a list of ports (17, or 44), each closed as soon as what it says is read (at most a few hundred bytes; for a web port, a minimal `GET /`); the multicast questions of mDNS and SSDP and one request to the description a UPnP device publishes (a page of at most 16 kB, only from the address that announced it); a NetBIOS name request; a reverse DNS lookup. **Nothing else.** No password, no login, no exploit, no fuzzing, no attempt to change anything on a device.
 
+## What leaves the house, and what comes in
+
+One request leaves the house: every ten minutes the node asks a public service for the public address (by default `https://ipinfo.io/json`, an https address you can change with `--public-info-url`), and nothing about the house is in it. `--no-public-info` stops it. What is asked of a device on request (a ping, a traceroute, a wake-up packet, a look at the ports, one `GET /` of a web page) is exactly what a person at the keyboard could do, and it only happens when an operator asks from Studio: the order arrives in the **answer** to the node's own message (the node never listens), it is one of six kinds, and its address must be private, on the network the node watches, not the node's own and not one it was told to skip (`--skip`); a wake-up goes to the broadcast address of that network and nowhere else. Nothing is run through a shell, and an order that does not pass is answered with the reason instead of being done.
+
 ## Being gentle
 
 * Twelve connections at a time at most, to one device; at most four devices have their ports looked at in one turn, a new one at once and the others every quarter of an hour.
