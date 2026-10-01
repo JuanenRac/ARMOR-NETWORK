@@ -30,6 +30,31 @@ armor-network demo --count 3 --validate  # a made-up house; --validate checks ev
 
 On the machine that is always on (the CM5, a Raspberry Pi, a PC): a systemd unit or a scheduled task that runs `armor-network watch` with the server's address, and `--data-dir` in a folder that survives reboots. The server needs the node to be allowed to write `armor/network/<node>/state` if it uses MQTT (`scripts/mqtt_identity.sh add network-node <node>` in ARMOR-DEVOPS); over HTTP it only needs the ingest token.
 
+A unit that works (the user, the paths and the server address are examples):
+
+```ini
+[Unit]
+Description=A.R.M.O.R. Network local monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=armor
+WorkingDirectory=/opt/armor/apps/ARMOR-NETWORK
+Environment=PYTHONPATH=/opt/armor/apps/ARMOR-NETWORK/src
+EnvironmentFile=/opt/armor/etc/armor.env
+ExecStart=/usr/bin/python3 -m armor_network watch --node-id house-1 --server-url http://127.0.0.1:18080 --data-dir /opt/armor/data/network-watch
+Restart=on-failure
+RestartSec=5
+MemoryMax=128M
+TasksMax=256
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Keep `TasksMax` at 256 or more: a sweep runs up to 32 `ping` workers, each starting a `ping` process of its own, and 12 more for the ports, so a smaller limit (32 is a common one) kills the node at its first sweep with `can't start new thread`. `ARMOR_INGEST_TOKEN` comes from the environment file, so it is never on a command line. When the server runs over HTTPS with a certificate for a host name, give `--server-url` that name (the certificate is checked, and a bare address does not match it); on the server's own machine, point the name at `127.0.0.1` in `/etc/hosts`.
+
 ## What to expect
 
 The first scan of a fresh `--data-dir` only learns: nothing is reported as new. From then on a device that appears is a `new_device` event and, on the server, an alarm until an administrator marks it as known in Studio. On Windows the sweep takes 10 to 20 seconds; a device that sleeps still answers ARP, so it stays present, and one that leaves is called offline after three minutes.
