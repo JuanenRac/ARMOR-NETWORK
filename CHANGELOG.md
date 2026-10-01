@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [0.0.5] - The public address, and orders from Studio
+
+- **The public address of the connection** (`public` in the message): every ten minutes the node asks a public service (`https://ipinfo.io/json` by default, `--public-info-url` to change it, `--no-public-info` to stop) and reports the address, the provider and the city, and when the address was seen to change. The answer is reduced to a real address and short plain texts; it is the one request this program makes that leaves the house, and nothing about the house is in it.
+- **Manual orders** (`results` in the message): an operator can ask from Studio for a sweep right now, a ping, a traceroute, a wake-up packet, a look at the ports of a device or at its web page. The orders arrive in the answer to the node's own message (the node never listens), at most four at a time, and each is checked before anything is done: one of six kinds, an address that is private, on the network the node watches, not its own and not one it was told to skip; a wake-up goes to the broadcast of that network only; nothing runs through a shell; an order that does not pass is answered with the reason. Results go out in every message for two minutes.
+- 13 new tests (66 in all); `docs/SAFETY.md`, `docs/MESSAGES.md`, `docs/USAGE.md` and the seven READMEs say what leaves the house and what comes in.
+
 ## [0.0.4] - A healthy line no longer looks slow
 
 - The latency of the line is what a ping, a connection and a DNS answer take. The web-page probe (a TLS handshake, a redirect, the other end's own load) is often a few hundred ms on a perfectly good line and was counted in the median, which made a healthy connection look degraded (32 'slow or lossy' alarms in three days on a line that was fine). It is still checked for being reachable, just not timed as the line.

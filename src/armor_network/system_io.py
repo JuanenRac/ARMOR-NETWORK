@@ -25,6 +25,7 @@ from .internet import ProbeResult
 from .ipnet import check_scan_range, hosts_of, is_private_address, network_of
 from .neighbors import in_network, parse_arp_windows, parse_ip_neigh, parse_proc_net_arp
 from .oui import normalize_mac
+from .orders import fetch_public_info, http_look, send_magic_packet
 from .services import clean_banner, parse_http, service_name
 
 WINDOWS = sys.platform.startswith("win")
@@ -315,6 +316,28 @@ class SystemIO:
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
             jobs = [pool.submit(tcp), pool.submit(dns, "1.1.1.1", "cloudflare.com"), pool.submit(dns, "8.8.8.8", "google.com"), pool.submit(web)]
             return [job.result() for job in jobs]
+
+    # ---- the manual orders ---------------------------------------------------------------------------------------------------------------------
+    def public_info(self, url: str) -> dict | None:
+        return fetch_public_info(url)
+
+    def traceroute(self, ip: str) -> str:
+        """The route to a device of the network, as the system's own tool prints it (a fixed argument list, never a shell), trimmed."""
+        if WINDOWS:
+            command = ["tracert", "-d", "-h", "12", "-w", "600", ip]
+        else:
+            command = ["traceroute", "-n", "-m", "12", "-w", "1", ip]
+        text = run(command, timeout=40)
+        if not text.strip() and not WINDOWS:
+            text = run(["tracepath", "-n", "-m", "12", ip], timeout=40)
+        return text.strip() or "this machine has no traceroute tool (on Linux: apt install traceroute)"
+
+    def wake(self, mac: str, broadcast: str) -> str:
+        send_magic_packet(mac, broadcast)
+        return f"a wake-up packet for {mac} was broadcast on {broadcast}"
+
+    def http_look(self, ip: str, port: int) -> dict:
+        return http_look(ip, port)
 
     # ---- how much goes through -------------------------------------------------------------------------------------------------------------------
     def traffic(self) -> tuple[int, int] | None:

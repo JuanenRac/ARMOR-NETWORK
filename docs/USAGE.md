@@ -25,6 +25,8 @@ armor-network demo --count 3 --validate  # a made-up house; --validate checks ev
 | `--data-dir` | where the inventory and the outages are kept between runs (default `armor-network-data`) |
 | `--scan-every`, `--internet-every` | seconds between sweeps (60) and internet checks (5) |
 | `--count N` | stop after N messages (0: never) |
+| `--no-public-info` | do not ask a public service for the public address |
+| `--public-info-url URL` | the https service that tells it (default `https://ipinfo.io/json`) |
 
 ## Running it for good
 

@@ -65,6 +65,7 @@ class SimIO:
         self._t0 = self._clock()
         self.tick_ms = tick_ms
         self.devices = devices if devices is not None else default_devices()
+        self.woken: list[tuple[str, str]] = []          # the wake-up packets it was asked to send
         self.cidr = cidr
         self.outage, self.lan_outage, self.conflict_at = outage, lan_outage, conflict_at
         self._counter = 0
@@ -153,6 +154,25 @@ class SimIO:
                     ProbeResult("connectivitycheck.gstatic.com", "http", False)]
         return [ProbeResult("1.1.1.1:443", "tcp", True, 11.0), ProbeResult("1.1.1.1", "dns", True, 13.0), ProbeResult("8.8.8.8", "dns", True, 14.0),
                 ProbeResult("connectivitycheck.gstatic.com", "http", True, 38.0)]
+
+    # the manual orders, scripted
+    public_ip = "95.60.192.108"
+
+    def public_info(self, url: str) -> dict | None:
+        return {"ip": self.public_ip, "city": "Madrid", "region": "Madrid", "country": "ES", "org": "AS3352 TELEFONICA DE ESPANA S.A.U.", "timezone": "Europe/Madrid"}
+
+    def traceroute(self, ip: str) -> str:
+        return f" 1  192.168.0.1  1.2 ms\n 2  {ip}  2.0 ms"
+
+    def wake(self, mac: str, broadcast: str) -> str:
+        self.woken.append((mac, broadcast))
+        return f"a wake-up packet for {mac} was broadcast on {broadcast}"
+
+    def http_look(self, ip: str, port: int) -> dict:
+        device = next((d for d in self.devices if d.ip == ip and self._present(d)), None)
+        if device is None or port not in device.ports:
+            return {"ok": False, "output": "no answer: connection refused"}
+        return {"ok": True, "output": f"http://{ip}:{port}/ -> HTTP 200\ntitle: {device.hostname or ip}"}
 
     def traffic(self) -> tuple[int, int] | None:
         self._counter += 1

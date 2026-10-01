@@ -12,6 +12,7 @@ time, or change anything on any device. It reads.
 
 from __future__ import annotations
 
+import ipaddress
 import socket
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -19,6 +20,7 @@ from typing import Protocol
 
 from .internet import InternetMonitor, ProbeResult
 from .inventory import EventLog, Inventory, Observation
+from .orders import DEFAULT_PUBLIC_URL, OUTPUT_LIMIT, Order, PublicTracker, target_allowed
 from .services import PROFILES
 
 
@@ -38,6 +40,10 @@ class NetworkIO(Protocol):
     def probe_gateway(self, gateway: str) -> bool: ...
     def probe_internet(self) -> list[ProbeResult]: ...
     def traffic(self) -> tuple[int, int] | None: ...
+    def public_info(self, url: str) -> dict | None: ...
+    def traceroute(self, ip: str) -> str: ...
+    def wake(self, mac: str, broadcast: str) -> str: ...
+    def http_look(self, ip: str, port: int) -> dict: ...
 
 
 @dataclass
@@ -54,6 +60,9 @@ class Config:
     max_ports_per_step: int = 4
     max_names_per_step: int = 8
     traffic_every_s: int = 5
+    public_info: bool = True               # ask a public service for the public address now and then (one https request, nothing about the house)
+    public_url: str = DEFAULT_PUBLIC_URL
+    public_every_s: int = 600
     skip: set[str] = field(default_factory=set)
     data_dir: Path | None = None
 
@@ -66,7 +75,10 @@ class Agent:
         self.log = EventLog()
         self.inventory = Inventory(directory / "inventory.json" if directory else None, offline_after_s=self.config.offline_after_s, log=self.log)
         self.monitor = InternetMonitor(directory / "internet.json" if directory else None, log=self.log)
-        self._next = {"internet": 0, "scan": 0, "discovery": 0, "publish": 0, "traffic": 0}
+        self._next = {"internet": 0, "scan": 0, "discovery": 0, "publish": 0, "traffic": 0, "public": 0}
+        self._public = PublicTracker(directory / "public.json" if directory else None)
+        self._orders: list[Order] = []
+        self._results: list[dict] = []
         self._announced: dict[str, dict] = {}
         self._ports_at: dict[str, int] = {}
         self._names_tried: dict[str, int] = {}
@@ -80,10 +92,15 @@ class Agent:
         now = self.io.now_ms()
         info = self.io.interface()
         events: list[dict] = []
+        if self._orders:
+            self._do_orders(now, info)
         if now >= self._next["internet"]:
             gateway = info.get("gateway")
             events += self.monitor.feed(now, self.io.probe_gateway(gateway) if gateway else None, self.io.probe_internet())
             self._next["internet"] = now + self.config.internet_every_s * 1000
+        if self.config.public_info and now >= self._next["public"]:
+            self._public.update(self.io.public_info(self.config.public_url), now)
+            self._next["public"] = now + self.config.public_every_s * 1000
         if now >= self._next["discovery"]:
             self._announced.update(self.io.discover())
             self._next["discovery"] = now + self.config.discovery_every_s * 1000
@@ -98,6 +115,57 @@ class Agent:
             self.inventory.save()
             return self.build_message(now, info)
         return None
+
+    # ---- the manual orders ---------------------------------------------------------------------------------------------------------------------
+    def submit(self, orders: list[Order]) -> None:
+        """Orders the server handed out; they are done at the next turn, and their results go out in the next messages."""
+        self._orders.extend(orders[:4])
+
+    def _do_orders(self, now: int, info: dict) -> None:
+        orders, self._orders = self._orders, []
+        for order in orders:
+            try:
+                result = self._execute(order, info)
+            except Exception as error:   # noqa: BLE001 - whatever an order does wrong is an answer, not the end of the node
+                result = {"ok": False, "output": f"the order failed: {error}"[:200]}
+            result.update({"id": order.id, "type": order.type, "finished_ms": self.io.now_ms()})
+            if order.device_id:
+                result["device_id"] = order.device_id
+            if "output" in result:
+                result["output"] = str(result["output"])[:OUTPUT_LIMIT]
+            self._results.append(result)
+        self._results = self._results[-16:]
+        self._next["publish"] = 0
+
+    def _execute(self, order: Order, info: dict) -> dict:
+        if order.type == "scan_now":
+            self._next["scan"] = 0
+            return {"ok": True, "output": "a sweep of the network was started"}
+        network = ipaddress.ip_network(info["cidr"], strict=False)
+        if order.type == "wake":
+            if not order.mac:
+                return {"ok": False, "output": "the device has no MAC address"}
+            if order.ip and not target_allowed(order.ip, network, set(), info["ip"]):
+                return {"ok": False, "output": "that address is not one of this network"}
+            return {"ok": True, "output": self.io.wake(order.mac, str(network.broadcast_address))}
+        if not target_allowed(order.ip, network, self.config.skip, info["ip"]):
+            return {"ok": False, "output": "that address is not on the network this node watches (or it was told to leave it alone)"}
+        assert order.ip is not None
+        if order.type == "ping":
+            answer = self.io.ping_many([order.ip]).get(order.ip)
+            if answer is None:
+                return {"ok": False, "output": f"{order.ip} did not answer"}
+            return {"ok": True, "latency_ms": round(float(answer[0]), 2), "output": f"{order.ip} answered in {answer[0]:.1f} ms" + (f" (TTL {answer[1]})" if answer[1] else "")}
+        if order.type == "traceroute":
+            return {"ok": True, "output": self.io.traceroute(order.ip)}
+        if order.type == "ports":
+            found = self.io.scan_ports(order.ip, PROFILES["standard"])
+            ports = [{"port": port, "proto": "tcp", **({"service": service[:32]} if service else {}), **({"banner": banner[:80]} if banner else {})}
+                     for port, (service, banner) in sorted(found.items())][:64]
+            return {"ok": True, "ports": ports, "output": f"{len(ports)} open port(s) of the {len(PROFILES['standard'])} looked at"}
+        if order.type == "http":
+            return self.io.http_look(order.ip, order.port or 80)
+        return {"ok": False, "output": "unknown order"}
 
     def _scan(self, now: int, info: dict) -> list[dict]:
         started = self.io.now_ms()
@@ -168,4 +236,11 @@ class Agent:
                    "devices": self.inventory.snapshot(), "events": list(self.log.events)}
         if self._scan_info is not None:
             message["scan"] = dict(self._scan_info)
+        public = self._public.block() if self.config.public_info else None
+        if public is not None:
+            message["public"] = public
+        # A result goes out in every message for two minutes, so one that is lost on the way is not lost (the server counts a result it reads twice once).
+        recent = [r for r in self._results if now - r["finished_ms"] <= 120_000]
+        if recent:
+            message["results"] = recent[-16:]
         return message
