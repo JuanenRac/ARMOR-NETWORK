@@ -77,7 +77,11 @@ class InternetMonitor:
         self._rounds.append((now_ms, good_round))
         while self._rounds and now_ms - self._rounds[0][0] > self.window_ms:
             self._rounds.popleft()
-        latencies = [r.latency_ms for r in results if r.ok and r.latency_ms is not None]
+        # The latency of the line is what a ping, a connection and a DNS answer take: a whole web page (a TLS handshake, a redirect, the other end's own load)
+        # is often a few hundred ms on a perfectly good line, and counting it made a healthy connection look slow.
+        latencies = [r.latency_ms for r in results if r.ok and r.latency_ms is not None and r.kind != "http"]
+        if not latencies:
+            latencies = [r.latency_ms for r in results if r.ok and r.latency_ms is not None]
         self.latency_ms = round(statistics.median(latencies), 1) if latencies else None
         if any_ok:
             self._ok_streak += 1
