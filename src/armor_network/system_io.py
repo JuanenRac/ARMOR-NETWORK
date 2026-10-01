@@ -101,7 +101,8 @@ class SystemIO:
                         ip, name = address.split("/")[0], iface
                         mask_cidr = str(ipaddress.ip_interface(address).network)
                         try:
-                            mac = normalize_mac(open(f"/sys/class/net/{iface}/address", encoding="ascii").read().strip())
+                            with open(f"/sys/class/net/{iface}/address", encoding="ascii") as address_file:
+                                mac = normalize_mac(address_file.read().strip())
                         except OSError:
                             mac = None
         if self._interface_ip:

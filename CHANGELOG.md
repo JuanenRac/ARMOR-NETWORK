@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## [0.0.3] - Running it for good, as a systemd service
+
+- `docs/USAGE.md` now shows a working systemd unit and the one limit that matters in it: a sweep runs up to 32 `ping` workers, each starting a `ping` process of its own, plus 12 port workers, so a unit with a small `TasksMax` (32 is common) dies at the first sweep with `can't start new thread`; 256 is enough. Found for real the first time it was installed on the CM5.
+- The MAC of the interface is read from `/sys/class/net/<interface>/address` with the file closed again (it was left to the garbage collector, a `ResourceWarning` in every test run on Linux).
+
 ## [0.0.2]
 
 - A GitHub Actions CI baseline (`.github/workflows/ci.yml`): validates the manifest, the version, CHANGELOG.md's heading, the seven README translations' structure and its own local Markdown links, then runs this project's real build/test through `tools/armor_project_tool.py build-test .` (vendored from ARMOR-COMMON, alongside `tools/armor_ci_validate.py` and `tools/_armor_readme_parity.py`, which do the manifest/docs checking).
