@@ -156,10 +156,10 @@ class SimIO:
                 ProbeResult("connectivitycheck.gstatic.com", "http", True, 38.0)]
 
     # the manual orders, scripted
-    public_ip = "95.60.192.108"
+    public_ip = "203.0.113.9"
 
     def public_info(self, url: str) -> dict | None:
-        return {"ip": self.public_ip, "city": "Madrid", "region": "Madrid", "country": "ES", "org": "AS3352 TELEFONICA DE ESPANA S.A.U.", "timezone": "Europe/Madrid"}
+        return {"ip": self.public_ip, "city": "Madrid", "region": "Madrid", "country": "ES", "org": "AS64496 EXAMPLE TELECOM", "timezone": "Europe/Madrid"}
 
     def traceroute(self, ip: str) -> str:
         return f" 1  192.168.0.1  1.2 ms\n 2  {ip}  2.0 ms"

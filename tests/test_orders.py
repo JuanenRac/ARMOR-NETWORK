@@ -49,8 +49,8 @@ def run_agent(*order_list: orders.Order, config: Config | None = None):
 
 class PublicInfoTests(unittest.TestCase):
     def test_what_a_service_answers_is_reduced_to_what_the_contract_holds(self):
-        info = orders.clean_public_info({"ip": " 95.60.192.108 ", "city": "Madrid", "org": "AS3352 TELEFONICA DE ESPANA S.A.U.", "readme": "x", "hostname": "h" * 500, "region": 3})
-        self.assertEqual(info["ip"], "95.60.192.108")
+        info = orders.clean_public_info({"ip": " 203.0.113.9 ", "city": "Madrid", "org": "AS64496 EXAMPLE TELECOM", "readme": "x", "hostname": "h" * 500, "region": 3})
+        self.assertEqual(info["ip"], "203.0.113.9")
         self.assertEqual(info["city"], "Madrid")
         self.assertEqual(len(info["hostname"]), 128)
         self.assertNotIn("readme", info)
@@ -75,16 +75,16 @@ class PublicInfoTests(unittest.TestCase):
             self.assertEqual(tracker.block(), {"ip": "1.2.3.4", "checked_ms": 1000})        # first time: nothing changed
             tracker.update({"ip": "1.2.3.4"}, 2000)
             self.assertNotIn("changed_ms", tracker.block())
-            tracker.update({"ip": "5.6.7.8"}, 3000)
-            self.assertEqual(tracker.block(), {"ip": "5.6.7.8", "checked_ms": 3000, "changed_ms": 3000})
+            tracker.update({"ip": "198.51.100.8"}, 3000)
+            self.assertEqual(tracker.block(), {"ip": "198.51.100.8", "checked_ms": 3000, "changed_ms": 3000})
             tracker.update(None, 4000)                                                       # a failed lookup keeps what was known
-            self.assertEqual(tracker.block()["ip"], "5.6.7.8")
+            self.assertEqual(tracker.block()["ip"], "198.51.100.8")
             again = orders.PublicTracker(path)
             self.assertEqual(again.block()["changed_ms"], 3000)
 
     def test_the_agent_tells_the_public_address_unless_told_not_to(self):
         _agent, _io, _clock, message = run_agent()
-        self.assertEqual(message["public"]["ip"], "95.60.192.108")
+        self.assertEqual(message["public"]["ip"], "203.0.113.9")
         self.assertEqual(message["public"]["country"], "ES")
         _agent, _io, _clock, quiet = run_agent(config=Config(scan_every_s=10, publish_every_s=10, public_info=False))
         self.assertNotIn("public", quiet)
