@@ -6,6 +6,7 @@ All notable changes to this project are documented here.
 
 - **`inspect` order:** with the login the person gave for that one order, the node opens the device's web administration (Basic or Digest), says whether it asks for a login, whether the login is accepted, whether it is a factory login that should be changed, and what the page says about the device (server, title, model, firmware, serial number). One login, tried once; nothing is changed on the device, and the password never appears in any output, log or printout.
 - Tests for the order, the parsing and the simulated device.
+- Documentation: the seven READMEs describe the orders on request, and the message and safety documents describe `inspect`.
 
 ## [0.0.5] - The public address, and orders from Studio
 
