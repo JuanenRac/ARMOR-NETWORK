@@ -44,6 +44,7 @@ class NetworkIO(Protocol):
     def traceroute(self, ip: str) -> str: ...
     def wake(self, mac: str, broadcast: str) -> str: ...
     def http_look(self, ip: str, port: int) -> dict: ...
+    def inspect_web(self, ip: str, port: int | None, user: str | None, password: str | None) -> dict: ...
 
 
 @dataclass
@@ -165,6 +166,8 @@ class Agent:
             return {"ok": True, "ports": ports, "output": f"{len(ports)} open port(s) of the {len(PROFILES['standard'])} looked at"}
         if order.type == "http":
             return self.io.http_look(order.ip, order.port or 80)
+        if order.type == "inspect":
+            return self.io.inspect_web(order.ip, order.port, order.user, order.password)
         return {"ok": False, "output": "unknown order"}
 
     def _scan(self, now: int, info: dict) -> list[dict]:

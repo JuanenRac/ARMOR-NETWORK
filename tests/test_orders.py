@@ -223,3 +223,87 @@ class DeliveryTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class InspectTests(unittest.TestCase):
+    """Looking at a device's web administration with the login the person gave: asked once, never guessed, never echoed."""
+
+    def _server(self, user="admin", password="s3cret"):
+        import base64
+        import threading
+        from http.server import BaseHTTPRequestHandler, HTTPServer
+
+        expected = "Basic " + base64.b64encode(f"{user}:{password}".encode()).decode()
+
+        class Handler(BaseHTTPRequestHandler):
+            server_version = "tiny-httpd"
+            sys_version = ""
+
+            def do_GET(self):  # noqa: N802
+                if self.headers.get("Authorization") != expected:
+                    self.send_response(401)
+                    self.send_header("WWW-Authenticate", 'Basic realm="Router"')
+                    self.end_headers()
+                    return
+                body = b"<html><head><title>Home Router</title></head><body>Model: HR-5000 <br> Firmware Version: 2.1.4 <br> password is s3cret</body></html>"
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *args):  # noqa: D401
+                return
+
+        server = HTTPServer(("127.0.0.1", 0), Handler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.shutdown)
+        return server.server_address[1]
+
+    def test_the_login_the_person_gave_is_tried_once_and_what_the_page_says_is_read(self):
+        port = self._server()
+        found = orders.inspect_web("127.0.0.1", port, "admin", "s3cret")
+        self.assertTrue(found["ok"])
+        for line in ("HTTP 200", "login: accepted (Basic)", 'realm: Router', "server: tiny-httpd", "title: Home Router", "model: HR-5000", "firmware: 2.1.4"):
+            self.assertIn(line, found["output"])
+        self.assertNotIn("s3cret", found["output"], "the login is never echoed back, not even by the device's own page")
+
+    def test_a_wrong_login_is_refused_and_no_login_says_that_one_is_required(self):
+        port = self._server()
+        refused = orders.inspect_web("127.0.0.1", port, "admin", "wrong")
+        self.assertFalse(refused["ok"])
+        self.assertIn("login: refused", refused["output"])
+        none = orders.inspect_web("127.0.0.1", port, None, None)
+        self.assertIn("required (Basic), no login was given", none["output"])
+
+    def test_a_factory_login_that_works_is_flagged(self):
+        port = self._server("admin", "admin")
+        found = orders.inspect_web("127.0.0.1", port, "admin", "admin")
+        self.assertIn("factory login", found["output"])
+
+    def test_no_web_interface_is_said_plainly(self):
+        found = orders.inspect_web("127.0.0.1", 9, "admin", "x", timeout=0.5)
+        self.assertFalse(found["ok"])
+        self.assertIn("no web interface answered", found["output"])
+
+    def test_the_login_travels_only_in_an_inspect_order_and_stays_out_of_every_printout(self):
+        parsed = orders.parse_orders({"commands": [
+            {"id": "i1", "type": "inspect", "ip": "192.168.0.50", "auth": {"user": "admin", "password": "hunter2"}},
+            {"id": "p1", "type": "ping", "ip": "192.168.0.50", "auth": {"user": "admin", "password": "hunter2"}},
+            {"id": "i2", "type": "inspect", "ip": "192.168.0.51", "auth": {"user": "", "password": "x"}}]})
+        self.assertEqual((parsed[0].user, parsed[0].password), ("admin", "hunter2"))
+        self.assertEqual((parsed[1].user, parsed[1].password), (None, None))
+        self.assertEqual((parsed[2].user, parsed[2].password), (None, None))
+        self.assertNotIn("hunter2", repr(parsed[0]))
+        self.assertNotIn("hunter2", str(parsed[0]))
+
+    def test_the_agent_does_an_inspect_order_on_its_network_only(self):
+        _agent, io, _clock, _first = run_agent()
+        device = next(d for d in io.devices if d.ports and d.hostname)
+        port = next(iter(device.ports))
+        _agent, _io, _clock, message = run_agent(orders.Order("n1", "inspect", ip=device.ip, device_id=device.mac, port=port, user="admin", password="admin"),
+                                                 orders.Order("n2", "inspect", ip="8.8.8.8", user="admin", password="admin"))
+        results = {r["id"]: r for r in message["results"]}
+        self.assertIn("login: accepted", results["n1"]["output"])
+        self.assertNotIn("password", results["n1"]["output"].lower().replace("factory login", ""))
+        self.assertFalse(results["n2"]["ok"])
+        self.assertIn("not on the network", results["n2"]["output"])

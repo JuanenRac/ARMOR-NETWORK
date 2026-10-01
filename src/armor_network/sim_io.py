@@ -174,6 +174,17 @@ class SimIO:
             return {"ok": False, "output": "no answer: connection refused"}
         return {"ok": True, "output": f"http://{ip}:{port}/ -> HTTP 200\ntitle: {device.hostname or ip}"}
 
+    def inspect_web(self, ip: str, port: int | None, user: str | None, password: str | None) -> dict:
+        """A made-up device whose web page asks for a login, accepts admin/admin and says what it is."""
+        device = next((d for d in self.devices if d.ip == ip and self._present(d)), None)
+        if device is None or (port or 80) not in self._ports(device):
+            return {"ok": False, "output": f"no web interface answered at {ip}"}
+        if user is None:
+            return {"ok": True, "output": f"http://{ip}:{port or 80}/ -> HTTP 401\nlogin: required (Digest), no login was given"}
+        if (user, password) != ("admin", "admin"):
+            return {"ok": False, "output": f"http://{ip}:{port or 80}/ -> HTTP 401\nlogin: refused"}
+        return {"ok": True, "output": f"http://{ip}:{port or 80}/ -> HTTP 200\nlogin: accepted (Digest) - it is a factory login: change it\ntitle: {device.hostname or ip}\nmodel: DS-2CD2043\nfirmware: V5.5.3"}
+
     def traffic(self) -> tuple[int, int] | None:
         self._counter += 1
         return (self._counter * 150_000, self._counter * 40_000)
