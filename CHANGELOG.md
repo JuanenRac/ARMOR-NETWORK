@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here.
 
+## [0.0.4] - A healthy line no longer looks slow
+
+- The latency of the line is what a ping, a connection and a DNS answer take. The web-page probe (a TLS handshake, a redirect, the other end's own load) is often a few hundred ms on a perfectly good line and was counted in the median, which made a healthy connection look degraded (32 'slow or lossy' alarms in three days on a line that was fine). It is still checked for being reachable, just not timed as the line.
+
 ## [0.0.3] - Running it for good, as a systemd service
 
 - `docs/USAGE.md` now shows a working systemd unit and the one limit that matters in it: a sweep runs up to 32 `ping` workers, each starting a `ping` process of its own, plus 12 port workers, so a unit with a small `TasksMax` (32 is common) dies at the first sweep with `can't start new thread`; 256 is enough. Found for real the first time it was installed on the CM5.
