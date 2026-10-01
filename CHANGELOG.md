@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## [0.0.6] - Look at a device's web login
+
+- **`inspect` order:** with the login the person gave for that one order, the node opens the device's web administration (Basic or Digest), says whether it asks for a login, whether the login is accepted, whether it is a factory login that should be changed, and what the page says about the device (server, title, model, firmware, serial number). One login, tried once; nothing is changed on the device, and the password never appears in any output, log or printout.
+- Tests for the order, the parsing and the simulated device.
+
 ## [0.0.5] - The public address, and orders from Studio
 
 - **The public address of the connection** (`public` in the message): every ten minutes the node asks a public service (`https://ipinfo.io/json` by default, `--public-info-url` to change it, `--no-public-info` to stop) and reports the address, the provider and the city, and when the address was seen to change. The answer is reduced to a real address and short plain texts; it is the one request this program makes that leaves the house, and nothing about the house is in it.

@@ -25,7 +25,7 @@ from .internet import ProbeResult
 from .ipnet import check_scan_range, hosts_of, is_private_address, network_of
 from .neighbors import in_network, parse_arp_windows, parse_ip_neigh, parse_proc_net_arp
 from .oui import normalize_mac
-from .orders import fetch_public_info, http_look, send_magic_packet
+from .orders import fetch_public_info, http_look, inspect_web, send_magic_packet
 from .services import clean_banner, parse_http, service_name
 
 WINDOWS = sys.platform.startswith("win")
@@ -338,6 +338,9 @@ class SystemIO:
 
     def http_look(self, ip: str, port: int) -> dict:
         return http_look(ip, port)
+
+    def inspect_web(self, ip: str, port: int | None, user: str | None, password: str | None) -> dict:
+        return inspect_web(ip, port, user, password)
 
     # ---- how much goes through -------------------------------------------------------------------------------------------------------------------
     def traffic(self) -> tuple[int, int] | None:
