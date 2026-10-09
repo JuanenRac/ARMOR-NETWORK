@@ -20,13 +20,13 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-53-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-72-00E5FF.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Maturity-scaffolding-ff9800.svg" alt="Maturity">
 </p>
 
 ---
 
-**正直さのチェック - 今日動いているもの:** **成熟度：足場段階。** スキャナー、変化を伝えるインベントリ、インターネット確認、メッセージは、台本どおりのネットワークを相手にコンピューター上でテスト済みです（53 件のテスト。すべてのメッセージを ARMOR-COMMON が受理）。実ネットワークで 1 回だけ実行しており、ルーターとスマートフォンが 1 台ありました。家全体を何日も監視したことはなく、ルーターには問い合わせるだけで設定は一切せず、機器の種類・OS・メーカーは推測です。パケットは取得しません。誰が誰と通信しているかは見えず、機器ごとのトラフィックや厳密な意味での侵入検知にはルーターのカウンターやミラーポートが必要で、それは後の段階です。
+**正直さのチェック - 今日動いているもの:** **成熟度：足場段階。** スキャナー、変化を伝えるインベントリ、インターネット確認、メッセージは、台本どおりのネットワークを相手にコンピューター上でテスト済みです（72 件のテスト。すべてのメッセージを ARMOR-COMMON が受理）。実ネットワークで 1 回だけ実行しており、ルーターとスマートフォンが 1 台ありました。家全体を何日も監視したことはなく、ルーターには問い合わせるだけで設定は一切せず、機器の種類・OS・メーカーは推測です。パケットは取得しません。誰が誰と通信しているかは見えず、機器ごとのトラフィックや厳密な意味での侵入検知にはルーターのカウンターやミラーポートが必要で、それは後の段階です。
 
 ---
 
@@ -58,7 +58,7 @@ ARMOR-NETWORK/
 ## 🛠️ 開発環境
 
 ```bash
-python -m unittest discover -s tests                  # 53 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 72 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched

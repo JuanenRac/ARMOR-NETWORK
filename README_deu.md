@@ -20,13 +20,13 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-53-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-72-00E5FF.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Maturity-scaffolding-ff9800.svg" alt="Maturity">
 </p>
 
 ---
 
-**Ehrlichkeitsprüfung - was heute läuft:** **Reife: Scaffolding.** Der Scanner, das Inventar, das sagt, was sich geändert hat, die Internetprüfung und die Nachricht werden auf einem Rechner gegen ein gestelltes Netzwerk getestet (53 Tests; ARMOR-COMMON akzeptiert jede Nachricht), und das Programm lief einmal in einem echten Netzwerk mit einem Router und einem Handy. Es hat noch kein ganzes Haus tagelang beobachtet, es fragt den Router nur und konfiguriert ihn nie, und was ein Gerät ist (Art, System, Hersteller), ist eine Vermutung. Es zeichnet keine Pakete auf: Es sieht nicht, wer mit wem spricht, und Verkehr je Gerät sowie Einbruchserkennung im engeren Sinn brauchen die Zähler des Routers oder einen Mirror-Port, was ein späterer Schritt ist.
+**Ehrlichkeitsprüfung - was heute läuft:** **Reife: Scaffolding.** Der Scanner, das Inventar, das sagt, was sich geändert hat, die Internetprüfung und die Nachricht werden auf einem Rechner gegen ein gestelltes Netzwerk getestet (72 Tests; ARMOR-COMMON akzeptiert jede Nachricht), und das Programm lief einmal in einem echten Netzwerk mit einem Router und einem Handy. Es hat noch kein ganzes Haus tagelang beobachtet, es fragt den Router nur und konfiguriert ihn nie, und was ein Gerät ist (Art, System, Hersteller), ist eine Vermutung. Es zeichnet keine Pakete auf: Es sieht nicht, wer mit wem spricht, und Verkehr je Gerät sowie Einbruchserkennung im engeren Sinn brauchen die Zähler des Routers oder einen Mirror-Port, was ein späterer Schritt ist.
 
 ---
 
@@ -58,7 +58,7 @@ ARMOR-NETWORK/
 ## 🛠️ Entwicklungsumgebung
 
 ```bash
-python -m unittest discover -s tests                  # 53 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 72 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched

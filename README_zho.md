@@ -20,13 +20,13 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-53-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-72-00E5FF.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Maturity-scaffolding-ff9800.svg" alt="Maturity">
 </p>
 
 ---
 
-**诚实性检查 - 今天真正能运行的部分:** **成熟度：脚手架阶段。** 扫描器、指出变化的清单、互联网检测和消息已在计算机上对照脚本化网络测试（53 个测试；ARMOR-COMMON 接受所有消息），程序在一个真实网络上运行过一次，网络里有一台路由器和一部手机。它还没有连续几天监视整栋房子，对路由器只提问、从不配置，设备是什么（类型、系统、厂商）只是推测。它不抓包：看不到谁和谁通信，按设备统计流量以及严格意义上的入侵检测需要路由器的计数器或镜像端口，那是后续步骤。
+**诚实性检查 - 今天真正能运行的部分:** **成熟度：脚手架阶段。** 扫描器、指出变化的清单、互联网检测和消息已在计算机上对照脚本化网络测试（72 个测试；ARMOR-COMMON 接受所有消息），程序在一个真实网络上运行过一次，网络里有一台路由器和一部手机。它还没有连续几天监视整栋房子，对路由器只提问、从不配置，设备是什么（类型、系统、厂商）只是推测。它不抓包：看不到谁和谁通信，按设备统计流量以及严格意义上的入侵检测需要路由器的计数器或镜像端口，那是后续步骤。
 
 ---
 
@@ -58,7 +58,7 @@ ARMOR-NETWORK/
 ## 🛠️ 开发环境
 
 ```bash
-python -m unittest discover -s tests                  # 53 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 72 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched
