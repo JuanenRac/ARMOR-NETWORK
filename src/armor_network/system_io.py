@@ -34,6 +34,20 @@ HTTP_PORTS = {80, 8000, 8008, 8080, 8081, 3000, 5000, 9000, 18080, 18081}
 TALKING_PORTS = {21, 22, 23, 25, 110, 143, 993, 1883}       # services that say something first
 
 
+# The calls that were too slow and whose threads are still running: there are never more than this many at once, so that a name server that does not answer cannot pile threads up.
+_MAX_STUCK = 32
+_stuck: set[threading.Thread] = set()
+_stuck_lock = threading.Lock()
+
+
+def stuck_calls() -> int:
+    """How many calls that took too long are still running."""
+    with _stuck_lock:
+        for thread in [t for t in _stuck if not t.is_alive()]:
+            _stuck.discard(thread)
+        return len(_stuck)
+
+
 def bounded(function, timeout: float):
     """The result of `function()`, or None when it takes longer than `timeout` seconds. The system's name lookups ignore socket timeouts (one for a phone that does not answer
     took sixteen seconds), so the call is made in a thread that is left behind when it is too slow; the thread never keeps the program from ending."""
@@ -44,10 +58,16 @@ def bounded(function, timeout: float):
             box.append(function())
         except (OSError, UnicodeError):
             box.append(None)
+    if stuck_calls() >= _MAX_STUCK:
+        return None   # too many calls are already stuck: this one is not made (the answer would be "too slow" anyway)
     thread = threading.Thread(target=work, daemon=True)
     thread.start()
     thread.join(timeout)
-    return box[0] if box else None
+    if box:
+        return box[0]
+    with _stuck_lock:
+        _stuck.add(thread)
+    return None
 
 
 def run(command: list[str], timeout: float = 6.0) -> str:
