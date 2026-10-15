@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [0.0.7] - Audit round two: sturdier agent, inventory and orders
+## [0.0.7] - Sturdier agent, inventory and orders
 
 - Hardening of the agent, the inventory, the system access and the orders, with tests.
 

@@ -20,13 +20,13 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-72-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-53-00E5FF.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Maturity-scaffolding-ff9800.svg" alt="Maturity">
 </p>
 
 ---
 
-**Comprobación de honestidad - qué funciona hoy:** **Madurez: scaffolding.** El escáner, el inventario que dice qué ha cambiado, la comprobación de internet y el mensaje se prueban en un ordenador contra una red simulada (72 pruebas; ARMOR-COMMON acepta todos los mensajes), y el programa se ha ejecutado una vez en una red real, que tenía un router y un móvil. No ha vigilado una casa entera durante días, al router solo le pregunta y nunca lo configura, y lo que es un dispositivo (su tipo, su sistema, su fabricante) es una suposición. No captura paquetes: no ve quién habla con quién, y el tráfico por dispositivo y la detección de intrusiones en sentido estricto necesitan los contadores del router o un puerto espejo, que es un paso posterior.
+**Comprobación de honestidad - qué funciona hoy:** **Madurez: scaffolding.** El escáner, el inventario que dice qué ha cambiado, la comprobación de internet y el mensaje se prueban en un ordenador contra una red simulada (53 pruebas; ARMOR-COMMON acepta todos los mensajes), y el programa se ha ejecutado una vez en una red real, que tenía un router y un móvil. No ha vigilado una casa entera durante días, al router solo le pregunta y nunca lo configura, y lo que es un dispositivo (su tipo, su sistema, su fabricante) es una suposición. No captura paquetes: no ve quién habla con quién, y el tráfico por dispositivo y la detección de intrusiones en sentido estricto necesitan los contadores del router o un puerto espejo, que es un paso posterior.
 
 ---
 
@@ -36,7 +36,6 @@
 * **Puertos:** una conexión TCP a 17 (o 44) puertos de cada dispositivo, de doce en doce, leyendo como mucho unos cientos de bytes de lo que responde; nunca un inicio de sesión, nunca un exploit. Un dispositivo nuevo se mira enseguida, los demás cada cuarto de hora.
 * **Qué cambia:** un dispositivo que aparece (el primer barrido solo aprende), calla o vuelve, cambia de dirección, un puerto que se abre o se cierra, y dos máquinas que responden por una misma dirección (sobre todo la del router). Cada evento tiene un id, así que se cuenta una vez.
 * **Internet:** cada pocos segundos un eco al router, una conexión TCP, dos preguntas DNS a resolvedores elegidos y una página web. Un corte necesita tres rondas para llamarse así y dos para darse por terminado, se fecha desde su primera ronda fallida y se cuenta hasta la primera buena, y dice de quién es la culpa: del operador (el router responde y nada más allá) o de este lado (el router tampoco responde). Latencia, pérdida y los cortes de las últimas 24 horas.
-* **Bajo demanda:** un operador puede pedir desde Studio un barrido ahora, un ping, un traceroute, un paquete de despertar, los puertos o la página web de un dispositivo, o inspeccionar su página de administración con el acceso guardado para él (su modelo, su firmware, si aún tiene un acceso de fábrica). Las órdenes llegan en la respuesta al propio mensaje del nodo; el nodo nunca escucha, solo toca direcciones privadas de su propia red y no cambia nada en un dispositivo.
 * **Solo mira tu propia red:** rechaza cualquier dirección que no sea privada (10/8, 172.16/12, 192.168/16) y cualquier rango mayor que un /22; una lista de exclusión lo mantiene lejos de lo frágil; a un dispositivo no se le envía nada que no sea una pregunta.
 * **El mensaje** `armor/network/<nodo>/state`: la interfaz, internet, cada dispositivo y los últimos eventos; está en el contrato compartido (330 vectores) y lleva hallazgos, nunca órdenes. `python -m armor_network scan` lo imprime como tabla, `watch` informa a ARMOR-SERVER y `demo` representa una casa inventada (se une un dispositivo nuevo, una cámara abre Telnet, se cae internet y vuelve, alguien responde por el router) sin tocar ninguna red.
 * **Dónde se ve:** el menú Red de ARMOR-STUDIO (los dispositivos, internet con sus cortes y su latencia, el tráfico y los eventos; un administrador pone nombre a los dispositivos y marca los conocidos, que es lo que apaga la alarma de un dispositivo nuevo), el Diseñador de red (el dibujo de la red de la casa, comparado con lo encontrado y capaz de dibujarlo) y la pantalla Red de la app Android. ARMOR-SERVER genera las alarmas.
@@ -58,7 +57,7 @@ ARMOR-NETWORK/
 ## 🛠️ Entorno de desarrollo
 
 ```bash
-python -m unittest discover -s tests                  # 72 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 53 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched
@@ -77,14 +76,12 @@ Véanse el [diseño](docs/DESIGN.md), las [notas de seguridad](docs/SAFETY.md), 
 * **[ARMOR-RADAR](https://github.com/JuanenRac/ARMOR-RADAR)** - Firmware del nodo de campo para ESP32-S3 con tres radares y su propio panel web
 * **[ARMOR-SOLAR](https://github.com/JuanenRac/ARMOR-SOLAR)** - Protocolos de inversores y baterías solares y los mensajes de un nodo pasarela
 * **[ARMOR-ELECTRICAL](https://github.com/JuanenRac/ARMOR-ELECTRICAL)** - Nodo eléctrico: contadores, el mensaje de las lecturas de la red y las reglas para maniobrar
-* **[ARMOR-ALARM](https://github.com/JuanenRac/ARMOR-ALARM)** - Nodo y central de alarma: zonas, armado, retardos, sirena y PIN, con el servidor o sin él
 * **[ARMOR-HMI](https://github.com/JuanenRac/ARMOR-HMI)** - Panel táctil: el estado del sistema en una pantalla de pared, armar y reconocer alarmas, y el hogar del asistente de voz
 * **ARMOR-NETWORK** (este repositorio) - La red local: sus dispositivos, internet y lo que cambia
 * **[ARMOR-SERVER](https://github.com/JuanenRac/ARMOR-SERVER)** - Coordinador central: telemetría, alarmas, dispositivos, lecturas solares y cámaras
 * **[ARMOR-STUDIO](https://github.com/JuanenRac/ARMOR-STUDIO)** - Consola web: cámaras, radar, alarmas, energía solar y el diseñador de sitio 2D/3D
 * **[ARMOR-ANDROID-CONTROL](https://github.com/JuanenRac/ARMOR-ANDROID-CONTROL)** - Cliente Android del operador con radar 2D/3D en vivo
 * **[ARMOR-SERVER-AI](https://github.com/JuanenRac/ARMOR-SERVER-AI)** - Política de inferencia visual que explica sus decisiones y nunca actúa
-* **[ARMOR-VISION](https://github.com/JuanenRac/ARMOR-VISION)** - Zonas de cámara, máscaras y reglas de detección para la Jetson Orin NX
 * **[ARMOR-VOICE-AI](https://github.com/JuanenRac/ARMOR-VOICE-AI)** - Intenciones de voz sin conexión con una confirmación imposible de falsificar
 * **[ARMOR-HARDWARE](https://github.com/JuanenRac/ARMOR-HARDWARE)** - Cajas, electrónica y la matriz de aceptación en banco
 * **[ARMOR-DEVOPS](https://github.com/JuanenRac/ARMOR-DEVOPS)** - Despliegue, el banco de pruebas de la CM5, copias de seguridad y TLS
