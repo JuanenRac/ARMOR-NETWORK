@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here.
 
+## [0.0.7] - Audit round two: sturdier agent, inventory and orders
+
+- Hardening of the agent, the inventory, the system access and the orders, with tests.
+
 ## [0.0.6] - Look at a device's web login
 
 - **`inspect` order:** with the login the person gave for that one order, the node opens the device's web administration (Basic or Digest), says whether it asks for a login, whether the login is accepted, whether it is a factory login that should be changed, and what the page says about the device (server, title, model, firmware, serial number). One login, tried once; nothing is changed on the device, and the password never appears in any output, log or printout.

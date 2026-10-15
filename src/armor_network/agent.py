@@ -211,6 +211,7 @@ class Agent:
                 self._ports_at[obs.ip] = now
                 obs.ports = self.io.scan_ports(obs.ip, PROFILES.get(self.config.profile, PROFILES["quick"]))
         events = self.inventory.observe(now, observations, gateway, mark_offline=self.monitor.gateway_ok is not False)
+        self.inventory.forget_old(now)
         self._scan_info = {"last_ms": now, "hosts": min(len(hosts), 1024), "duration_ms": max(0, self.io.now_ms() - started)}
         return events
 
@@ -222,6 +223,11 @@ class Agent:
             seconds = (now - self._counters[0]) / 1000
             if seconds >= 1 and counters[0] >= self._counters[1] and counters[1] >= self._counters[2]:
                 self._bps = (int((counters[0] - self._counters[1]) * 8 / seconds), int((counters[1] - self._counters[2]) * 8 / seconds))
+                self._counters = (now, counters[0], counters[1])
+            elif seconds >= 1:
+                # A counter that went DOWN (a 32-bit counter that wrapped, an interface that restarted): the old base is no use, so the reading becomes the new base and the rate is
+                # unknown until the next one. Before, the base was never renewed and the rate stayed frozen at its last value for ever.
+                self._bps = None
                 self._counters = (now, counters[0], counters[1])
         else:
             self._counters = (now, counters[0], counters[1])

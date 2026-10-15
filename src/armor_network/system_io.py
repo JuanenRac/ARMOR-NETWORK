@@ -100,6 +100,8 @@ class SystemIO:
         """{"name", "ip", "cidr", "gateway", "mac"}: the interface the default route leaves by. The network is the one of its address and mask unless it was given."""
         if self._info is not None:
             return self._info
+        if self._cidr_override:
+            check_scan_range(self._cidr_override)   # a target outside the private ranges is refused first, whatever the state of this machine's routes
         gateway = ip = None
         name = "lan"
         mac = None

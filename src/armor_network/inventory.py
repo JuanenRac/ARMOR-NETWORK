@@ -260,8 +260,20 @@ class Inventory:
 
     # ---- the picture ------------------------------------------------------------------------------------------------------------------------
     def snapshot(self) -> list[dict]:
-        """Every device as the message has it, by address."""
-        return [device.to_json() for device in sorted(self.devices.values(), key=lambda d: _ip_key(d.ip))][:512]
+        """Every device as the message has it, by address. Past 512 (the most the server takes), the ones that go are the ones seen longest ago, never the ones with a high address."""
+        devices = list(self.devices.values())
+        if len(devices) > 512:
+            devices = sorted(devices, key=lambda d: (d.online, d.last_seen_ms), reverse=True)[:512]
+        return [device.to_json() for device in sorted(devices, key=lambda d: _ip_key(d.ip))]
+
+    def forget_old(self, now_ms: int, days: int = 14) -> int:
+        """Forgets the devices with a randomised MAC that have not been seen for `days` days: a phone that changes its address now and then would otherwise fill the inventory with ghosts
+        for ever. A device with a real MAC is never forgotten here (it is a machine of the house that is switched off). Returns how many went."""
+        limit = now_ms - days * 86_400_000
+        gone = [key for key, d in self.devices.items() if d.randomized and not d.online and d.last_seen_ms < limit]
+        for key in gone:
+            del self.devices[key]
+        return len(gone)
 
     def find_by_ip(self, ip: str) -> Device | None:
         return next((d for d in self.devices.values() if d.ip == ip), None)

@@ -727,5 +727,50 @@ class CliTests(unittest.TestCase):
             checked(message)
 
 
+class RoundTwoTests(unittest.TestCase):
+    def test_a_traffic_counter_that_goes_down_renews_the_base_instead_of_freezing_the_rate(self):
+        import types
+        readings = iter([(1000, 1000), (5000, 5000), (200, 300), (1200, 1300)])
+        agent = Agent.__new__(Agent)
+        agent._counters, agent._bps = None, None
+        agent.io = types.SimpleNamespace(traffic=lambda: next(readings))
+        agent._traffic(0)
+        agent._traffic(10_000)
+        self.assertEqual(agent._bps, (3200, 3200))
+        agent._traffic(20_000)               # the counters wrapped or the interface restarted
+        self.assertIsNone(agent._bps, "the rate is unknown, not the old one")
+        agent._traffic(30_000)
+        self.assertEqual(agent._bps, (800, 800), "and it is measured again from the new base")
+
+    def test_the_snapshot_keeps_the_recent_ones_and_old_random_addresses_are_forgotten(self):
+        inventory = Inventory()
+        now = 1_790_000_000_000
+        for index in range(600):
+            inventory.observe(now + index, [Observation(ip=f"10.0.{index // 250}.{index % 250 + 1}", mac=f"02:00:00:00:{index // 256:02x}:{index % 256:02x}")])
+        inventory.observe(now + 5000, [Observation(ip="10.0.9.250", mac="02:aa:bb:cc:dd:ee")])
+        snapshot = inventory.snapshot()
+        self.assertEqual(len(snapshot), 512)
+        self.assertIn("10.0.9.250", {item["ip"] for item in snapshot}, "the newest is in, whatever its address")
+        ips = [tuple(int(part) for part in item["ip"].split(".")) for item in snapshot]
+        self.assertEqual(ips, sorted(ips), "and the list is still by address")
+        # a phone with a randomised address that has not been seen for two weeks is forgotten; a machine with a real address never is
+        later = now + 15 * 86_400_000
+        inventory.devices.clear()
+        inventory.observe(now, [Observation(ip="192.168.0.12", mac="96:b3:ed:0b:1c:18"), Observation(ip="192.168.0.2", mac="14:2e:5e:86:d9:62")])
+        inventory.observe(later, [], mark_offline=True)
+        self.assertEqual(inventory.forget_old(later), 1)
+        self.assertEqual([d.ip for d in inventory.devices.values()], ["192.168.0.2"])
+
+    def test_a_device_that_sends_the_login_elsewhere_is_not_followed(self):
+        from urllib.error import URLError
+        from urllib.request import Request
+        from armor_network.orders import _PrivateRedirects
+        handler = _PrivateRedirects()
+        request = Request("http://192.168.0.5/")
+        with self.assertRaises(URLError):
+            handler.redirect_request(request, None, 302, "Found", {}, "http://evil.example/steal")
+        self.assertIsNotNone(handler.redirect_request(request, None, 302, "Found", {}, "http://192.168.0.5/login"))
+
+
 if __name__ == "__main__":
     unittest.main()

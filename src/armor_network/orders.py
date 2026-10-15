@@ -21,7 +21,8 @@ import ssl
 from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.parse import urlparse
+from urllib.request import HTTPRedirectHandler, Request, urlopen
 
 from .ipnet import is_private_address
 
@@ -203,6 +204,16 @@ _HINTS = (("model", re.compile(r"(?:device\s*model|model(?:\s*name)?|product)\s*
           ("serial", re.compile(r"(?:serial(?:\s*(?:no|number))?)\s*[:=\"'>]\s*([A-Za-z0-9][A-Za-z0-9._-]{3,29})", re.I)))
 
 
+class _PrivateRedirects(HTTPRedirectHandler):
+    """A device may send the browser elsewhere; this one follows a redirect only to another private address (a device must not be able to send the login to a public host)."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: ANN001 - the signature of the standard library
+        host = urlparse(newurl).hostname or ""
+        if not is_private_address(host):
+            raise URLError(f"the device redirects to {host or 'nowhere'}, which is not on the local network: not followed")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 def _open(url: str, user: str | None, password: str | None, context: ssl.SSLContext | None, timeout: float):
     """One GET, with the login when there is one (Basic or Digest, whichever the device asks for)."""
     from urllib.request import HTTPBasicAuthHandler, HTTPDigestAuthHandler, HTTPPasswordMgrWithDefaultRealm, HTTPSHandler, build_opener
@@ -213,6 +224,7 @@ def _open(url: str, user: str | None, password: str | None, context: ssl.SSLCont
         handlers += [HTTPBasicAuthHandler(manager), HTTPDigestAuthHandler(manager)]
     if context is not None:
         handlers.append(HTTPSHandler(context=context))
+    handlers.append(_PrivateRedirects())
     opener = build_opener(*handlers)
     return opener.open(Request(url, headers={"User-Agent": "armor-network", "Accept": "text/html,*/*"}), timeout=timeout)  # noqa: S310 - a private address, checked before
 
@@ -269,7 +281,7 @@ def _inspect_one(ip: str, port: int, user: str | None, password: str | None, tim
         if found:
             parts.append(f"{name}: {found.group(1).strip()[:40]}")
     text = "\n".join(parts)
-    if password:
+    if password and len(password) >= 4:       # a one-letter "password" would wreck the text; the page is not likely to echo it anyway
         text = text.replace(password, "***")   # whatever the page says, the login is never echoed back
     return {"ok": not login.startswith(("refused", "not tried")), "output": text}
 
