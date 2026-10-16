@@ -15,21 +15,32 @@
   <a href="README_por.md">🇵🇹 Português</a>
 </p>
 
-### Surveille le réseau local : les appareils qui y sont, si internet est là, ce qui change et ce qui est nouveau (un programme Python sans dépendances, en lecture seule ; il tourne sur une machine du réseau et rapporte à ARMOR-SERVER)
+### Surveille le réseau local : les appareils présents, si internet est là, ce qui change et ce qui est nouveau (un programme Python sans dépendances ; il tourne sur une machine du réseau et rapporte à ARMOR-SERVER)
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-53-00E5FF.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Maturity-scaffolding-ff9800.svg" alt="Maturity">
+  <img src="https://img.shields.io/badge/Tests-89-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.1.0-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**Vérification d'honnêteté - ce qui fonctionne aujourd'hui:** **Maturité : scaffolding.** Le scanner, l'inventaire qui dit ce qui a changé, la vérification d'internet et le message sont testés sur un ordinateur contre un réseau scénarisé (53 tests ; ARMOR-COMMON accepte tous les messages), et le programme a tourné une fois sur un vrai réseau, avec un routeur et un téléphone. Il n'a pas surveillé une maison entière pendant des jours, il ne fait qu'interroger le routeur et ne le configure jamais, et ce qu'est un appareil (son type, son système, son fabricant) est une supposition. Il ne capture pas de paquets : il ne voit pas qui parle à qui, et le trafic par appareil et la détection d'intrusion au sens strict demandent les compteurs du routeur ou un port miroir, ce qui est une étape ultérieure.
+**Vérification d'honnêteté - ce qui fonctionne aujourd'hui:** Le scanner, l'inventaire qui dit ce qui a changé, le contrôle d'internet, la recherche de l'adresse publique, les ordres depuis Studio et les identifiants scellés sont testés sur un ordinateur contre un réseau scripté (89 tests ; chaque message est accepté par le contrat d'ARMOR-COMMON), et le programme tourne comme service sur le banc de test CM5, en surveillant le vrai réseau où se trouve le banc (un routeur, les téléphones et les nœuds de la maison). Il n'a pas surveillé une maison entière pendant des semaines, il ne fait que demander au routeur et ne le configure jamais, et ce qu'est un appareil (son type, son système, son fabricant) est une supposition. Il ne capture pas de paquets : il ne voit pas qui parle à qui, et le trafic par appareil et la détection d'intrusion au sens strict demandent les compteurs du routeur ou un port miroir, ce qui est une étape ultérieure.
 
 ---
+
+## 📋 En un coup d'œil
+
+| | |
+|---|---|
+| Version | `0.1.0` |
+| Maturité | Établi |
+| Tests | 89 (`python -m unittest discover -s tests`) |
+| Technologie | Python 3.11+ (standard library only) |
+| Sur matériel réel | Tourne comme service sur le banc de test CM5, en surveillant son vrai réseau (un routeur, les téléphones et les nœuds de la maison) |
 
 ## 🎯 Présentation
 
@@ -40,7 +51,15 @@
 * **Il ne regarde que votre propre réseau :** il refuse toute adresse non privée (10/8, 172.16/12, 192.168/16) et toute plage plus grande qu'un /22 ; une liste d'exclusion le tient éloigné de ce qui est fragile ; rien n'est envoyé à un appareil qui ne soit une question.
 * **Le message** `armor/network/<nœud>/state` : l'interface, internet, chaque appareil et les derniers événements ; il est dans le contrat partagé (330 vecteurs) et porte des constats, jamais des ordres. `python -m armor_network scan` l'imprime en tableau, `watch` informe ARMOR-SERVER, `demo` joue une maison inventée (un nouvel appareil arrive, une caméra ouvre Telnet, internet tombe et revient, quelqu'un répond pour le routeur) sans toucher aucun réseau.
 * **Où on le voit :** le menu Réseau d'ARMOR-STUDIO (les appareils, internet avec ses coupures et sa latence, le trafic et les événements ; un administrateur nomme les appareils et marque les connus, ce qui apaise l'alarme d'un nouvel appareil), le Concepteur de réseau (le dessin du réseau de la maison, comparé à ce qui a été trouvé et capable de le dessiner) et l'écran Réseau de l'app Android. ARMOR-SERVER déclenche les alarmes.
+* **Ordres depuis Studio :** un balayage tout de suite, un ping, un traceroute, un réveil réseau, les ports ou la page web d'un appareil et une inspection avec un identifiant que vous donnez ; les ordres arrivent dans la réponse au propre message du nœud (jamais comme une connexion faite vers le nœud), chacun est vérifié avant d'agir et rien n'est exécuté par un shell.
+* **Des identifiants qui restent sûrs :** l'identifiant d'une inspection voyage scellé pour ce seul nœud, n'est envoyé qu'en Digest ou HTTPS (jamais Basic en HTTP clair), seulement à l'appareil dont le certificat HTTPS a été vu la première fois, et n'est jamais renvoyé en écho.
+* **Le côté public :** l'adresse publique de la maison, qui la donne et où elle se trouve (une requête HTTPS vers un service public fixe toutes les quelques minutes ; `--no-public-info` la désactive).
+* **Un service :** il tourne comme unité systemd sur le banc de test CM5 (voir ARMOR-DEVOPS) et garde ses données dans son propre dossier.
 * **Pas encore :** les compteurs du routeur lui-même (trafic par appareil), la capture de paquets, contrôler quoi que ce soit (bloquer un appareil, fermer un port, changer le routeur) et des semaines sur un vrai réseau.
+
+## 🧩 Rôle dans A.R.M.O.R.
+
+ARMOR-NETWORK est l'œil de la famille sur le réseau local. Il tourne sur une machine du réseau (la CM5 sur le banc), regarde ce qui s'y trouve sans y toucher et rapporte à [ARMOR-SERVER](https://github.com/JuanenRac/ARMOR-SERVER), qui garde les noms, les appareils masqués et surveillés et les coupures ; le menu *Réseau* et le *Concepteur réseau* d'[ARMOR-STUDIO](https://github.com/JuanenRac/ARMOR-STUDIO) et l'écran Réseau d'[ARMOR-ANDROID-CONTROL](https://github.com/JuanenRac/ARMOR-ANDROID-CONTROL) le montrent, et Studio peut lui donner des ordres. Il ne configure jamais le routeur ni aucun appareil.
 
 ## 📂 Structure du dépôt
 
@@ -57,8 +76,10 @@ ARMOR-NETWORK/
 
 ## 🛠️ Environnement de développement
 
+**Prérequis:** Python 3.11+ (standard library only), a machine on the network to be watched (Linux, Windows or macOS)
+
 ```bash
-python -m unittest discover -s tests                  # 53 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 89 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched
@@ -77,12 +98,14 @@ Voir la [conception](docs/DESIGN.md), les [notes de sécurité](docs/SAFETY.md),
 * **[ARMOR-RADAR](https://github.com/JuanenRac/ARMOR-RADAR)** - Firmware du nœud de terrain pour ESP32-S3 avec trois radars et son propre panneau web
 * **[ARMOR-SOLAR](https://github.com/JuanenRac/ARMOR-SOLAR)** - Protocoles des onduleurs et batteries solaires et messages d'un nœud passerelle
 * **[ARMOR-ELECTRICAL](https://github.com/JuanenRac/ARMOR-ELECTRICAL)** - Nœud électrique : compteurs, le message des mesures du réseau et les règles de commutation
+* **[ARMOR-ALARM](https://github.com/JuanenRac/ARMOR-ALARM)** - Nœud et centrale d'alarme : zones, armement, temporisations, sirène et PIN, avec ou sans le serveur
 * **[ARMOR-HMI](https://github.com/JuanenRac/ARMOR-HMI)** - Panneau tactile : l'état du système sur un écran mural, armer et acquitter, et la maison de l'assistant vocal
 * **ARMOR-NETWORK** (ce dépôt) - Le réseau local : ses appareils, internet et ce qui change
 * **[ARMOR-SERVER](https://github.com/JuanenRac/ARMOR-SERVER)** - Coordinateur central : télémétrie, alarmes, appareils, relevés solaires et caméras
 * **[ARMOR-STUDIO](https://github.com/JuanenRac/ARMOR-STUDIO)** - Console web : caméras, radar, alarmes, énergie solaire et concepteur de site 2D/3D
 * **[ARMOR-ANDROID-CONTROL](https://github.com/JuanenRac/ARMOR-ANDROID-CONTROL)** - Client Android de l'opérateur avec radar 2D/3D en direct
 * **[ARMOR-SERVER-AI](https://github.com/JuanenRac/ARMOR-SERVER-AI)** - Politique d'inférence visuelle qui explique ses décisions et n'agit jamais
+* **[ARMOR-VISION](https://github.com/JuanenRac/ARMOR-VISION)** - Zones de caméra, masques et règles de détection pour la Jetson Orin NX
 * **[ARMOR-VOICE-AI](https://github.com/JuanenRac/ARMOR-VOICE-AI)** - Intentions vocales hors ligne avec une confirmation impossible à falsifier
 * **[ARMOR-HARDWARE](https://github.com/JuanenRac/ARMOR-HARDWARE)** - Boîtiers, électronique et matrice d'acceptation sur banc
 * **[ARMOR-DEVOPS](https://github.com/JuanenRac/ARMOR-DEVOPS)** - Déploiement, banc d'essai CM5, sauvegarde et TLS

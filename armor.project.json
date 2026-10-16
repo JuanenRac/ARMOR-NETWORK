@@ -12,7 +12,7 @@
     "MQTT-compatible JSON"
   ],
   "deployment_target": "Any machine on the network being watched (a PC, the CM5, a Raspberry Pi); it reports to ARMOR-SERVER",
-  "maturity": "functional",
+  "maturity": "established",
   "family": "Field Nodes",
   "parent": "ARMOR-COMMON",
   "native_version": "0.1.0",

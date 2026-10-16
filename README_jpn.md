@@ -15,21 +15,32 @@
   <a href="README_por.md">🇵🇹 Português</a>
 </p>
 
-### ローカルネットワークを監視：どんな機器があるか、インターネットがつながっているか、何が変わったか、何が新しいか（依存ライブラリなしの Python プログラム、読み取り専用。ネットワーク上のマシンで動作し、ARMOR-SERVER に報告します）
+### ローカルネットワークを見張ります：接続されているデバイス、インターネットがあるか、何が変わり何が新しいか（依存ライブラリなしの Python プログラム。ネットワーク上のマシンで動き、ARMOR-SERVER に報告）
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-53-00E5FF.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Maturity-scaffolding-ff9800.svg" alt="Maturity">
+  <img src="https://img.shields.io/badge/Tests-89-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.1.0-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**正直さのチェック - 今日動いているもの:** **成熟度：足場段階。** スキャナー、変化を伝えるインベントリ、インターネット確認、メッセージは、台本どおりのネットワークを相手にコンピューター上でテスト済みです（53 件のテスト。すべてのメッセージを ARMOR-COMMON が受理）。実ネットワークで 1 回だけ実行しており、ルーターとスマートフォンが 1 台ありました。家全体を何日も監視したことはなく、ルーターには問い合わせるだけで設定は一切せず、機器の種類・OS・メーカーは推測です。パケットは取得しません。誰が誰と通信しているかは見えず、機器ごとのトラフィックや厳密な意味での侵入検知にはルーターのカウンターやミラーポートが必要で、それは後の段階です。
+**正直さのチェック - 今日動いているもの:** スキャナー、何が変わったかを伝えるインベントリ、インターネットの検査、公開アドレスの問い合わせ、Studio からの指示、封印されたログインは、スクリプト化したネットワークに対してコンピューター上でテストされ（89 件。すべてのメッセージが ARMOR-COMMON のコントラクトに受け付けられる）、プログラムは CM5 テストベンチ上でサービスとして動き、ベンチがつながる実際のネットワーク（ルーター、家のスマートフォンとノード）を見張っています。家全体を数週間見張ったことはなく、ルーターに尋ねるだけで設定は一切せず、デバイスが何か（種類、システム、メーカー）は推測です。パケットは取得しません。誰が誰と話しているかは見えず、デバイスごとのトラフィックや厳密な意味での侵入検知にはルーターのカウンターかミラーポートが必要で、それは今後の段階です。
 
 ---
+
+## 📋 ひと目で
+
+| | |
+|---|---|
+| バージョン | `0.1.0` |
+| 成熟度 | 確立 |
+| テスト | 89 (`python -m unittest discover -s tests`) |
+| 技術 | Python 3.11+ (standard library only) |
+| 実機での確認 | CM5 テストベンチ上でサービスとして動き、実際のネットワーク（ルーター、家のスマートフォンとノード）を見張っています |
 
 ## 🎯 概要
 
@@ -40,7 +51,15 @@
 * **自分のネットワークだけを見ます：** プライベートでないアドレス（10/8、172.16/12、192.168/16 以外）と /22 より大きい範囲は拒否します。除外リストでデリケートな機器には触れず、機器には質問以外を送りません。
 * **メッセージ** `armor/network/<ノード>/state`：インターフェース、インターネット、全機器、最新のイベント。共有コントラクト（330 ベクター）にあり、発見だけを運び、命令は運びません。`python -m armor_network scan` は表で表示、`watch` は ARMOR-SERVER に通知、`demo` は架空の家（新しい機器の参加、カメラが Telnet を開く、インターネットの断と復旧、ルーターになりすます応答）を、ネットワークに触れずに再生します。
 * **表示場所：** ARMOR-STUDIO のネットワークメニュー（機器、停止と遅延のあるインターネット、トラフィック、イベント。管理者が機器に名前を付け既知として印を付けると、新しい機器の警報が静まります）、ネットワーク設計（家のネットワークの図面を、検出結果と比較し、描くこともできます）、Android アプリのネットワーク画面。警報は ARMOR-SERVER が発します。
+* **Studio からの指示：**今すぐのスキャン、ping、traceroute、ウェイクアップ、1 台のデバイスのポートや Web ページ、あなたが渡したログインでの検査。指示はノード自身のメッセージへの応答として届き（ノードへの接続としては決して来ません）、実行前にそれぞれ検査され、シェルを通して何かを実行することはありません。
+* **安全なままのログイン：**検査のログインはそのノードだけに封印されて届き、Digest または HTTPS でのみ送られ（平文 HTTP の Basic は決して使わない）、最初に HTTPS 証明書を見たデバイスにだけ送られ、エコーバックされません。
+* **公開側：**家の公開アドレス、その提供元と場所（数分ごとに固定の公開サービスへ HTTPS リクエストを 1 回。`--no-public-info` でオフ）。
+* **サービス：**CM5 テストベンチで systemd ユニットとして動き（ARMOR-DEVOPS を参照）、データは専用のフォルダーに保存します。
 * **まだ：** ルーター自身のカウンター（機器ごとのトラフィック）、パケットキャプチャ、何かを制御すること（機器のブロック、ポートを閉じる、ルーターの変更）、実ネットワークでの数週間の運用。
+
+## 🧩 A.R.M.O.R. での役割
+
+ARMOR-NETWORK はファミリーのローカルネットワークを見る目です。ネットワーク上のマシン（ベンチの CM5）で動き、そこにあるものに触れずに見て、[ARMOR-SERVER](https://github.com/JuanenRac/ARMOR-SERVER) に報告します。サーバーが名前、非表示・監視デバイス、停止を保持し、[ARMOR-STUDIO](https://github.com/JuanenRac/ARMOR-STUDIO) の*ネットワーク*メニューと*ネットワークデザイナー*、[ARMOR-ANDROID-CONTROL](https://github.com/JuanenRac/ARMOR-ANDROID-CONTROL) のネットワーク画面が表示し、Studio から指示も出せます。ルーターやデバイスを設定することはありません。
 
 ## 📂 リポジトリの構成
 
@@ -57,8 +76,10 @@ ARMOR-NETWORK/
 
 ## 🛠️ 開発環境
 
+**必要なもの:** Python 3.11+ (standard library only), a machine on the network to be watched (Linux, Windows or macOS)
+
 ```bash
-python -m unittest discover -s tests                  # 53 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 89 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched
@@ -77,12 +98,14 @@ See the [usage](docs/USAGE.md) and the [design](docs/DESIGN.md).
 * **[ARMOR-RADAR](https://github.com/JuanenRac/ARMOR-RADAR)** - ESP32-S3 用フィールドノードのファームウェア。レーダー 3 基と独自の Web パネル付き
 * **[ARMOR-SOLAR](https://github.com/JuanenRac/ARMOR-SOLAR)** - 太陽光インバーターとバッテリーのプロトコル、およびゲートウェイノードのメッセージ
 * **[ARMOR-ELECTRICAL](https://github.com/JuanenRac/ARMOR-ELECTRICAL)** - 電気ノード：電力量計、電力網の計測メッセージ、開閉のルール
+* **[ARMOR-ALARM](https://github.com/JuanenRac/ARMOR-ALARM)** - 警報ノードと警報盤：警戒区域、警戒セット、遅延、サイレン、PIN。サーバーがあってもなくても
 * **[ARMOR-HMI](https://github.com/JuanenRac/ARMOR-HMI)** - タッチパネル：壁面ディスプレイでのシステム状態表示、警戒・確認操作、音声アシスタントの拠点
 * **ARMOR-NETWORK** (このリポジトリ) - ローカルネットワーク：機器、インターネット、そして変化
 * **[ARMOR-SERVER](https://github.com/JuanenRac/ARMOR-SERVER)** - 中央コーディネーター：テレメトリ、アラーム、デバイス、太陽光の測定値、カメラ
 * **[ARMOR-STUDIO](https://github.com/JuanenRac/ARMOR-STUDIO)** - Web コンソール：カメラ、レーダー、アラーム、太陽光発電、2D/3D サイト設計
 * **[ARMOR-ANDROID-CONTROL](https://github.com/JuanenRac/ARMOR-ANDROID-CONTROL)** - リアルタイム 2D/3D レーダー付きの Android オペレータークライアント
 * **[ARMOR-SERVER-AI](https://github.com/JuanenRac/ARMOR-SERVER-AI)** - 判断を説明し、決して動作しない視覚推論ポリシー
+* **[ARMOR-VISION](https://github.com/JuanenRac/ARMOR-VISION)** - Jetson Orin NX 向けのカメラのゾーン、マスク、検知ルール
 * **[ARMOR-VOICE-AI](https://github.com/JuanenRac/ARMOR-VOICE-AI)** - 偽造できない確認を備えたオフライン音声インテント
 * **[ARMOR-HARDWARE](https://github.com/JuanenRac/ARMOR-HARDWARE)** - 筐体、電子部品、ベンチ受け入れマトリクス
 * **[ARMOR-DEVOPS](https://github.com/JuanenRac/ARMOR-DEVOPS)** - デプロイ、CM5 テストベンチ、バックアップ、TLS
