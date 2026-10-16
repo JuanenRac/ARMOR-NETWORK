@@ -69,12 +69,21 @@ def _print_summary(message: dict) -> None:
         print(f"  event {event['id']:>4} {event['kind']:<15} {event.get('detail', '')}")
 
 
+def _is_local(server: str) -> bool:
+    from urllib.parse import urlparse
+    host = (urlparse(server).hostname or "").lower()
+    return host in ("localhost", "::1") or host.startswith("127.")
+
+
 def _run_loop(agent: Agent, args: argparse.Namespace, *, forever: bool) -> int:
     server = check_server_url(args.server_url) if args.server_url else None
     token = args.ingest_token or os.environ.get("ARMOR_INGEST_TOKEN", "")
     if bool(server) != bool(token):
         print("--server-url and --ingest-token (or ARMOR_INGEST_TOKEN) must be supplied together", file=sys.stderr)
         return 2
+    if server and server.startswith("http://") and not _is_local(server):
+        # The ingest token and the results of an inspection travel with the message: over plain HTTP anyone on the path reads them. HTTPS, or a server on this same machine, is the way.
+        print("warning: the server is spoken to over plain HTTP: the ingest token and what the node finds cross the network in the clear (use an https:// address)", file=sys.stderr)
     validate = _validator() if getattr(args, "validate", False) else None
     if getattr(args, "validate", False) and validate is None:
         print("--validate needs ARMOR-COMMON next to this project", file=sys.stderr)

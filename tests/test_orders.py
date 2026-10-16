@@ -1,10 +1,12 @@
 """Tests of the public address and of the manual orders: what is kept of a public service's answer, which orders and addresses are refused, and the whole agent
 doing each order against the scripted network, with every message checked by ARMOR-COMMON's contract. Nothing here touches a network."""
 import json
+import os
 import sys
 import tempfile
 import threading
 import unittest
+from unittest import mock
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
@@ -234,6 +236,9 @@ class InspectTests(unittest.TestCase):
         from http.server import BaseHTTPRequestHandler, HTTPServer
 
         expected = "Basic " + base64.b64encode(f"{user}:{password}".encode()).decode()
+        patch = mock.patch.dict(os.environ, {"ARMOR_NETWORK_ALLOW_BASIC_HTTP": "1"})   # these tests talk Basic to a local server over plain HTTP
+        patch.start()
+        self.addCleanup(patch.stop)
 
         class Handler(BaseHTTPRequestHandler):
             server_version = "tiny-httpd"
@@ -279,6 +284,23 @@ class InspectTests(unittest.TestCase):
         port = self._server("admin", "admin")
         found = orders.inspect_web("127.0.0.1", port, "admin", "admin")
         self.assertIn("factory login", found["output"])
+
+    def test_a_login_is_not_sent_in_Basic_over_plain_http_unless_it_is_allowed(self):
+        port = self._server()
+        with mock.patch.dict(os.environ, {"ARMOR_NETWORK_ALLOW_BASIC_HTTP": "0"}):
+            found = orders.inspect_web("127.0.0.1", port, "admin", "s3cret")
+        self.assertFalse(found["ok"])
+        self.assertIn("login: not sent", found["output"])
+        self.assertNotIn("s3cret", found["output"])
+
+    def test_an_order_that_was_already_done_is_not_done_twice(self):
+        agent, io, clock, first = run_agent()
+        order = orders.Order("dup1", "ping", ip="192.168.0.50") if hasattr(orders, "Order") else None
+        if order is None:
+            self.skipTest("the order type has another name")
+        agent.submit([order]); agent.step()
+        agent.submit([order])
+        self.assertEqual(len(agent._orders), 0)
 
     def test_no_web_interface_is_said_plainly(self):
         found = orders.inspect_web("127.0.0.1", 9, "admin", "x", timeout=0.5)

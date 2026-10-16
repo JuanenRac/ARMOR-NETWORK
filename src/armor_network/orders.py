@@ -13,6 +13,7 @@ Two things that are not about the house's own devices:
 
 from __future__ import annotations
 
+import os
 import ipaddress
 import json
 import re
@@ -221,7 +222,10 @@ def _open(url: str, user: str | None, password: str | None, context: ssl.SSLCont
     if user is not None:
         manager = HTTPPasswordMgrWithDefaultRealm()
         manager.add_password(None, url, user, password or "")
-        handlers += [HTTPBasicAuthHandler(manager), HTTPDigestAuthHandler(manager)]
+        # Digest sends a proof and never the password; Basic sends the password itself, so it is used only over HTTPS: over plain HTTP anyone on the path (an ARP spoofer) would read it.
+        handlers.append(HTTPDigestAuthHandler(manager))
+        if url.startswith("https://") or os.environ.get("ARMOR_NETWORK_ALLOW_BASIC_HTTP") == "1":
+            handlers.append(HTTPBasicAuthHandler(manager))
     if context is not None:
         handlers.append(HTTPSHandler(context=context))
     handlers.append(_PrivateRedirects())
@@ -255,6 +259,9 @@ def _inspect_one(ip: str, port: int, user: str | None, password: str | None, tim
         realm = re.search(r'realm="([^"]{1,60})"', challenge)
         if user is None:
             login = f"required ({scheme_name}), no login was given"
+        elif scheme == "http" and scheme_name.lower() == "basic" and os.environ.get("ARMOR_NETWORK_ALLOW_BASIC_HTTP") != "1":
+            # Basic sends the password itself: over plain HTTP anyone on the path (an ARP spoofer) reads it. The login is not sent; Digest and HTTPS are fine.
+            login = "not sent: the device asks for Basic over plain HTTP, which would show the password to the network (ARMOR_NETWORK_ALLOW_BASIC_HTTP=1 allows it)"
         else:
             try:
                 with _open(url, user, password, context, timeout) as response:
@@ -283,7 +290,7 @@ def _inspect_one(ip: str, port: int, user: str | None, password: str | None, tim
     text = "\n".join(parts)
     if password and len(password) >= 4:       # a one-letter "password" would wreck the text; the page is not likely to echo it anyway
         text = text.replace(password, "***")   # whatever the page says, the login is never echoed back
-    return {"ok": not login.startswith(("refused", "not tried")), "output": text}
+    return {"ok": not login.startswith(("refused", "not tried", "not sent")), "output": text}
 
 
 def inspect_web(ip: str, port: int | None, user: str | None, password: str | None, timeout: float = 4.0) -> dict:

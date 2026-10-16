@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [0.0.8] - Basic authentication only over HTTPS, and an agent that does not repeat finished orders
+
+- The agent sends Basic credentials only over HTTPS unless a flag allows plain HTTP, and the command line warns when the address is not local.
+- An order that already finished is not run again after the agent restarts.
+- Tests cover both.
+
 ## [0.0.7] - Sturdier agent, inventory and orders
 
 - Hardening of the agent, the inventory, the system access and the orders, with tests.

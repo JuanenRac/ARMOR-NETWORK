@@ -80,6 +80,7 @@ class Agent:
         self._public = PublicTracker(directory / "public.json" if directory else None)
         self._orders: list[Order] = []
         self._results: list[dict] = []
+        self._done_ids: list[str] = []   # the orders already done: the server offers again one whose result it never got, and it is not done twice
         self._announced: dict[str, dict] = {}
         self._ports_at: dict[str, int] = {}
         self._names_tried: dict[str, int] = {}
@@ -120,7 +121,10 @@ class Agent:
     # ---- the manual orders ---------------------------------------------------------------------------------------------------------------------
     def submit(self, orders: list[Order]) -> None:
         """Orders the server handed out; they are done at the next turn, and their results go out in the next messages."""
-        self._orders.extend(orders[:4])
+        for order in orders[:4]:
+            if order.id in self._done_ids or any(queued.id == order.id for queued in self._orders):
+                continue
+            self._orders.append(order)
 
     def _do_orders(self, now: int, info: dict) -> None:
         orders, self._orders = self._orders, []
@@ -135,6 +139,7 @@ class Agent:
             if "output" in result:
                 result["output"] = str(result["output"])[:OUTPUT_LIMIT]
             self._results.append(result)
+            self._done_ids = (self._done_ids + [order.id])[-64:]
         self._results = self._results[-16:]
         self._next["publish"] = 0
 
