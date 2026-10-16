@@ -18,6 +18,7 @@ import ipaddress
 import json
 import re
 import socket
+import hashlib
 import ssl
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -245,6 +246,55 @@ def _open(url: str, user: str | None, password: str | None, context: ssl.SSLCont
     return opener.open(Request(url, headers={"User-Agent": "armor-network", "Accept": "text/html,*/*"}), timeout=timeout)  # noqa: S310 - a private address, checked before
 
 
+def pin_file() -> Path:
+    """Where the certificates seen are kept (ARMOR_NETWORK_PINS, or ~/.armor-network/https-pins.json)."""
+    return Path(os.environ.get("ARMOR_NETWORK_PINS") or Path.home() / ".armor-network" / "https-pins.json")
+
+
+def certificate_fingerprint(ip: str, port: int, timeout: float) -> str | None:
+    """The SHA-256 of the certificate a device shows (it is not validated: a device's own certificate is almost always its own)."""
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+    try:
+        with socket.create_connection((ip, port), timeout=timeout) as raw, context.wrap_socket(raw) as tls:
+            der = tls.getpeercert(True)
+    except OSError:
+        return None
+    return hashlib.sha256(der).hexdigest() if der else None
+
+
+def check_pin(ip: str, port: int, fingerprint: str, path: Path | None = None) -> str:
+    """Trust on first use: the first certificate seen from an address is kept ("new"); the same one later is "same"; another one is "changed" (a different device, or someone
+    in the path pretending to be it) and is NOT kept, so the person decides by removing the line."""
+    path = path or pin_file()
+    try:
+        pins = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(pins, dict):
+            pins = {}
+    except (OSError, ValueError):
+        pins = {}
+    key = f"{ip}:{port}"
+    known = pins.get(key)
+    if known == fingerprint:
+        return "same"
+    if known:
+        return "changed"
+    pins[key] = fingerprint
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = path.with_name(path.name + ".tmp")
+        temporary.write_text(json.dumps(pins, indent=1, sort_keys=True), encoding="utf-8")
+        os.replace(temporary, path)
+        try:
+            os.chmod(path, 0o600)
+        except OSError:
+            pass
+    except OSError:
+        pass   # the pin could not be kept: the next look is "new" again, nothing is lost
+    return "new"
+
+
 def _inspect_one(ip: str, port: int, user: str | None, password: str | None, timeout: float) -> dict | None:
     scheme = "https" if port in (443, 8443, 4443) else "http"
     url = f"{scheme}://{ip}:{port}/"
@@ -274,6 +324,9 @@ def _inspect_one(ip: str, port: int, user: str | None, password: str | None, tim
         elif scheme == "http" and scheme_name.lower() == "basic" and os.environ.get("ARMOR_NETWORK_ALLOW_BASIC_HTTP") != "1":
             # Basic sends the password itself: over plain HTTP anyone on the path (an ARP spoofer) reads it. The login is not sent; Digest and HTTPS are fine.
             login = "not sent: the device asks for Basic over plain HTTP, which would show the password to the network (ARMOR_NETWORK_ALLOW_BASIC_HTTP=1 allows it)"
+        elif scheme == "https" and (shown := certificate_fingerprint(ip, port, timeout)) is not None and check_pin(ip, port, shown) == "changed":
+            # the login is sent only to the device it was first sent to: another certificate may be another device or someone in the path
+            login = f"not sent: the HTTPS certificate of this device is not the one seen the first time (sha256 {shown[:16]}...); remove its line from {pin_file()} if the change is expected"
         else:
             try:
                 with _open(url, user, password, context, timeout) as response:

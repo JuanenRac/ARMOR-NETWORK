@@ -293,6 +293,54 @@ class InspectTests(unittest.TestCase):
         self.assertIn("login: not sent", found["output"])
         self.assertNotIn("s3cret", found["output"])
 
+    def test_the_certificate_seen_first_is_kept_and_another_one_is_not_trusted(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "pins.json"
+            self.assertEqual(orders.check_pin("192.168.0.9", 443, "aa" * 32, path), "new")
+            self.assertEqual(orders.check_pin("192.168.0.9", 443, "aa" * 32, path), "same")
+            self.assertEqual(orders.check_pin("192.168.0.9", 443, "bb" * 32, path), "changed")
+            self.assertEqual(orders.check_pin("192.168.0.9", 443, "aa" * 32, path), "same", "a changed certificate is not kept")
+            self.assertEqual(orders.check_pin("192.168.0.9", 8443, "bb" * 32, path), "new", "each address and port has its own")
+            path.write_text("not json", encoding="utf-8")
+            self.assertEqual(orders.check_pin("192.168.0.9", 443, "cc" * 32, path), "new", "a damaged file is started again")
+
+    def test_a_login_is_not_sent_to_an_https_device_whose_certificate_changed(self):
+        from email.message import Message
+        from urllib.error import HTTPError
+        sent = []
+
+        def fake_open(url, user, password, context, timeout):
+            if user is None:
+                headers = Message()
+                headers["WWW-Authenticate"] = 'Digest realm="Cam"'
+                raise HTTPError(url, 401, "Unauthorized", headers, None)
+            sent.append((url, user))
+
+            class Page:
+                status = 200
+                headers = {"Server": "cam"}
+
+                def read(self, n):
+                    return b"<title>Cam</title>"
+
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, *a):
+                    return False
+            return Page()
+
+        with tempfile.TemporaryDirectory() as folder, mock.patch.dict(os.environ, {"ARMOR_NETWORK_PINS": str(Path(folder) / "pins.json")}), mock.patch.object(orders, "_open", fake_open):
+            with mock.patch.object(orders, "certificate_fingerprint", return_value="aa" * 32):
+                first = orders.inspect_web("192.168.0.9", 443, "admin", "s3cret")
+            self.assertIn("login: accepted", first["output"])
+            with mock.patch.object(orders, "certificate_fingerprint", return_value="bb" * 32):
+                second = orders.inspect_web("192.168.0.9", 443, "admin", "s3cret")
+            self.assertFalse(second["ok"])
+            self.assertIn("login: not sent", second["output"])
+            self.assertNotIn("s3cret", second["output"])
+        self.assertEqual(len(sent), 1, "the login went only to the device whose certificate was first seen")
+
     def test_an_order_that_was_already_done_is_not_done_twice(self):
         agent, io, clock, first = run_agent()
         order = orders.Order("dup1", "ping", ip="192.168.0.50") if hasattr(orders, "Order") else None

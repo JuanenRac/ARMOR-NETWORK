@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [0.1.0] - The login goes only to the device it was first sent to
+
+- When a device is looked at over HTTPS with a login, the certificate it shows is kept the first time (trust on first use) in a private file (`~/.armor-network/https-pins.json`, or the path in `ARMOR_NETWORK_PINS`).
+- If the certificate of that address later is another one (another device, or someone in the path pretending to be it), the login is not sent and the result says so; removing the line from the file accepts the new certificate.
+- Tests cover the store (new, same, changed, damaged file) and that the login reaches only the device first seen.
+
 ## [0.0.9] - The login of an inspection arrives sealed
 
 - The node opens the login of an inspection order with its own token (`auth_sealed`); one that does not open, or a message for another node, leaves the order without a login.
