@@ -26,6 +26,7 @@ from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, Request, urlopen
 
 from .ipnet import is_private_address
+from .seal import open_sealed
 
 ORDER_TYPES = ("scan_now", "ping", "traceroute", "wake", "ports", "http", "inspect")
 ORDER_ID = re.compile(r"^[a-z0-9][a-z0-9_-]{0,31}$")
@@ -124,8 +125,8 @@ class Order:
     password: str | None = field(default=None, repr=False, compare=False)
 
 
-def parse_orders(body: object) -> list[Order]:
-    """The orders in the server's answer: the well-formed ones only, at most four, and nothing else in the answer is looked at."""
+def parse_orders(body: object, token: str = "") -> list[Order]:
+    """The orders in the server's answer: the well-formed ones only, at most four, and nothing else in the answer is looked at. A login arrives sealed for this node (`auth_sealed`, opened with its own token); one that does not open leaves the order without a login."""
     commands = body.get("commands") if isinstance(body, dict) else None
     if not isinstance(commands, list):
         return []
@@ -138,12 +139,23 @@ def parse_orders(body: object) -> list[Order]:
             continue
         ip, mac, device_id, port = item.get("ip"), item.get("mac"), item.get("device_id"), item.get("port")
         auth = item.get("auth") if item["type"] == "inspect" and isinstance(item.get("auth"), dict) else {}
+        if item["type"] == "inspect" and isinstance(item.get("auth_sealed"), str) and token:
+            auth = _unseal_login(token, item["auth_sealed"])
         user = auth.get("user") if isinstance(auth.get("user"), str) and 0 < len(auth["user"]) <= 64 else None
         password = auth.get("password") if isinstance(auth.get("password"), str) and len(auth["password"]) <= 128 else None
         orders.append(Order(identifier, item["type"], ip if isinstance(ip, str) else None, mac.lower() if isinstance(mac, str) and MAC.match(mac.lower()) else None,
                             device_id if isinstance(device_id, str) and len(device_id) <= 64 else None,
                             port if isinstance(port, int) and not isinstance(port, bool) and 1 <= port <= 65_535 else None, user, password if user is not None else None))
     return orders
+
+
+def _unseal_login(token: str, sealed: str) -> dict:
+    opened = open_sealed(token, sealed)
+    try:
+        value = json.loads(opened) if opened else {}
+    except ValueError:
+        return {}
+    return value if isinstance(value, dict) else {}
 
 
 def magic_packet(mac: str) -> bytes:

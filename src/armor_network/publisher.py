@@ -61,4 +61,4 @@ def post(server_url: str, token: str, payload: dict, timeout: float = 8.0, attem
 
 def deliver(server_url: str, token: str, payload: dict, timeout: float = 8.0, attempts: int = 2, pause_s: float = 0.5) -> list[Order]:
     """The same, and the manual orders the server handed out in its answer (the well-formed ones, at most four)."""
-    return parse_orders(_send(server_url, token, payload, timeout, attempts, pause_s)[1])
+    return parse_orders(_send(server_url, token, payload, timeout, attempts, pause_s)[1], token)

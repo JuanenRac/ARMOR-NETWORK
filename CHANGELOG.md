@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## [0.0.9] - The login of an inspection arrives sealed
+
+- The node opens the login of an inspection order with its own token (`auth_sealed`); one that does not open, or a message for another node, leaves the order without a login.
+- A test checks the format against a vector produced by the server.
+
 ## [0.0.8] - Basic authentication only over HTTPS, and an agent that does not repeat finished orders
 
 - The agent sends Basic credentials only over HTTPS unless a flag allows plain HTTP, and the command line warns when the address is not local.
