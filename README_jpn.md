@@ -11,7 +11,8 @@
   <a href="README_ita.md">🇮🇹 Italiano</a> |
   <a href="README_deu.md">🇩🇪 Deutsch</a> |
   <a href="README_zho.md">🇨🇳 简体中文</a> |
-  🇯🇵 <b>日本語</b>
+  🇯🇵 <b>日本語</b> |
+  <a href="README_por.md">🇵🇹 Português</a>
 </p>
 
 ### ローカルネットワークを監視：どんな機器があるか、インターネットがつながっているか、何が変わったか、何が新しいか（依存ライブラリなしの Python プログラム、読み取り専用。ネットワーク上のマシンで動作し、ARMOR-SERVER に報告します）

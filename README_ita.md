@@ -11,7 +11,8 @@
   🇮🇹 <b>Italiano</b> |
   <a href="README_deu.md">🇩🇪 Deutsch</a> |
   <a href="README_zho.md">🇨🇳 简体中文</a> |
-  <a href="README_jpn.md">🇯🇵 日本語</a>
+  <a href="README_jpn.md">🇯🇵 日本語</a> |
+  <a href="README_por.md">🇵🇹 Português</a>
 </p>
 
 ### Sorveglia la rete locale: i dispositivi che ci sono, se internet c'è, cosa cambia e cosa è nuovo (un programma Python senza dipendenze, in sola lettura; gira su una macchina della rete e riferisce ad ARMOR-SERVER)
