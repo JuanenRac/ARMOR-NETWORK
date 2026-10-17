@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-89-00E5FF.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.1.0-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Tests-93-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.1.1-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**Verificação de honestidade - o que funciona hoje:** O scanner, o inventário que diz o que mudou, a verificação da internet, a consulta do endereço público, as ordens do Studio e os acessos selados são testados num computador contra uma rede guionizada (89 testes; cada mensagem é aceite pelo contrato do ARMOR-COMMON), e o programa corre como serviço na bancada de testes do CM5, vigiando a rede real em que a bancada está (um router, os telemóveis e os nós da casa). Não vigiou uma casa inteira durante semanas, só pergunta ao router e nunca o configura, e o que é um dispositivo (o tipo, o sistema, o fabricante) é um palpite. Não captura pacotes: não pode ver quem fala com quem, e o tráfego por dispositivo e a deteção de intrusos em sentido estrito precisam dos contadores do router ou de uma porta espelho, que é um passo posterior.
+**Verificação de honestidade - o que funciona hoje:** O scanner, o inventário que diz o que mudou, a verificação da internet, a consulta do endereço público, as ordens do Studio e os acessos selados são testados num computador contra uma rede guionizada (93 testes; cada mensagem é aceite pelo contrato do ARMOR-COMMON), e o programa corre como serviço na bancada de testes do CM5, vigiando a rede real em que a bancada está (um router, os telemóveis e os nós da casa). Não vigiou uma casa inteira durante semanas, só pergunta ao router e nunca o configura, e o que é um dispositivo (o tipo, o sistema, o fabricante) é um palpite. Não captura pacotes: não pode ver quem fala com quem, e o tráfego por dispositivo e a deteção de intrusos em sentido estrito precisam dos contadores do router ou de uma porta espelho, que é um passo posterior.
 
 ---
 
@@ -36,9 +36,9 @@
 
 | | |
 |---|---|
-| Versão | `0.1.0` |
+| Versão | `0.1.1` |
 | Maturidade | Estabelecido |
-| Testes | 89 (`python -m unittest discover -s tests`) |
+| Testes | 93 (`python -m unittest discover -s tests`) |
 | Tecnologia | Python 3.11+ (standard library only) |
 | Em hardware real | Corre como serviço na bancada de testes do CM5, vigiando a sua rede real (um router, os telemóveis e os nós da casa) |
 
@@ -46,7 +46,7 @@
 
 * **O que há na rede:** a tabela de vizinhos da máquina, um toque a cada endereço para que se preencha, um eco a cada dispositivo encontrado (latência e TTL) e o que os dispositivos anunciam sobre si (mDNS, UPnP, NetBIOS, DNS inverso). Para cada dispositivo: endereço, MAC, fabricante (do registo IEEE de 40 000 blocos), nome, tipo, sistema, portas abertas com o que cada uma diz, e quando foi visto pela primeira e última vez.
 * **Portas:** uma ligação TCP a 17 (ou 44) portas de cada dispositivo, doze de cada vez, lendo no máximo algumas centenas de bytes do que responde; nunca um início de sessão, nunca uma exploração. Um dispositivo novo observa-se de imediato, os outros a cada quarto de hora.
-* **O que muda:** um dispositivo que aparece (a primeira pesquisa só aprende), fica em silêncio ou volta, muda de endereço, uma porta que abre ou fecha, e duas máquinas a responder por um endereço (sobretudo o do router). Cada evento tem um id, por isso diz-se uma só vez.
+* **O que muda:** um dispositivo que aparece (as três primeiras pesquisas só aprendem), fica em silêncio ou volta, muda de endereço, uma porta que abre ou fecha, e duas máquinas a responder por um endereço (sobretudo o do router). Cada evento tem um id, por isso diz-se uma só vez.
 * **A internet:** a cada poucos segundos um eco ao router, uma ligação TCP, duas perguntas DNS a resolvedores escolhidos e uma página web. Uma queda precisa de três rondas para se considerar queda e duas para terminar, datada desde a sua primeira ronda falhada e contada até à primeira boa, e diz de quem é a culpa: do operador (o router responde e nada para além dele) ou deste lado (o router também não responde). Latência, perda e as quedas das últimas 24 horas.
 * **Só olha para a sua própria rede:** recusa qualquer endereço que não seja privado (10/8, 172.16/12, 192.168/16) e qualquer intervalo maior que um /22; uma lista de exclusão mantém-no longe do que é frágil; nada se envia a um dispositivo que não seja uma pergunta.
 * **A mensagem** `armor/network/<node>/state`: a interface, a internet, cada dispositivo e os últimos eventos; está no contrato partilhado (330 vetores) e leva constatações, nunca comandos. `python -m armor_network scan` imprime-a como tabela, `watch` informa o ARMOR-SERVER, `demo` representa uma casa inventada (entra um dispositivo novo, uma câmara abre Telnet, a internet cai e volta, alguém responde pelo router) sem tocar em nenhuma rede.
@@ -54,7 +54,7 @@
 * **Ordens do Studio:** um varrimento já, um ping, um traceroute, um acordar, as portas ou a página web de um dispositivo e uma inspeção com um acesso que der; as ordens chegam na resposta à própria mensagem do nó (nunca como uma ligação feita ao nó), cada uma é verificada antes de se fazer algo e nada é executado por uma shell.
 * **Acessos que se mantêm seguros:** o acesso de uma inspeção viaja selado só para este nó, é enviado só por Digest ou HTTPS (nunca Basic por HTTP simples), só ao dispositivo cujo certificado HTTPS foi visto da primeira vez, e nunca é devolvido em eco.
 * **O lado público:** o endereço público da casa, quem o dá e onde está (um pedido HTTPS a um serviço público fixo de poucos em poucos minutos; `--no-public-info` desliga-o).
-* **Um serviço:** corre como unidade systemd na bancada de testes do CM5 (veja ARMOR-DEVOPS) e guarda os seus dados na sua própria pasta.
+* **Um serviço:** corre como unidade systemd na bancada de testes do CM5 (escrita à mão, veja o guia de uso) e guarda os seus dados na sua própria pasta.
 * **Ainda não:** os contadores do próprio router (tráfego por dispositivo), captura de pacotes, controlar o que quer que seja (bloquear um dispositivo, fechar uma porta, alterar o router) e semanas numa rede real.
 
 ## 🧩 Papel no A.R.M.O.R.
@@ -79,7 +79,7 @@ ARMOR-NETWORK/
 **Requisitos:** Python 3.11+ (standard library only), a machine on the network to be watched (Linux, Windows or macOS)
 
 ```bash
-python -m unittest discover -s tests                  # 89 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 93 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched

@@ -333,7 +333,7 @@ class InventoryTests(unittest.TestCase):
     ESP = ("192.168.0.30", "24:0a:c4:11:22:33")
 
     def test_the_first_round_only_learns(self):
-        inventory = Inventory()
+        inventory = Inventory(baseline_rounds=1)
         events = inventory.observe(1000, [obs(*self.ROUTER), obs(*self.PHONE)], "192.168.0.1")
         self.assertEqual(events, [])
         self.assertEqual([d["ip"] for d in inventory.snapshot()], ["192.168.0.1", "192.168.0.12"])
@@ -343,7 +343,7 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual([(e["kind"], e["device_id"]) for e in events], [("new_device", self.ESP[1])])
 
     def test_a_device_goes_quiet_and_comes_back(self):
-        inventory = Inventory(offline_after_s=30)
+        inventory = Inventory(offline_after_s=30, baseline_rounds=1)
         inventory.observe(0, [obs(*self.ROUTER), obs(*self.ESP)])
         self.assertEqual(inventory.observe(20_000, [obs(*self.ROUTER)]), [])                      # not yet: 20 s of 30
         events = inventory.observe(40_000, [obs(*self.ROUTER)])
@@ -354,14 +354,14 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual([e["kind"] for e in events], ["device_online"])
 
     def test_a_device_that_changes_address(self):
-        inventory = Inventory()
+        inventory = Inventory(baseline_rounds=1)
         inventory.observe(0, [obs(*self.ESP)])
         events = inventory.observe(5000, [obs("192.168.0.99", self.ESP[1])])
         self.assertEqual([(e["kind"], e["detail"]) for e in events], [("ip_changed", "192.168.0.30 to 192.168.0.99")])
         self.assertEqual(len(inventory.snapshot()), 1)
 
     def test_a_device_known_only_by_its_address_gets_its_mac(self):
-        inventory = Inventory()
+        inventory = Inventory(baseline_rounds=1)
         inventory.observe(0, [obs("192.168.0.70")])
         self.assertEqual(inventory.snapshot()[0]["id"], "ip-192-168-0-70")
         self.assertEqual(inventory.observe(1000, [obs("192.168.0.70", self.ESP[1])]), [])
@@ -370,7 +370,7 @@ class InventoryTests(unittest.TestCase):
         self.assertIn("Espressif", device["vendor"])
 
     def test_two_machines_for_one_address(self):
-        inventory = Inventory()
+        inventory = Inventory(baseline_rounds=1)
         inventory.observe(0, [obs(*self.ROUTER), obs(*self.PHONE)], "192.168.0.1")
         # somebody else answers for the router's address while the router is still there
         events = inventory.observe(30_000, [obs("192.168.0.1", "de:ad:be:ef:01:01"), obs(*self.PHONE)], "192.168.0.1")
@@ -381,14 +381,14 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual([e["kind"] for e in again], [])
 
     def test_a_handover_is_not_a_conflict(self):
-        inventory = Inventory(offline_after_s=30)
+        inventory = Inventory(offline_after_s=30, baseline_rounds=1)
         inventory.observe(0, [obs(*self.PHONE), obs(*self.ROUTER)])
         inventory.observe(100_000, [obs(*self.ROUTER)])                      # the phone went away and is marked offline
         events = inventory.observe(200_000, [obs("192.168.0.12", "aa:bb:cc:00:00:01"), obs(*self.ROUTER)])
         self.assertEqual([e["kind"] for e in events], ["new_device"])         # the address was lent to another device: new, but no conflict
 
     def test_ports_that_open_and_close(self):
-        inventory = Inventory()
+        inventory = Inventory(baseline_rounds=1)
         inventory.observe(0, [obs(*self.ROUTER, ports={80: ("http", None), 443: ("https", None)})], "192.168.0.1")
         self.assertEqual(inventory.observe(1000, [obs(*self.ROUTER, ports={80: ("http", None), 443: ("https", None)})], "192.168.0.1"), [])
         self.assertEqual(inventory.observe(2000, [obs(*self.ROUTER)], "192.168.0.1"), [])       # not scanned this time is not "nothing open"
@@ -400,17 +400,17 @@ class InventoryTests(unittest.TestCase):
     def test_it_is_remembered_between_runs(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "inventory.json"
-            first = Inventory(path)
+            first = Inventory(path, baseline_rounds=1)
             first.observe(0, [obs(*self.ROUTER, ports={80: ("http", None)})], "192.168.0.1")
             first.observe(1000, [obs(*self.ROUTER, ports={80: ("http", None)}), obs(*self.ESP)], "192.168.0.1")
             first.save()
-            second = Inventory(path)
+            second = Inventory(path, baseline_rounds=1)
             self.assertTrue(second.baseline_done)
             self.assertEqual(len(second.snapshot()), 2)
             self.assertEqual(second.observe(2000, [obs(*self.ROUTER, ports={80: ("http", None), 22: ("ssh", None)}), obs(*self.ESP)], "192.168.0.1")[0]["kind"], "port_opened")
             self.assertEqual(second.log.events[-1]["id"], "e2")     # the ids go on where they stopped
             path.write_text("{ not json", encoding="utf-8")
-            self.assertEqual(Inventory(path).snapshot(), [])          # a damaged file is a network not learned yet
+            self.assertEqual(Inventory(path, baseline_rounds=1).snapshot(), [])          # a damaged file is a network not learned yet
 
     def test_the_log_keeps_the_last_events_with_ids_that_do_not_repeat(self):
         log = EventLog()
@@ -743,7 +743,7 @@ class RoundTwoTests(unittest.TestCase):
         self.assertEqual(agent._bps, (800, 800), "and it is measured again from the new base")
 
     def test_the_snapshot_keeps_the_recent_ones_and_old_random_addresses_are_forgotten(self):
-        inventory = Inventory()
+        inventory = Inventory(baseline_rounds=1)
         now = 1_790_000_000_000
         for index in range(600):
             inventory.observe(now + index, [Observation(ip=f"10.0.{index // 250}.{index % 250 + 1}", mac=f"02:00:00:00:{index // 256:02x}:{index % 256:02x}")])

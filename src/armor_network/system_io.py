@@ -4,7 +4,7 @@ Copyright (C) 2026 JuanenRac (Electro Hobby 3D). GPL-3.0-or-later.
 
 Everything the program sends is listed here, and none of it is an attack: an ICMP echo and a TCP connection to a handful of ports of the devices of the private network it
 watches, a UDP datagram to the discard port to make the system resolve their addresses, the multicast questions of mDNS and SSDP, a NetBIOS name request, and, for the internet
-check, a TCP connection, two DNS questions and one web request to well-known public addresses. It never sends a password, never tries a login, never leaves the private
+check, a TCP connection, two DNS questions and one web request to well-known public addresses. It never sends a password and never tries a login by itself (only an `inspect` order from an administrator carries one, in orders.py), never leaves the private
 range for anything but that check (`check_scan_range`), and reads at most a few hundred bytes of what answers.
 """
 
@@ -25,8 +25,10 @@ from .internet import ProbeResult
 from .ipnet import check_scan_range, hosts_of, is_private_address, network_of
 from .neighbors import in_network, parse_arp_windows, parse_ip_neigh, parse_proc_net_arp
 from .oui import normalize_mac
-from .orders import fetch_public_info, http_look, inspect_web, send_magic_packet
+from .orders import _open, fetch_public_info, http_look, inspect_web, send_magic_packet
 from .services import clean_banner, parse_http, service_name
+
+INTERFACE_REFRESH_S = 60.0   # the address, network and router of this machine are read again this often: a lease renewed or a cable moved must not stay wrong for ever
 
 WINDOWS = sys.platform.startswith("win")
 NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
@@ -88,6 +90,7 @@ class SystemIO:
         self._cidr_override = cidr
         self._interface_ip = interface_ip
         self._info: dict | None = None
+        self._info_at = 0.0
 
     # ---- the clock and the interface ---------------------------------------------------------------------------------------------------------
     def now_ms(self) -> int:
@@ -98,8 +101,16 @@ class SystemIO:
 
     def interface(self) -> dict:
         """{"name", "ip", "cidr", "gateway", "mac"}: the interface the default route leaves by. The network is the one of its address and mask unless it was given."""
-        if self._info is not None:
+        if self._info is not None and time.monotonic() - self._info_at < INTERFACE_REFRESH_S:
             return self._info
+        try:
+            return self._read_interface()
+        except RuntimeError:
+            if self._info is not None:     # a moment without a route (a renewal of the lease) does not make the node forget where it is
+                return self._info
+            raise
+
+    def _read_interface(self) -> dict:
         if self._cidr_override:
             check_scan_range(self._cidr_override)   # a target outside the private ranges is refused first, whatever the state of this machine's routes
         gateway = ip = None
@@ -135,6 +146,7 @@ class SystemIO:
         cidr = self._cidr_override or mask_cidr or network_of(ip, "255.255.255.0")
         check_scan_range(cidr)
         self._info = {"name": name, "ip": ip, "cidr": cidr, "gateway": gateway, "mac": mac}
+        self._info_at = time.monotonic()
         return self._info
 
     # ---- who is there ----------------------------------------------------------------------------------------------------------------------------
@@ -258,8 +270,7 @@ class SystemIO:
             sock.close()
         for ip, location in list(locations.items())[:20]:      # the description of a UPnP device names it (a TV says "Living room TV")
             try:
-                request = Request(location, headers={"User-Agent": "armor-network"})
-                with urlopen(request, timeout=1.5) as response:  # noqa: S310 - a private address, checked above
+                with _open(location, None, None, None, 1.5) as response:   # a redirect is followed only to another private address
                     info = parsers.upnp_device_info(response.read(16384).decode("utf-8", "replace"))
             except (OSError, URLError, ValueError):
                 continue

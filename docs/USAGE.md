@@ -44,21 +44,29 @@ Wants=network-online.target
 User=armor
 WorkingDirectory=/opt/armor/apps/ARMOR-NETWORK
 Environment=PYTHONPATH=/opt/armor/apps/ARMOR-NETWORK/src
-EnvironmentFile=/opt/armor/etc/armor.env
+EnvironmentFile=/opt/armor/etc/armor.network-node.env
 ExecStart=/usr/bin/python3 -m armor_network watch --node-id house-1 --server-url http://127.0.0.1:18080 --data-dir /opt/armor/data/network-watch
 Restart=on-failure
 RestartSec=5
 MemoryMax=128M
 TasksMax=256
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/armor/data/network-watch
+CapabilityBoundingSet=
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-Keep `TasksMax` at 256 or more: a sweep runs up to 32 `ping` workers, each starting a `ping` process of its own, and 12 more for the ports, so a smaller limit (32 is a common one) kills the node at its first sweep with `can't start new thread`. `ARMOR_INGEST_TOKEN` comes from the environment file, so it is never on a command line. When the server runs over HTTPS with a certificate for a host name, give `--server-url` that name (the certificate is checked, and a bare address does not match it); on the server's own machine, point the name at `127.0.0.1` in `/etc/hosts`.
+Keep `TasksMax` at 256 or more: a sweep runs up to 32 `ping` workers, each starting a `ping` process of its own, and 12 more for the ports, so a smaller limit (32 is a common one) kills the node at its first sweep with `can't start new thread`. `ARMOR_INGEST_TOKEN` comes from its own small environment file (`/opt/armor/etc/armor.network-node.env`, mode 0640, `root:armor`, one line: `ARMOR_INGEST_TOKEN=<this node's own token>`), so it is never on a command line, and this process - which reads hostile data from the network - does not get the server's other secrets (it must not read `armor.env`). The node's own token (Studio shows it for `node_id`) is the one the server needs to hand this node a saved login for `inspect`; the shared ingest token works for delivering the state, but an `inspect` then arrives without a login (and with `ARMOR_INGEST_STRICT=1` the shared token is refused).
+
+A saved login is sealed with that token, which the node sends in clear in every request, so over plain `http://` across the network anyone who saw one request could open it: **the node never opens a login unless the server's address is `https://` or this same machine** (an `inspect` then says the saved login was not used). `--server-url http://127.0.0.1:...` as above is fine. When the server runs over HTTPS with a certificate for a host name, give `--server-url` that name (the certificate is checked, and a bare address does not match it); on the server's own machine, point the name at `127.0.0.1` in `/etc/hosts`.
 
 ## What to expect
 
-The first scan of a fresh `--data-dir` only learns: nothing is reported as new. From then on a device that appears is a `new_device` event and, on the server, an alarm until an administrator marks it as known in Studio. On Windows the sweep takes 10 to 20 seconds; a device that sleeps still answers ARP, so it stays present, and one that leaves is called offline after three minutes.
+The first three sweeps of a fresh `--data-dir` only learn: nothing is reported as new (the first one often sees only part of the network). From then on a device that appears is a `new_device` event and, on the server, an alarm until an administrator marks it as known in Studio. On Windows the sweep takes 10 to 20 seconds; a device that sleeps still answers ARP, so it stays present, and one that leaves is called offline after three minutes.
 
 The made-up house of `demo` plays its script on a clock of its own (`--tick-s`, ten seconds by default): in the first minutes an unknown device joins, a camera opens Telnet and a smart plug goes and comes back; then the internet goes down and back, the whole local network goes down and back, and someone starts answering for the router.

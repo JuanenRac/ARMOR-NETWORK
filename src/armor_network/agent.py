@@ -114,7 +114,7 @@ class Agent:
             self._next["traffic"] = now + self.config.traffic_every_s * 1000
         if events or now >= self._next["publish"]:
             self._next["publish"] = now + self.config.publish_every_s * 1000
-            self.inventory.save()
+            self.inventory.save(now, force=bool(events))
             return self.build_message(now, info)
         return None
 
@@ -172,7 +172,22 @@ class Agent:
         if order.type == "http":
             return self.io.http_look(order.ip, order.port or 80)
         if order.type == "inspect":
-            return self.io.inspect_web(order.ip, order.port, order.user, order.password)
+            user, password, note = order.user, order.password, ""
+            if order.login_withheld:
+                note = "\nthe saved login was not used: it would travel to this node in the clear (use https to the server, or run the node on the server's machine)"
+            elif user is not None:
+                # The login goes only to the machine it belongs to: the address is answered now by the MAC of the device, and no conflict about it is open.
+                seen = self.io.arp_table().get(order.ip)
+                if order.mac and seen and seen != order.mac:
+                    user, password = None, None
+                    note = f"\nthe saved login was not used: {order.ip} is answered by {seen}, not by the device it belongs to ({order.mac})"
+                elif any(e.get("kind") == "arp_conflict" and e.get("at_ms", 0) >= self.io.now_ms() - 600_000 and order.ip in str(e.get("detail", "")) for e in self.log.events):
+                    user, password = None, None
+                    note = f"\nthe saved login was not used: two machines claimed {order.ip} a moment ago"
+            result = self.io.inspect_web(order.ip, order.port, user, password)
+            if note and "output" in result:
+                result["output"] = str(result["output"]) + note
+            return result
         return {"ok": False, "output": "unknown order"}
 
     def _scan(self, now: int, info: dict) -> list[dict]:

@@ -73,14 +73,19 @@ def guess_os(ttl: int | None) -> str | None:
 
 _VENDOR_KINDS = (
     ("camera", ("hikvision", "dahua", "reolink", "amcrest", "axis communications", "foscam", "wyze", "eufy", "ezviz", "annke", "uniview")),
-    ("printer", ("brother", "canon", "epson", "lexmark", "xerox", "kyocera", "ricoh", "konica", "hewlett", "hp inc")),
+    ("printer", ("brother", "canon", "epson", "lexmark", "xerox", "kyocera", "ricoh", "konica", "hp inc")),
     ("tv", ("roku", "vizio", "tcl", "hisense", "sonos", "nvidia shield")),
     ("nas", ("synology", "qnap", "western digital", "asustor", "terramaster")),
-    ("iot", ("espressif", "tuya", "shelly", "allterco", "itead", "sonoff", "ecobee", "nest labs", "philips lighting", "signify", "tp-link smart", "shenzhen", "hangzhou", "zhejiang")),
+    ("iot", ("espressif", "tuya", "shelly", "allterco", "itead", "sonoff", "ecobee", "nest labs", "philips lighting", "signify", "tp-link smart")),
     ("network", ("ubiquiti", "netgear", "cisco", "mikrotik", "routerboard", "zyxel", "d-link", "tp-link", "tp link", "aruba", "juniper", "engenius", "linksys", "huawei", "sagemcom",
                  "zte", "arris", "technicolor", "compal", "askey", "fritz", "avm")),
     ("computer", ("raspberry", "intel corporate", "dell", "lenovo", "microsoft", "asustek", "gigabyte", "micro-star", "msi", "vmware", "hyper-v", "realtek")),
 )
+def _has_word(text: str, word: str) -> bool:
+    """`word` as a whole word (or words) of `text`: "zte" is in "ZTE Corporation" and not in "Aztech Electronics"."""
+    return re.search(r"(?<![a-z0-9])" + re.escape(word) + r"(?![a-z0-9])", text) is not None
+
+
 _SERVICE_KINDS = (
     ("tv", ("_googlecast._tcp", "_roku", "_spotify-connect._tcp", "urn:dial-multiscreen-org:service:dial", "mediarenderer")),
     ("printer", ("_ipp._tcp", "_printer._tcp", "_pdl-datastream._tcp", "_scanner._tcp", "printer")),
@@ -117,7 +122,7 @@ def guess_kind(*, is_gateway: bool = False, ports: set[int] | frozenset[int] = f
     name = (hostname or "").lower()
     maker = (vendor or "").lower()
     for kind, words in _VENDOR_KINDS:
-        if maker and any(word in maker for word in words):
+        if maker and any(_has_word(maker, word) for word in words):
             if kind == "computer" and name and any(w in name for w in ("iphone", "ipad", "android")):
                 break
             return kind

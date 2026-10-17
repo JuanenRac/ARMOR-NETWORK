@@ -24,7 +24,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
-from urllib.request import HTTPRedirectHandler, Request, urlopen
+from http.client import HTTPSConnection
+from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, urlopen
 
 from .ipnet import is_private_address
 from .seal import open_sealed
@@ -121,13 +122,17 @@ class Order:
     mac: str | None = None
     device_id: str | None = None
     port: int | None = None
+    # true when the server sent a login that was not opened because the way to the server is plain HTTP over the network (see parse_orders)
+    login_withheld: bool = False
     # the login the person gave for this one order (an `inspect`): kept out of every printout, used once and never stored
     user: str | None = field(default=None, repr=False)
     password: str | None = field(default=None, repr=False, compare=False)
 
 
-def parse_orders(body: object, token: str = "") -> list[Order]:
-    """The orders in the server's answer: the well-formed ones only, at most four, and nothing else in the answer is looked at. A login arrives sealed for this node (`auth_sealed`, opened with its own token); one that does not open leaves the order without a login."""
+def parse_orders(body: object, token: str = "", allow_login: bool = True) -> list[Order]:
+    """The orders in the server's answer: the well-formed ones only, at most four, and nothing else in the answer is looked at. A login arrives sealed for this node (`auth_sealed`, opened with its own token); one that does not open leaves the order without a login.
+    The seal is keyed with the token the node sends in clear as its Bearer, so over plain HTTP across the network anyone who saw the request can open it: with `allow_login` false (a plain
+    http address that is not this machine) a login is never opened, and the order says so."""
     commands = body.get("commands") if isinstance(body, dict) else None
     if not isinstance(commands, list):
         return []
@@ -140,13 +145,16 @@ def parse_orders(body: object, token: str = "") -> list[Order]:
             continue
         ip, mac, device_id, port = item.get("ip"), item.get("mac"), item.get("device_id"), item.get("port")
         auth = item.get("auth") if item["type"] == "inspect" and isinstance(item.get("auth"), dict) else {}
-        if item["type"] == "inspect" and isinstance(item.get("auth_sealed"), str) and token:
+        withheld = False
+        if item["type"] == "inspect" and (auth or isinstance(item.get("auth_sealed"), str)) and not allow_login:
+            auth, withheld = {}, True
+        elif item["type"] == "inspect" and isinstance(item.get("auth_sealed"), str) and token:
             auth = _unseal_login(token, item["auth_sealed"])
         user = auth.get("user") if isinstance(auth.get("user"), str) and 0 < len(auth["user"]) <= 64 else None
         password = auth.get("password") if isinstance(auth.get("password"), str) and len(auth["password"]) <= 128 else None
         orders.append(Order(identifier, item["type"], ip if isinstance(ip, str) else None, mac.lower() if isinstance(mac, str) and MAC.match(mac.lower()) else None,
                             device_id if isinstance(device_id, str) and len(device_id) <= 64 else None,
-                            port if isinstance(port, int) and not isinstance(port, bool) and 1 <= port <= 65_535 else None, user, password if user is not None else None))
+                            port if isinstance(port, int) and not isinstance(port, bool) and 1 <= port <= 65_535 else None, withheld, user, password if user is not None else None))
     return orders
 
 
@@ -178,13 +186,13 @@ def send_magic_packet(mac: str, broadcast: str) -> None:
 
 def http_look(ip: str, port: int, timeout: float = 3.0) -> dict:
     """One GET of the front page of a device: the status, the server it says it is and the title. A device's own certificate is not checked (it is almost always its own)."""
-    scheme = "https" if port in (443, 8443, 4443, 8883) else "http"
+    scheme = "https" if port in (443, 8443, 4443) else "http"
     context = ssl.create_default_context()
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
-    request = Request(f"{scheme}://{ip}:{port}/", headers={"User-Agent": "armor-network", "Accept": "text/html,*/*"})
     try:
-        with urlopen(request, timeout=timeout, context=context if scheme == "https" else None) as response:  # noqa: S310 - a private address, checked before
+        # _open follows a redirect only to another private address: a device cannot send this look to a public host
+        with _open(f"{scheme}://{ip}:{port}/", None, None, context if scheme == "https" else None, timeout) as response:
             status, server = response.status, response.headers.get("Server", "")
             body = response.read(16_384).decode("utf-8", "replace")
     except OSError as error:
@@ -228,9 +236,41 @@ class _PrivateRedirects(HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
-def _open(url: str, user: str | None, password: str | None, context: ssl.SSLContext | None, timeout: float):
-    """One GET, with the login when there is one (Basic or Digest, whichever the device asks for)."""
-    from urllib.request import HTTPBasicAuthHandler, HTTPDigestAuthHandler, HTTPPasswordMgrWithDefaultRealm, HTTPSHandler, build_opener
+class PinChanged(URLError):
+    """The certificate a device showed is not the one kept for it (or could not be read): nothing was sent."""
+
+    def __init__(self, shown: str | None) -> None:
+        super().__init__("the certificate could not be read" if shown is None else f"the certificate is not the one seen the first time (sha256 {shown[:16]}...)")
+        self.shown = shown
+
+
+class _PinnedConnection(HTTPSConnection):
+    """An HTTPS connection that looks at the certificate in THIS connection, after the handshake and before a single header (the login) is sent."""
+
+    pin_ip = ""
+    pin_port = 0
+
+    def connect(self) -> None:
+        super().connect()
+        der = self.sock.getpeercert(True) if self.sock is not None else None
+        shown = hashlib.sha256(der).hexdigest() if der else None
+        if shown is None or check_pin(self.pin_ip, self.pin_port, shown) == "changed":
+            self.close()
+            raise PinChanged(shown)
+
+
+class _PinnedHandler(HTTPSHandler):
+    def __init__(self, context: ssl.SSLContext | None, ip: str, port: int) -> None:
+        super().__init__(context=context)
+        self._connection = type("PinnedConnection", (_PinnedConnection,), {"pin_ip": ip, "pin_port": port})
+
+    def https_open(self, req):  # noqa: ANN001 - the signature of the standard library
+        return self.do_open(self._connection, req, context=self._context)
+
+
+def _open(url: str, user: str | None, password: str | None, context: ssl.SSLContext | None, timeout: float, pin: tuple[str, int] | None = None):
+    """One GET, with the login when there is one (Basic or Digest, whichever the device asks for). With `pin` (ip, port) the certificate is checked in the same connection that carries the login."""
+    from urllib.request import HTTPBasicAuthHandler, HTTPDigestAuthHandler, HTTPPasswordMgrWithDefaultRealm, build_opener
     handlers = []
     if user is not None:
         manager = HTTPPasswordMgrWithDefaultRealm()
@@ -239,7 +279,9 @@ def _open(url: str, user: str | None, password: str | None, context: ssl.SSLCont
         handlers.append(HTTPDigestAuthHandler(manager))
         if url.startswith("https://") or os.environ.get("ARMOR_NETWORK_ALLOW_BASIC_HTTP") == "1":
             handlers.append(HTTPBasicAuthHandler(manager))
-    if context is not None:
+    if context is not None and pin is not None:
+        handlers.append(_PinnedHandler(context, pin[0], pin[1]))
+    elif context is not None:
         handlers.append(HTTPSHandler(context=context))
     handlers.append(_PrivateRedirects())
     opener = build_opener(*handlers)
@@ -324,12 +366,11 @@ def _inspect_one(ip: str, port: int, user: str | None, password: str | None, tim
         elif scheme == "http" and scheme_name.lower() == "basic" and os.environ.get("ARMOR_NETWORK_ALLOW_BASIC_HTTP") != "1":
             # Basic sends the password itself: over plain HTTP anyone on the path (an ARP spoofer) reads it. The login is not sent; Digest and HTTPS are fine.
             login = "not sent: the device asks for Basic over plain HTTP, which would show the password to the network (ARMOR_NETWORK_ALLOW_BASIC_HTTP=1 allows it)"
-        elif scheme == "https" and (shown := certificate_fingerprint(ip, port, timeout)) is not None and check_pin(ip, port, shown) == "changed":
-            # the login is sent only to the device it was first sent to: another certificate may be another device or someone in the path
-            login = f"not sent: the HTTPS certificate of this device is not the one seen the first time (sha256 {shown[:16]}...); remove its line from {pin_file()} if the change is expected"
         else:
             try:
-                with _open(url, user, password, context, timeout) as response:
+                # the login is sent only to the device it was first sent to: the certificate is checked in the very connection that carries it (another certificate may be another
+                # device or someone in the path), and one that cannot be read is treated as a different one
+                with _open(url, user, password, context, timeout, pin=(ip, port) if scheme == "https" else None) as response:
                     status, body = response.status, response.read(16_384).decode("utf-8", "replace")
                     server = response.headers.get("Server", server)
                 login = f"accepted ({scheme_name})"
@@ -338,6 +379,8 @@ def _inspect_one(ip: str, port: int, user: str | None, password: str | None, tim
             except HTTPError as error:
                 status = error.code
                 login = "refused" if error.code == 401 else f"refused (HTTP {error.code})"
+            except PinChanged as error:
+                login = f"not sent: the HTTPS certificate of this device is not the one seen the first time ({error}); remove its line from {pin_file()} if the change is expected"
             except OSError as error:
                 login = f"not tried: {error}"[:80]
         if realm:

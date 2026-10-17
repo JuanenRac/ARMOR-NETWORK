@@ -54,10 +54,11 @@ def main() -> int:
         request = Request(URL, headers={"User-Agent": "armor-network-fetch-oui"})
         with urlopen(request, timeout=60) as response:  # noqa: S310 - a fixed https address
             text = response.read().decode("utf-8")
-    count = write(blocks(text))
-    if count < 20000:
-        print(f"only {count} blocks: the register looks incomplete, the file was written anyway", file=sys.stderr)
+    found = blocks(text)
+    if len(found) < 20000:
+        print(f"only {len(found)} blocks: the register looks incomplete, the file was NOT written", file=sys.stderr)
         return 1
+    count = write(found)
     print(f"{count} manufacturers written to {OUT}")
     return 0
 

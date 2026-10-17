@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-89-00E5FF.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.1.0-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Tests-93-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.1.1-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**Vérification d'honnêteté - ce qui fonctionne aujourd'hui:** Le scanner, l'inventaire qui dit ce qui a changé, le contrôle d'internet, la recherche de l'adresse publique, les ordres depuis Studio et les identifiants scellés sont testés sur un ordinateur contre un réseau scripté (89 tests ; chaque message est accepté par le contrat d'ARMOR-COMMON), et le programme tourne comme service sur le banc de test CM5, en surveillant le vrai réseau où se trouve le banc (un routeur, les téléphones et les nœuds de la maison). Il n'a pas surveillé une maison entière pendant des semaines, il ne fait que demander au routeur et ne le configure jamais, et ce qu'est un appareil (son type, son système, son fabricant) est une supposition. Il ne capture pas de paquets : il ne voit pas qui parle à qui, et le trafic par appareil et la détection d'intrusion au sens strict demandent les compteurs du routeur ou un port miroir, ce qui est une étape ultérieure.
+**Vérification d'honnêteté - ce qui fonctionne aujourd'hui:** Le scanner, l'inventaire qui dit ce qui a changé, le contrôle d'internet, la recherche de l'adresse publique, les ordres depuis Studio et les identifiants scellés sont testés sur un ordinateur contre un réseau scripté (93 tests ; chaque message est accepté par le contrat d'ARMOR-COMMON), et le programme tourne comme service sur le banc de test CM5, en surveillant le vrai réseau où se trouve le banc (un routeur, les téléphones et les nœuds de la maison). Il n'a pas surveillé une maison entière pendant des semaines, il ne fait que demander au routeur et ne le configure jamais, et ce qu'est un appareil (son type, son système, son fabricant) est une supposition. Il ne capture pas de paquets : il ne voit pas qui parle à qui, et le trafic par appareil et la détection d'intrusion au sens strict demandent les compteurs du routeur ou un port miroir, ce qui est une étape ultérieure.
 
 ---
 
@@ -36,9 +36,9 @@
 
 | | |
 |---|---|
-| Version | `0.1.0` |
+| Version | `0.1.1` |
 | Maturité | Établi |
-| Tests | 89 (`python -m unittest discover -s tests`) |
+| Tests | 93 (`python -m unittest discover -s tests`) |
 | Technologie | Python 3.11+ (standard library only) |
 | Sur matériel réel | Tourne comme service sur le banc de test CM5, en surveillant son vrai réseau (un routeur, les téléphones et les nœuds de la maison) |
 
@@ -46,7 +46,7 @@
 
 * **Ce qu'il y a sur le réseau :** la table de voisins de la machine, un coup sur chaque adresse pour qu'elle se remplisse, un écho à chaque appareil trouvé (latence et TTL) et ce que les appareils annoncent d'eux-mêmes (mDNS, UPnP, NetBIOS, DNS inverse). Pour chacun : adresse, MAC, fabricant (du registre de l'IEEE, 40 000 blocs), nom, type, système, ports ouverts avec ce que dit chacun, et quand il a été vu pour la première et la dernière fois.
 * **Ports :** une connexion TCP à 17 (ou 44) ports de chaque appareil, douze à la fois, en lisant au plus quelques centaines d'octets de la réponse ; jamais de connexion, jamais d'exploit. Un nouvel appareil est examiné aussitôt, les autres tous les quarts d'heure.
-* **Ce qui change :** un appareil qui apparaît (le premier balayage ne fait qu'apprendre), se tait ou revient, change d'adresse, un port qui s'ouvre ou se ferme, et deux machines qui répondent pour une même adresse (surtout celle du routeur). Chaque événement a un id, il n'est donc dit qu'une fois.
+* **Ce qui change :** un appareil qui apparaît (les trois premiers balayages ne font qu'apprendre), se tait ou revient, change d'adresse, un port qui s'ouvre ou se ferme, et deux machines qui répondent pour une même adresse (surtout celle du routeur). Chaque événement a un id, il n'est donc dit qu'une fois.
 * **Internet :** toutes les quelques secondes un écho au routeur, une connexion TCP, deux questions DNS à des résolveurs choisis et une page web. Une coupure demande trois tours pour être déclarée et deux pour être finie, est datée du premier tour raté et comptée jusqu'au premier bon, et dit à qui est la faute : au fournisseur (le routeur répond et rien au-delà) ou à ce côté-ci (le routeur ne répond pas non plus). Latence, perte et les coupures des dernières 24 heures.
 * **Il ne regarde que votre propre réseau :** il refuse toute adresse non privée (10/8, 172.16/12, 192.168/16) et toute plage plus grande qu'un /22 ; une liste d'exclusion le tient éloigné de ce qui est fragile ; rien n'est envoyé à un appareil qui ne soit une question.
 * **Le message** `armor/network/<nœud>/state` : l'interface, internet, chaque appareil et les derniers événements ; il est dans le contrat partagé (330 vecteurs) et porte des constats, jamais des ordres. `python -m armor_network scan` l'imprime en tableau, `watch` informe ARMOR-SERVER, `demo` joue une maison inventée (un nouvel appareil arrive, une caméra ouvre Telnet, internet tombe et revient, quelqu'un répond pour le routeur) sans toucher aucun réseau.
@@ -54,7 +54,7 @@
 * **Ordres depuis Studio :** un balayage tout de suite, un ping, un traceroute, un réveil réseau, les ports ou la page web d'un appareil et une inspection avec un identifiant que vous donnez ; les ordres arrivent dans la réponse au propre message du nœud (jamais comme une connexion faite vers le nœud), chacun est vérifié avant d'agir et rien n'est exécuté par un shell.
 * **Des identifiants qui restent sûrs :** l'identifiant d'une inspection voyage scellé pour ce seul nœud, n'est envoyé qu'en Digest ou HTTPS (jamais Basic en HTTP clair), seulement à l'appareil dont le certificat HTTPS a été vu la première fois, et n'est jamais renvoyé en écho.
 * **Le côté public :** l'adresse publique de la maison, qui la donne et où elle se trouve (une requête HTTPS vers un service public fixe toutes les quelques minutes ; `--no-public-info` la désactive).
-* **Un service :** il tourne comme unité systemd sur le banc de test CM5 (voir ARMOR-DEVOPS) et garde ses données dans son propre dossier.
+* **Un service :** il tourne comme unité systemd sur le banc de test CM5 (écrite à la main, voir le guide d'utilisation) et garde ses données dans son propre dossier.
 * **Pas encore :** les compteurs du routeur lui-même (trafic par appareil), la capture de paquets, contrôler quoi que ce soit (bloquer un appareil, fermer un port, changer le routeur) et des semaines sur un vrai réseau.
 
 ## 🧩 Rôle dans A.R.M.O.R.
@@ -79,7 +79,7 @@ ARMOR-NETWORK/
 **Prérequis:** Python 3.11+ (standard library only), a machine on the network to be watched (Linux, Windows or macOS)
 
 ```bash
-python -m unittest discover -s tests                  # 89 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 93 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched

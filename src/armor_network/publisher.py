@@ -5,6 +5,7 @@ Copyright (C) 2026 JuanenRac (Electro Hobby 3D). GPL-3.0-or-later.
 
 from __future__ import annotations
 
+import ipaddress
 import json
 import time
 from urllib.error import HTTPError
@@ -59,6 +60,20 @@ def post(server_url: str, token: str, payload: dict, timeout: float = 8.0, attem
     return _send(server_url, token, payload, timeout, attempts, pause_s)[0]
 
 
+def login_may_travel(server_url: str) -> bool:
+    """A login sealed with the token travels safely only over https, or to a server on this same machine: the token is sent in clear in every request over plain http."""
+    parsed = urlparse(server_url)
+    if parsed.scheme == "https":
+        return True
+    host = parsed.hostname or ""
+    if host == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
 def deliver(server_url: str, token: str, payload: dict, timeout: float = 8.0, attempts: int = 2, pause_s: float = 0.5) -> list[Order]:
     """The same, and the manual orders the server handed out in its answer (the well-formed ones, at most four)."""
-    return parse_orders(_send(server_url, token, payload, timeout, attempts, pause_s)[1], token)
+    return parse_orders(_send(server_url, token, payload, timeout, attempts, pause_s)[1], token, login_may_travel(server_url))

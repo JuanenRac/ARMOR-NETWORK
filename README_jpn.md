@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-89-00E5FF.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.1.0-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Tests-93-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.1.1-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**正直さのチェック - 今日動いているもの:** スキャナー、何が変わったかを伝えるインベントリ、インターネットの検査、公開アドレスの問い合わせ、Studio からの指示、封印されたログインは、スクリプト化したネットワークに対してコンピューター上でテストされ（89 件。すべてのメッセージが ARMOR-COMMON のコントラクトに受け付けられる）、プログラムは CM5 テストベンチ上でサービスとして動き、ベンチがつながる実際のネットワーク（ルーター、家のスマートフォンとノード）を見張っています。家全体を数週間見張ったことはなく、ルーターに尋ねるだけで設定は一切せず、デバイスが何か（種類、システム、メーカー）は推測です。パケットは取得しません。誰が誰と話しているかは見えず、デバイスごとのトラフィックや厳密な意味での侵入検知にはルーターのカウンターかミラーポートが必要で、それは今後の段階です。
+**正直さのチェック - 今日動いているもの:** スキャナー、何が変わったかを伝えるインベントリ、インターネットの検査、公開アドレスの問い合わせ、Studio からの指示、封印されたログインは、スクリプト化したネットワークに対してコンピューター上でテストされ（93 件。すべてのメッセージが ARMOR-COMMON のコントラクトに受け付けられる）、プログラムは CM5 テストベンチ上でサービスとして動き、ベンチがつながる実際のネットワーク（ルーター、家のスマートフォンとノード）を見張っています。家全体を数週間見張ったことはなく、ルーターに尋ねるだけで設定は一切せず、デバイスが何か（種類、システム、メーカー）は推測です。パケットは取得しません。誰が誰と話しているかは見えず、デバイスごとのトラフィックや厳密な意味での侵入検知にはルーターのカウンターかミラーポートが必要で、それは今後の段階です。
 
 ---
 
@@ -36,9 +36,9 @@
 
 | | |
 |---|---|
-| バージョン | `0.1.0` |
+| バージョン | `0.1.1` |
 | 成熟度 | 確立 |
-| テスト | 89 (`python -m unittest discover -s tests`) |
+| テスト | 93 (`python -m unittest discover -s tests`) |
 | 技術 | Python 3.11+ (standard library only) |
 | 実機での確認 | CM5 テストベンチ上でサービスとして動き、実際のネットワーク（ルーター、家のスマートフォンとノード）を見張っています |
 
@@ -46,7 +46,7 @@
 
 * **ネットワーク上にあるもの：** マシンの近隣テーブル、それを満たすための各アドレスへの呼びかけ、見つかった各機器へのエコー（遅延と TTL）、機器自身の告知（mDNS、UPnP、NetBIOS、逆引き DNS）。機器ごとに、アドレス、MAC、メーカー（IEEE の 40,000 ブロックの登録簿から）、名前、種類、OS、開いているポートとその応答内容、初回と最終の確認時刻を持ちます。
 * **ポート：** 各機器の 17（または 44）ポートに TCP 接続を 12 本ずつ行い、応答は数百バイトまでしか読みません。ログインも攻撃も行いません。新しい機器はすぐに、他は 15 分ごとに調べます。
-* **変化：** 機器の出現（最初のスキャンは学習のみ）、沈黙、復帰、アドレスの変更、ポートの開閉、1 つのアドレスに 2 台が応答（特にルーターのアドレス）。各イベントには ID があり、一度だけ通知されます。
+* **変化：** 機器の出現（最初の 3 回のスキャンは学習のみ）、沈黙、復帰、アドレスの変更、ポートの開閉、1 つのアドレスに 2 台が応答（特にルーターのアドレス）。各イベントには ID があり、一度だけ通知されます。
 * **インターネット：** 数秒ごとにルーターへのエコー、TCP 接続、選んだリゾルバーへの DNS 問い合わせ 2 件、ウェブページ 1 件。停止と判定するには 3 回、復旧と判定するには 2 回の連続が必要で、最初の失敗の回から起算し最初の成功の回まで数え、原因がどちら側かも示します：プロバイダー側（ルーターは応答し、その先は応答しない）か、こちら側（ルーターも応答しない）。遅延、損失、過去 24 時間の停止。
 * **自分のネットワークだけを見ます：** プライベートでないアドレス（10/8、172.16/12、192.168/16 以外）と /22 より大きい範囲は拒否します。除外リストでデリケートな機器には触れず、機器には質問以外を送りません。
 * **メッセージ** `armor/network/<ノード>/state`：インターフェース、インターネット、全機器、最新のイベント。共有コントラクト（330 ベクター）にあり、発見だけを運び、命令は運びません。`python -m armor_network scan` は表で表示、`watch` は ARMOR-SERVER に通知、`demo` は架空の家（新しい機器の参加、カメラが Telnet を開く、インターネットの断と復旧、ルーターになりすます応答）を、ネットワークに触れずに再生します。
@@ -54,7 +54,7 @@
 * **Studio からの指示：**今すぐのスキャン、ping、traceroute、ウェイクアップ、1 台のデバイスのポートや Web ページ、あなたが渡したログインでの検査。指示はノード自身のメッセージへの応答として届き（ノードへの接続としては決して来ません）、実行前にそれぞれ検査され、シェルを通して何かを実行することはありません。
 * **安全なままのログイン：**検査のログインはそのノードだけに封印されて届き、Digest または HTTPS でのみ送られ（平文 HTTP の Basic は決して使わない）、最初に HTTPS 証明書を見たデバイスにだけ送られ、エコーバックされません。
 * **公開側：**家の公開アドレス、その提供元と場所（数分ごとに固定の公開サービスへ HTTPS リクエストを 1 回。`--no-public-info` でオフ）。
-* **サービス：**CM5 テストベンチで systemd ユニットとして動き（ARMOR-DEVOPS を参照）、データは専用のフォルダーに保存します。
+* **サービス：**CM5 テストベンチで systemd ユニットとして動き（手書き、使い方ガイドを参照）、データは専用のフォルダーに保存します。
 * **まだ：** ルーター自身のカウンター（機器ごとのトラフィック）、パケットキャプチャ、何かを制御すること（機器のブロック、ポートを閉じる、ルーターの変更）、実ネットワークでの数週間の運用。
 
 ## 🧩 A.R.M.O.R. での役割
@@ -79,7 +79,7 @@ ARMOR-NETWORK/
 **必要なもの:** Python 3.11+ (standard library only), a machine on the network to be watched (Linux, Windows or macOS)
 
 ```bash
-python -m unittest discover -s tests                  # 89 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 93 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched

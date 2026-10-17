@@ -18,12 +18,28 @@ class SealTest(unittest.TestCase):
         self.assertIsNone(open_sealed("k" * 64, "not base64 !"))
 
     def test_an_order_takes_its_login_from_the_seal(self):
-        # sealed by the server for the text {"user":"u","password":"p"} is not reproducible here without the nonce: check the refusal path instead
-        body = {"commands": [{"id": "c1", "type": "inspect", "ip": "192.168.0.1", "device_id": "d1", "auth_sealed": VECTOR}]}
-        order = parse_orders(body, "k" * 64)[0]
-        self.assertIsNone(order.user)   # "hello" is not a login: the order goes without one
-        self.assertEqual(json.dumps({}), "{}")
+        import base64
+        import hashlib
+        import hmac
+        from armor_network import seal as sealing
 
+        def seal_for(token, text, nonce=b"" * 16):   # the same construction as ARMOR-SERVER's credential_seal.ts, with a fixed nonce
+            data = text.encode()
+            cipher = bytes(a ^ b for a, b in zip(data, sealing._stream(sealing._sub_key(token, "enc"), nonce, len(data))))
+            tag = hmac.new(sealing._sub_key(token, "mac"), nonce + cipher, hashlib.sha256).digest()
+            return base64.b64encode(nonce + cipher + tag).decode()
+
+        self.assertEqual(seal_for("k" * 64, "hello"), VECTOR)    # the construction here is the server's, byte for byte
+        sealed = seal_for("k" * 64, json.dumps({"user": "u", "password": "p"}))
+        body = {"commands": [{"id": "c1", "type": "inspect", "ip": "192.168.0.1", "device_id": "d1", "auth_sealed": sealed}]}
+        order = parse_orders(body, "k" * 64)[0]
+        self.assertEqual((order.user, order.password), ("u", "p"))
+        self.assertIsNone(parse_orders(body, "j" * 64)[0].user)              # another token opens nothing
+        withheld = parse_orders(body, "k" * 64, allow_login=False)[0]        # plain http across the network: never opened
+        self.assertIsNone(withheld.user)
+        self.assertTrue(withheld.login_withheld)
+        plain = {"commands": [{"id": "c2", "type": "inspect", "ip": "192.168.0.1", "auth_sealed": VECTOR}]}
+        self.assertIsNone(parse_orders(plain, "k" * 64)[0].user)             # "hello" is not a login
 
 if __name__ == "__main__":
     unittest.main()

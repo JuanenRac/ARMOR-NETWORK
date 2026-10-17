@@ -6,7 +6,7 @@ ARMOR-NETWORK watches the local network of the house: which devices are on it, w
   the machine's neighbour table ─┐
   echo and TCP to the devices ───┤                      ┌── ARMOR-SERVER ── alarms, history ── Studio (Network menu, Network Designer)
   mDNS, UPnP, NetBIOS, rDNS ─────┼── ARMOR-NETWORK ─────┤                                    └── Android (Network screen)
-  echo, TCP, DNS, web to the ────┤   (inventory, events, └── armor/network/<node>/state (MQTT) or POST /api/v1/network/state
+  echo, TCP, DNS, web to the ────┤   (inventory, events, └── POST /api/v1/network/state (HTTP; the program has no MQTT client)
   router and the internet ───────┘    internet state)
 ```
 
@@ -51,4 +51,4 @@ The agent knows the network only through a `NetworkIO`: `SystemIO` (the real mac
 * It does not control anything: no blocking of a device, no closing of a port, no change to the router. Marking a device as known is a note on the server.
 * Presence has minutes of lag: a phone that sleeps still answers ARP, and the system keeps a neighbour for a while after it has gone.
 * Every result about what a device is (kind, system, maker) is a guess from an address, some answers and a register.
-* It has been run once on a real network that had a router and a phone on it; it has not watched a whole house for days.
+* It runs on the CM5 test bench, watching the real network the bench is on; it has not been checked over a long time on a large house.

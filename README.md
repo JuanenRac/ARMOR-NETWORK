@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-89-00E5FF.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.1.0-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Tests-93-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.1.1-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**Honesty check - what runs today:** The scanner, the inventory that tells what changed, the internet check, the public-address look-up, the orders from Studio and the sealed logins are tested on a computer against a scripted network (89 tests; every message is accepted by ARMOR-COMMON's contract), and the program runs as a service on the CM5 test bench, watching the real network the bench is on (a router, the phones and nodes of the house). It has not watched a whole house for weeks, it only asks the router and never configures it, and what a device is (its kind, its system, its maker) is a guess. It does not capture packets: it cannot see who talks to whom, and traffic per device and intrusion detection in the strict sense need the router's counters or a mirror port, which is a later step.
+**Honesty check - what runs today:** The scanner, the inventory that tells what changed, the internet check, the public-address look-up, the orders from Studio and the sealed logins are tested on a computer against a scripted network (93 tests; every message is accepted by ARMOR-COMMON's contract), and the program runs as a service on the CM5 test bench, watching the real network the bench is on (a router, the phones and nodes of the house). It has not watched a whole house for weeks, it only asks the router and never configures it, and what a device is (its kind, its system, its maker) is a guess. It does not capture packets: it cannot see who talks to whom, and traffic per device and intrusion detection in the strict sense need the router's counters or a mirror port, which is a later step.
 
 ---
 
@@ -36,9 +36,9 @@
 
 | | |
 |---|---|
-| Version | `0.1.0` |
+| Version | `0.1.1` |
 | Maturity | Established |
-| Tests | 89 (`python -m unittest discover -s tests`) |
+| Tests | 93 (`python -m unittest discover -s tests`) |
 | Stack | Python 3.11+ (standard library only) |
 | On real hardware | Runs as a service on the CM5 test bench, watching its real network (a router, the phones and nodes of the house) |
 
@@ -46,7 +46,7 @@
 
 * **What is on the network:** the neighbour table of the machine, a poke of every address so that it fills, an echo to each device found (latency and TTL) and what devices announce about themselves (mDNS, UPnP, NetBIOS, reverse DNS). For each device: address, MAC, maker (from the IEEE register of 40,000 blocks), name, kind, system, open ports with what each says, and when it was first and last seen.
 * **Ports:** a TCP connection to 17 (or 44) ports of each device, twelve at a time, reading at most a few hundred bytes of what answers; never a login, never an exploit. A new device is looked at at once, the others every quarter of an hour.
-* **What changes:** a device that appears (the first scan only learns), goes quiet or comes back, changes its address, a port that opens or closes, and two machines answering for one address (the router's above all). Every event has an id, so it is told once.
+* **What changes:** a device that appears (the first three sweeps only learn), goes quiet or comes back, changes its address, a port that opens or closes, and two machines answering for one address (the router's above all). Every event has an id, so it is told once.
 * **The internet:** every few seconds an echo to the router, a TCP connection, two DNS questions to chosen resolvers and a web page. An outage takes three rounds to be called one and two to be over, is dated from its first failed round and counted to the first good one, and says whose fault it is: the provider's (the router answers and nothing beyond it does) or this side's (the router does not answer either). Latency, loss and the outages of the last 24 hours.
 * **It only looks at your own network:** it refuses any address that is not private (10/8, 172.16/12, 192.168/16) and any range larger than a /22; a skip list keeps it away from what is fragile; nothing is sent to a device that is not a question.
 * **The message** `armor/network/<node>/state`: the interface, the internet, every device and the latest events; it is in the shared contract (330 vectors) and carries findings, never commands. `python -m armor_network scan` prints it as a table, `watch` tells ARMOR-SERVER, `demo` plays a made-up house (a new device joins, a camera opens Telnet, the internet falls and comes back, someone answers for the router) without touching any network.
@@ -54,7 +54,7 @@
 * **Orders from Studio:** a sweep now, a ping, a traceroute, a wake-up, the ports or the web page of one device and an inspection with a login you give; orders arrive in the answer to the node's own message (never as a connection made to the node), each is checked before anything is done, and nothing is run through a shell.
 * **Logins that stay safe:** the login of an inspection travels sealed for this node alone, is sent only over Digest or HTTPS (never Basic over plain HTTP), only to the device whose HTTPS certificate was seen the first time, and is never echoed back.
 * **The public side:** the house's public address, who gives it and where it is (one HTTPS request to a fixed public service every few minutes; `--no-public-info` turns it off).
-* **A service:** it runs as a systemd unit on the CM5 test bench (see ARMOR-DEVOPS) and keeps its data in its own folder.
+* **A service:** it runs as a systemd unit on the CM5 test bench (written by hand, see the usage guide) and keeps its data in its own folder.
 * **Not yet:** the router's own counters (traffic per device), packet capture, controlling anything (blocking a device, closing a port, changing the router) and weeks on a real network.
 
 ## 🧩 Role in A.R.M.O.R.
@@ -79,7 +79,7 @@ ARMOR-NETWORK/
 **Requirements:** Python 3.11+ (standard library only), a machine on the network to be watched (Linux, Windows or macOS)
 
 ```bash
-python -m unittest discover -s tests                  # 89 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 93 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched

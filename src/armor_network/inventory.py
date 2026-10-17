@@ -17,6 +17,7 @@ from __future__ import annotations
 import ipaddress
 import json
 import os
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -25,6 +26,8 @@ from .ipnet import dashed
 from .services import guess_kind, guess_os, service_name
 
 MAX_EVENTS = 64
+BASELINE_ROUNDS = 3        # rounds with something seen before a new device is news
+SAVE_EVERY_MS = 60_000     # how often the inventory is written when nothing happened
 MAX_PORTS = 64
 MAX_SERVICES = 16
 
@@ -129,13 +132,16 @@ def _ip_key(ip: str) -> int:
 
 
 class Inventory:
-    def __init__(self, path: Path | None = None, *, offline_after_s: int = 180, conflict_window_s: int = 600, log: EventLog | None = None) -> None:
+    def __init__(self, path: Path | None = None, *, offline_after_s: int = 180, conflict_window_s: int = 600, log: EventLog | None = None, baseline_rounds: int = BASELINE_ROUNDS) -> None:
         self.path = path
+        self._baseline_target = max(1, baseline_rounds)
         self.offline_after_ms = offline_after_s * 1000
         self.conflict_window_ms = conflict_window_s * 1000
         self.devices: dict[str, Device] = {}
         self.log = log or EventLog()
         self.baseline_done = False
+        self.baseline_rounds = 0          # rounds with something seen so far; the network is "learned" after BASELINE_ROUNDS, so a first sweep that missed half the houses' devices does not make the rest "new"
+        self._saved_ms = -10**15
         self._reported: dict[tuple[str, str, str], int] = {}
         if path is not None:
             self.load()
@@ -190,7 +196,9 @@ class Inventory:
                 if not learning:
                     events.append(self.log.add("device_offline", now_ms, device_id=device.id, detail=f"{device.ip} stopped answering"))
         if learning and observations:
-            self.baseline_done = True
+            self.baseline_rounds += 1
+            if self.baseline_rounds >= self._baseline_target:
+                self.baseline_done = True
         return events
 
     def _find(self, obs: Observation, by_ip: dict[str, Device]) -> Device | None:
@@ -286,17 +294,31 @@ class Inventory:
             data = json.loads(self.path.read_text(encoding="utf-8"))
             self.devices = {d["id"]: Device.from_record(d) for d in data.get("devices", [])}
             self.baseline_done = bool(data.get("baseline_done"))
+            self.baseline_rounds = int(data.get("baseline_rounds", BASELINE_ROUNDS if self.baseline_done else 0))
             self.log.counter = int(data.get("counter", 0))            # the log may be shared with the internet monitor: it is filled in place
             self.log.events[:] = list(data.get("events", []))
         except (OSError, ValueError, KeyError, TypeError):
-            self.devices, self.baseline_done = {}, False    # an unreadable file is a network not learned yet, not a crash
+            self.devices, self.baseline_done, self.baseline_rounds = {}, False, 0    # an unreadable file is a network not learned yet, not a crash
+            try:                                                                    # ... but the damaged file is kept aside, not written over
+                self.path.replace(self.path.with_name(f"{self.path.name}.corrupt-{int(time.time())}"))
+            except OSError:
+                pass
 
-    def save(self) -> None:
+    def save(self, now_ms: int | None = None, force: bool = True) -> bool:
+        """Write the inventory. With `now_ms` and no `force` it is written at most once a minute (a memory card does not last for ever); a disk that cannot be written is not the end of the program."""
         if self.path is None:
-            return
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        body = {"version": 1, "baseline_done": self.baseline_done, "counter": self.log.counter, "events": self.log.events,
+            return False
+        if now_ms is not None and not force and now_ms - self._saved_ms < SAVE_EVERY_MS:
+            return False
+        body = {"version": 1, "baseline_done": self.baseline_done, "baseline_rounds": self.baseline_rounds, "counter": self.log.counter, "events": self.log.events,
                 "devices": [d.to_record() for d in self.devices.values()]}
-        temporary = self.path.with_name(self.path.name + f".{os.getpid()}.tmp")
-        temporary.write_text(json.dumps(body, separators=(",", ":")), encoding="utf-8")
-        os.replace(temporary, self.path)
+        try:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            temporary = self.path.with_name(self.path.name + f".{os.getpid()}.tmp")
+            temporary.write_text(json.dumps(body, separators=(",", ":")), encoding="utf-8")
+            os.replace(temporary, self.path)
+        except OSError:
+            return False
+        if now_ms is not None:
+            self._saved_ms = now_ms
+        return True

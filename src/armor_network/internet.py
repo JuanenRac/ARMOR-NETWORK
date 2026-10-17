@@ -133,7 +133,9 @@ class InternetMonitor:
                 events.append(self.log.add("gateway_up", now_ms, outage_s=max(0, round((now_ms - started) / 1000)), detail="the router answers again, the internet still does not"))
                 self._gateway_down_ms = None
                 self._enter("down", now_ms)
-        self.save()
+        key = (self.state, self._outage_start_ms)
+        self.save(now_ms, force=bool(events) or key != getattr(self, "_saved_key", None))
+        self._saved_key = key
         return events
 
     def _enter(self, state: str, at_ms: int) -> None:
@@ -197,11 +199,19 @@ class InternetMonitor:
         except (OSError, ValueError, KeyError, TypeError):
             self.history = []
 
-    def save(self) -> None:
+    def save(self, now_ms: int | None = None, force: bool = True) -> bool:
+        """Write the history. From the checks (`now_ms` given, nothing changed) it is written once a minute, not every few seconds; a disk that cannot be written is not the end of the program."""
         if self.path is None:
-            return
-        self.path.parent.mkdir(parents=True, exist_ok=True)
+            return False
+        if now_ms is not None and not force and now_ms - getattr(self, "_saved_ms", -10**15) < 60_000:
+            return False
         body = {"version": 1, "history": self.history, "outage_start_ms": self._outage_start_ms, "last_feed_ms": self._last_feed_ms}
-        temporary = self.path.with_name(self.path.name + f".{os.getpid()}.tmp")
-        temporary.write_text(json.dumps(body, separators=(",", ":")), encoding="utf-8")
-        os.replace(temporary, self.path)
+        try:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            temporary = self.path.with_name(self.path.name + f".{os.getpid()}.tmp")
+            temporary.write_text(json.dumps(body, separators=(",", ":")), encoding="utf-8")
+            os.replace(temporary, self.path)
+        except OSError:
+            return False
+        self._saved_ms = now_ms if now_ms is not None else getattr(self, "_saved_ms", -10**15)
+        return True

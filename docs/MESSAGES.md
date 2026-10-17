@@ -1,6 +1,6 @@
 # The message of a network node (contract version 0)
 
-`armor/network/{node_id}/state`, one message per node every ten seconds or when something happened; JSON, no retained flag; or `POST /api/v1/network/state` with the ingest token. The schema, the topic rule and the conformance vectors are in ARMOR-COMMON (`network.schema.json`, `conformance/network.json`, 64 vectors); the server takes it, keeps the latest state of every node, a history of the internet and of the traffic, the list of outages, and raises the alarms.
+`armor/network/{node_id}/state` (the topic name of the contract; this program delivers it only by HTTP), one message per node every ten seconds or when something happened; JSON, no retained flag; or `POST /api/v1/network/state` with the ingest token. The schema, the topic rule and the conformance vectors are in ARMOR-COMMON (`network.schema.json`, `conformance/network.json`, 64 vectors); the server takes it, keeps the latest state of every node, a history of the internet and of the traffic, the list of outages, and raises the alarms.
 
 ```json
 {"kind":"network","node_id":"network-1","timestamp_ms":1790000060000,

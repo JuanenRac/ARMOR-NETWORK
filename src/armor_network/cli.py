@@ -128,7 +128,7 @@ def main(argv: list[str] | None = None) -> int:
         watch = sub.add_parser(name, help=text)
         _common_arguments(watch)
         watch.add_argument("--server-url", help="an ARMOR-SERVER, for example http://127.0.0.1:8080; without it the messages are printed")
-        watch.add_argument("--ingest-token", help="the server's ingest token; never write it to a file (ARMOR_INGEST_TOKEN also works)")
+        watch.add_argument("--ingest-token", help="this node's own token (Studio shows it), or the server's shared ingest token, which cannot open a saved login for `inspect`; never write it to a file (ARMOR_INGEST_TOKEN also works)")
         watch.add_argument("--data-dir", type=Path, default=Path("armor-network-data"), help="where the inventory and the outages are kept between runs")
         watch.add_argument("--scan-every", type=int, default=60, help="seconds between sweeps of the network")
         watch.add_argument("--internet-every", type=int, default=5, help="seconds between internet checks")
@@ -150,6 +150,9 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         print(f"{mac}  {'randomised (not a real identity)' if oui.is_randomized(mac) else (oui.vendor(mac) or 'unknown maker')}   ({oui.table_size()} makers in the table)")
         return 0
+    if getattr(args, "node_id", None) is not None and not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,63}", args.node_id):
+        print(f"--node-id {args.node_id!r} must be lower-case letters, digits, - or _ (up to 64): the server refuses every message with any other", file=sys.stderr)
+        return 2
     try:
         if getattr(args, "cidr", None):
             check_scan_range(args.cidr)

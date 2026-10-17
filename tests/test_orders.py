@@ -309,7 +309,11 @@ class InspectTests(unittest.TestCase):
         from urllib.error import HTTPError
         sent = []
 
-        def fake_open(url, user, password, context, timeout):
+        changed = []
+
+        def fake_open(url, user, password, context, timeout, pin=None):
+            if user is not None and changed:
+                raise orders.PinChanged("bb" * 32)
             if user is None:
                 headers = Message()
                 headers["WWW-Authenticate"] = 'Digest realm="Cam"'
@@ -331,15 +335,47 @@ class InspectTests(unittest.TestCase):
             return Page()
 
         with tempfile.TemporaryDirectory() as folder, mock.patch.dict(os.environ, {"ARMOR_NETWORK_PINS": str(Path(folder) / "pins.json")}), mock.patch.object(orders, "_open", fake_open):
-            with mock.patch.object(orders, "certificate_fingerprint", return_value="aa" * 32):
-                first = orders.inspect_web("192.168.0.9", 443, "admin", "s3cret")
+            first = orders.inspect_web("192.168.0.9", 443, "admin", "s3cret")
             self.assertIn("login: accepted", first["output"])
-            with mock.patch.object(orders, "certificate_fingerprint", return_value="bb" * 32):
-                second = orders.inspect_web("192.168.0.9", 443, "admin", "s3cret")
+            changed.append(True)
+            second = orders.inspect_web("192.168.0.9", 443, "admin", "s3cret")
             self.assertFalse(second["ok"])
             self.assertIn("login: not sent", second["output"])
             self.assertNotIn("s3cret", second["output"])
         self.assertEqual(len(sent), 1, "the login went only to the device whose certificate was first seen")
+
+    def test_a_login_is_never_opened_over_plain_http_across_the_network(self):
+        from armor_network import publisher, seal
+        self.assertTrue(publisher.login_may_travel("https://192.168.0.180:18080"))
+        self.assertTrue(publisher.login_may_travel("http://127.0.0.1:18080"))
+        self.assertFalse(publisher.login_may_travel("http://192.168.0.180:18080"))
+        body = {"commands": [{"id": "a1", "type": "inspect", "ip": "192.168.0.9", "auth": {"user": "admin", "password": "x"}, "auth_sealed": "AAAA"}]}
+        order = orders.parse_orders(body, "tok", allow_login=False)[0]
+        self.assertTrue(order.login_withheld)
+        self.assertIsNone(order.user)
+
+    def test_a_wrong_mac_or_a_conflict_withholds_the_login(self):
+        agent, io, clock, first = run_agent()
+        calls = []
+        io.inspect_web = lambda ip, port, user, password: calls.append((user, password)) or {"ok": True, "output": "looked"}
+        io.arp_table = lambda: {"192.168.0.50": "aa:aa:aa:aa:aa:aa"}
+        order = orders.Order("w1", "inspect", ip="192.168.0.50", mac="bb:bb:bb:bb:bb:bb", user="admin", password="p")
+        agent.submit([order]); agent.step()
+        self.assertEqual(calls[-1], (None, None))
+        good = orders.Order("w2", "inspect", ip="192.168.0.50", mac="aa:aa:aa:aa:aa:aa", user="admin", password="p")
+        agent.submit([good]); agent.step()
+        self.assertEqual(calls[-1], ("admin", "p"))
+
+    def test_a_route_without_a_gateway_and_the_lowest_metric(self):
+        from armor_network import parsers
+        self.assertEqual(parsers.parse_ip_route("default dev wwan0 scope link"), (None, "wwan0"))
+        self.assertEqual(parsers.parse_ip_route("default via 10.0.0.1 dev eth0 metric 600" + chr(10) + "default via 192.168.0.1 dev wlan0 metric 100"), ("192.168.0.1", "wlan0"))
+
+    def test_vendors_are_matched_by_whole_words(self):
+        from armor_network.services import guess_kind
+        self.assertEqual(guess_kind(vendor="zte corporation"), "network")
+        self.assertNotEqual(guess_kind(vendor="aztech electronics"), "network")
+        self.assertNotEqual(guess_kind(vendor="harris corporation"), "network")
 
     def test_an_order_that_was_already_done_is_not_done_twice(self):
         agent, io, clock, first = run_agent()

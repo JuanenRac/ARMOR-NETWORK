@@ -75,15 +75,20 @@ def parse_route_windows(text: str) -> tuple[str, str] | None:
     return (best[1], best[2]) if best else None
 
 
-def parse_ip_route(text: str) -> tuple[str, str | None] | None:
-    """`ip route show default`: `default via 192.168.0.1 dev eth0 ...` as (gateway, interface name)."""
-    for line in text.splitlines():
+def parse_ip_route(text: str) -> tuple[str | None, str | None] | None:
+    """`ip route show default`: `default via 192.168.0.1 dev eth0 ...` as (gateway, interface name). A route with no `via` (a point-to-point link: `default dev wwan0`) has no gateway;
+    with several default routes the one with the lowest metric is the one the system uses."""
+    best: tuple[int, int, str | None, str | None] | None = None
+    for number, line in enumerate(text.splitlines()):
         columns = line.split()
-        if columns[:1] == ["default"] and "via" in columns:
-            gateway = columns[columns.index("via") + 1]
-            device = columns[columns.index("dev") + 1] if "dev" in columns else None
-            return gateway, device
-    return None
+        if columns[:1] != ["default"] or ("via" not in columns and "dev" not in columns):
+            continue
+        gateway = columns[columns.index("via") + 1] if "via" in columns and columns.index("via") + 1 < len(columns) else None
+        device = columns[columns.index("dev") + 1] if "dev" in columns and columns.index("dev") + 1 < len(columns) else None
+        metric = int(columns[columns.index("metric") + 1]) if "metric" in columns and columns.index("metric") + 1 < len(columns) and columns[columns.index("metric") + 1].isdigit() else 0
+        if best is None or (metric, number) < best[:2]:
+            best = (metric, number, gateway, device)
+    return (best[2], best[3]) if best else None
 
 
 def parse_ip_addr(text: str) -> list[tuple[str, str]]:

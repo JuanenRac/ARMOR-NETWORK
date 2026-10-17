@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here.
 
+## [0.1.1] - Logins that are never opened in the clear, and a service that keeps up with its network
+
+- **A saved login is not opened over plain HTTP across the network:** the seal is keyed with the token the node sends in clear, so anyone who saw one request could open it. The node now opens a login only when the server is `https://` or on the same machine; otherwise the `inspect` says the login was not used. USAGE explains the node's own token and a hardened unit with its own environment file.
+- **The certificate is checked in the same connection that carries the login** (after the handshake, before any header): a certificate that is not the kept one, or that cannot be read, sends nothing. Before, it was read in one connection and the login sent in another, and an unreadable certificate let the login go.
+- **The login goes only to the machine it belongs to:** if the address is answered by another MAC than the device's, or two machines claimed it in the last ten minutes, the saved login is not used.
+- **Redirects:** the web look at a device (`http`) and the UPnP description are followed only to private addresses; 8883 (MQTT over TLS) is no longer fetched as a web page.
+- **The interface is read again every minute** (a renewed lease, a moved cable or a changed router no longer leave the node on the old address until a restart); a moment without a route keeps the last one.
+- **The disk:** the internet history and the inventory are written once a minute unless something happened (not every 5 and 10 seconds, which wears a memory card), and a disk that cannot be written no longer stops the program. A damaged inventory is kept aside as `inventory.json.corrupt-<time>`.
+- **The first three sweeps only learn** (the first one often sees only part of the network, and the rest came out as new devices).
+- A default route without a gateway (`default dev wwan0`) is accepted, and with several the lowest metric wins; `--node-id` is validated (the server refused every message of a bad one); makers are matched by whole words ("zte" is no longer "Aztech") and generic city names no longer make a device an IoT thing; `tools/fetch_oui.py` does not overwrite the table with an incomplete download.
+- The documents say what is true (89 to 93 tests, no MQTT client, the node's own token, who writes the unit). Tests: 93 (4 new: the plain-HTTP rule, the MAC and conflict rule, routes, whole-word makers; the certificate test follows the new check).
+
 ## [0.1.0] - The login goes only to the device it was first sent to
 
 - When a device is looked at over HTTPS with a login, the certificate it shows is kept the first time (trust on first use) in a private file (`~/.armor-network/https-pins.json`, or the path in `ARMOR_NETWORK_PINS`).
