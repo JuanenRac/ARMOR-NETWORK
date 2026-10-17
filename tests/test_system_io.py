@@ -24,16 +24,17 @@ class BoundedTests(unittest.TestCase):
 
     def test_a_slow_call_is_given_up_on_and_counted_until_it_ends(self):
         release = threading.Event()
+        before = system_io.stuck_calls()                        # other tests may still have a call of their own winding down
         started = time.monotonic()
         self.assertIsNone(system_io.bounded(lambda: release.wait(5) and "late", 0.05))
         self.assertLess(time.monotonic() - started, 1.0)       # it did not wait for the slow call
-        self.assertGreaterEqual(system_io.stuck_calls(), 1)
+        self.assertGreater(system_io.stuck_calls(), before)
         release.set()
-        for _ in range(100):
-            if system_io.stuck_calls() == 0:
+        for _ in range(250):
+            if system_io.stuck_calls() <= before:
                 break
             time.sleep(0.02)
-        self.assertEqual(system_io.stuck_calls(), 0)             # once it ends it is not counted
+        self.assertLessEqual(system_io.stuck_calls(), before)    # once it ends it is not counted
 
     def test_stuck_calls_do_not_pile_up(self):
         release = threading.Event()
