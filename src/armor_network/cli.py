@@ -99,6 +99,8 @@ def _run_loop(agent: Agent, args: argparse.Namespace, *, forever: bool) -> int:
         print("--validate needs ARMOR-COMMON next to this project", file=sys.stderr)
         return 2
     published = 0
+    failures = 0           # consecutive deliveries that failed: the wait before the next try grows with them, up to five minutes
+    retry_at = 0.0
     try:
         while True:
             message = agent.step()
@@ -106,10 +108,14 @@ def _run_loop(agent: Agent, args: argparse.Namespace, *, forever: bool) -> int:
                 if validate is not None:
                     validate(f"armor/network/{message['node_id']}/state", message)
                 if server:
-                    try:
-                        agent.submit(deliver(server, token, message))
-                    except DeliveryError as error:
-                        print(f"ARMOR_NETWORK=UNDELIVERED {error}", file=sys.stderr)
+                    if time.monotonic() >= retry_at:
+                        try:
+                            agent.submit(deliver(server, token, message))
+                            failures = 0
+                        except DeliveryError as error:
+                            failures += 1
+                            retry_at = time.monotonic() + min(300, 10 * 2 ** min(failures, 5))
+                            print(f"ARMOR_NETWORK=UNDELIVERED {error} (next try in {int(retry_at - time.monotonic())} s)", file=sys.stderr)
                 else:
                     print(json.dumps(message, separators=(",", ":")))
                 published += 1

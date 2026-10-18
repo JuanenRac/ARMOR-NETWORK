@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-167-00E5FF.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.1.2-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Tests-168-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.1.3-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**诚实性检查 - 今天真正能运行的部分:** 扫描器、说明发生了什么变化的清单、互联网检查、公网地址查询、来自 Studio 的指令和加密封装的登录信息，都在计算机上对照脚本化网络测试（167 个测试；每条消息都被 ARMOR-COMMON 的契约接受），程序在 CM5 测试台上作为服务运行，监视测试台所在的真实网络（一台路由器、住宅的手机和节点）。它还没有连续数周监视整个住宅，只询问路由器而从不配置它，设备是什么（类型、系统、厂商）只是猜测。它不抓包：看不到谁与谁通信，每个设备的流量和严格意义上的入侵检测需要路由器的计数器或镜像端口，那是以后的一步。
+**诚实性检查 - 今天真正能运行的部分:** 扫描器、说明发生了什么变化的清单、互联网检查、公网地址查询、来自 Studio 的指令和加密封装的登录信息，都在计算机上对照脚本化网络测试（168 个测试；每条消息都被 ARMOR-COMMON 的契约接受），程序在 CM5 测试台上作为服务运行，监视测试台所在的真实网络（一台路由器、住宅的手机和节点）。它还没有连续数周监视整个住宅，只询问路由器而从不配置它，设备是什么（类型、系统、厂商）只是猜测。它不抓包：看不到谁与谁通信，每个设备的流量和严格意义上的入侵检测需要路由器的计数器或镜像端口，那是以后的一步。
 
 ---
 
@@ -36,9 +36,9 @@
 
 | | |
 |---|---|
-| 版本 | `0.1.2` |
+| 版本 | `0.1.3` |
 | 成熟度 | 成熟 |
-| 测试 | 167 (`python -m unittest discover -s tests`) |
+| 测试 | 168 (`python -m unittest discover -s tests`) |
 | 技术栈 | Python 3.11+ (standard library only) |
 | 真实硬件 | 在 CM5 测试台上作为服务运行，监视其真实网络（路由器、住宅的手机和节点） |
 
@@ -79,7 +79,7 @@ ARMOR-NETWORK/
 **环境要求:** Python 3.11+ (standard library only), a machine on the network to be watched (Linux, Windows or macOS)
 
 ```bash
-python -m unittest discover -s tests                  # 167 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 168 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched

@@ -4,7 +4,7 @@ A program that looks at a network is only welcome if what it sends is small, bor
 
 ## The rule that decides what may be probed
 
-`ipnet.check_scan_range` is the one place. It refuses, for a scan, any network that is not entirely inside 10.0.0.0/8, 172.16.0.0/12 or 192.168.0.0/16, any range of more than 1,024 addresses (a /22) and any prefix longer than /30. Every function of `system_io.py` that talks to a device (`scan_ports`, `ping_many`, `resolve`, `poke`) refuses an address that is not private (`is_private_address`), whatever it was asked. The tests check that a public address gets no probe and no port scan, and that `armor-network scan --cidr 8.8.8.0/24` exits with a refusal.
+`ipnet.check_scan_range` is the one place. It refuses, for a scan, any network that is not entirely inside 10.0.0.0/8, 172.16.0.0/12 or 192.168.0.0/16, any range of more than 1,024 addresses (a /22) and any prefix longer than /30. Every function of `system_io.py` that talks to a device (`scan_ports`, `ping_many`, `resolve`, `poke`) refuses an address that is not private (`is_private_address`), whatever it was asked. When the network of the interface is larger than a /22 (an office /16), the default is the /24 the machine's own address is in; a network named with `--cidr` is never reduced, only checked. The tests check that a public address gets no probe and no port scan, and that `armor-network scan --cidr 8.8.8.0/24` exits with a refusal.
 
 The only traffic that leaves the private range is the internet check: a TCP connection to `1.1.1.1:443`, one DNS question to `1.1.1.1` and one to `8.8.8.8`, and one web request to `connectivitycheck.gstatic.com`.
 

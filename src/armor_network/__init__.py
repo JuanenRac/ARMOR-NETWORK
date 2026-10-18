@@ -1,3 +1,3 @@
 """ARMOR-NETWORK: the local network, watched: its devices, its internet, what changes. Reads only."""
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"

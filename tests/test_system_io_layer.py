@@ -86,6 +86,11 @@ class InterfaceTests(unittest.TestCase):
         with self.assertRaises(ScanRefused):
             self.read(SystemIO(cidr="8.8.8.0/24"), run=fake_run({}))
 
+    def test_a_network_larger_than_a_slash_22_is_looked_at_as_the_slash_24_of_this_machine(self):
+        big = "2: eth0    inet 10.0.7.50/16 brd 10.0.255.255 scope global eth0\n"
+        run = fake_run({("ip", "route"): "default via 10.0.0.1 dev eth0 proto dhcp\n", ("ip", "-o"): big})
+        self.assertEqual(self.read(run=run)["cidr"], "10.0.7.0/24")
+
     def test_an_address_that_was_given_replaces_the_one_read(self):
         self.assertEqual(self.read(SystemIO(interface_ip="192.168.0.99"))["ip"], "192.168.0.99")
 

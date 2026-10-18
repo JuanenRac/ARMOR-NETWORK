@@ -18,7 +18,7 @@ armor-network demo --count 3 --validate  # a made-up house; --validate checks ev
 | Option | Meaning |
 |---|---|
 | `--node-id` | the name of this node in the messages (default `network-1`) |
-| `--cidr` | the network to scan when it is not the one of the default route; always private and at most a /22 |
+| `--cidr` | the network to scan when it is not the one of the default route; always private and at most a /22; without it, a larger network is reduced to the /24 of this machine |
 | `--profile quick\|standard` | 17 or 44 ports per device (default `quick`) |
 | `--no-ports` | do not look at ports at all |
 | `--skip IP` | never probe this address (repeatable) |

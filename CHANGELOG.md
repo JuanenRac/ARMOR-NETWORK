@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here.
 
+## [0.1.3] - A large network is looked at as the /24 of this machine, and a down server is retried less often
+
+- On a network larger than a /22 (an office /16, a home mesh) the node no longer refuses to start: it looks at the /24 its own address is in, and the `internet` command works there. A network named with `--cidr` is still checked as before.
+- When the server cannot be reached the node waits longer between tries (10 s, then 20, 40, 80, 160 and at most 5 minutes) and says in the log when the next one is; one success goes back to the normal pace.
+
 ## [0.1.2] - A broken saved file, a name that only looks like this machine and a bad address no longer end in a traceback
 
 - A saved public-address file that holds valid JSON that is not an object (a list, a number) no longer stops the watcher at start: it is forgotten like any damaged file.

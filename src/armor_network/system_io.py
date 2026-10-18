@@ -22,7 +22,7 @@ from urllib.request import Request, urlopen
 
 from . import dnswire, parsers
 from .internet import ProbeResult
-from .ipnet import check_scan_range, hosts_of, is_private_address, network_of
+from .ipnet import MAX_HOSTS, check_scan_range, hosts_of, is_private_address, network_of
 from .neighbors import in_network, parse_arp_windows, parse_ip_neigh, parse_proc_net_arp
 from .oui import normalize_mac
 from .orders import _open, fetch_public_info, http_look, inspect_web, send_magic_packet
@@ -144,6 +144,8 @@ class SystemIO:
         if not ip:
             raise RuntimeError("no default route: this machine is not on a network")
         cidr = self._cidr_override or mask_cidr or network_of(ip, "255.255.255.0")
+        if not self._cidr_override and ipaddress.ip_network(cidr, strict=False).num_addresses > MAX_HOSTS:
+            cidr = network_of(ip, "255.255.255.0")      # a network larger than a /22 (an office /16): look only at the /24 this machine is in
         check_scan_range(cidr)
         self._info = {"name": name, "ip": ip, "cidr": cidr, "gateway": gateway, "mac": mac}
         self._info_at = time.monotonic()

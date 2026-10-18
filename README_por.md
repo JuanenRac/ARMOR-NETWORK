@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-167-00E5FF.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.1.2-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Tests-168-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.1.3-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**Verificação de honestidade - o que funciona hoje:** O scanner, o inventário que diz o que mudou, a verificação da internet, a consulta do endereço público, as ordens do Studio e os acessos selados são testados num computador contra uma rede guionizada (167 testes; cada mensagem é aceite pelo contrato do ARMOR-COMMON), e o programa corre como serviço na bancada de testes do CM5, vigiando a rede real em que a bancada está (um router, os telemóveis e os nós da casa). Não vigiou uma casa inteira durante semanas, só pergunta ao router e nunca o configura, e o que é um dispositivo (o tipo, o sistema, o fabricante) é um palpite. Não captura pacotes: não pode ver quem fala com quem, e o tráfego por dispositivo e a deteção de intrusos em sentido estrito precisam dos contadores do router ou de uma porta espelho, que é um passo posterior.
+**Verificação de honestidade - o que funciona hoje:** O scanner, o inventário que diz o que mudou, a verificação da internet, a consulta do endereço público, as ordens do Studio e os acessos selados são testados num computador contra uma rede guionizada (168 testes; cada mensagem é aceite pelo contrato do ARMOR-COMMON), e o programa corre como serviço na bancada de testes do CM5, vigiando a rede real em que a bancada está (um router, os telemóveis e os nós da casa). Não vigiou uma casa inteira durante semanas, só pergunta ao router e nunca o configura, e o que é um dispositivo (o tipo, o sistema, o fabricante) é um palpite. Não captura pacotes: não pode ver quem fala com quem, e o tráfego por dispositivo e a deteção de intrusos em sentido estrito precisam dos contadores do router ou de uma porta espelho, que é um passo posterior.
 
 ---
 
@@ -36,9 +36,9 @@
 
 | | |
 |---|---|
-| Versão | `0.1.2` |
+| Versão | `0.1.3` |
 | Maturidade | Estabelecido |
-| Testes | 167 (`python -m unittest discover -s tests`) |
+| Testes | 168 (`python -m unittest discover -s tests`) |
 | Tecnologia | Python 3.11+ (standard library only) |
 | Em hardware real | Corre como serviço na bancada de testes do CM5, vigiando a sua rede real (um router, os telemóveis e os nós da casa) |
 
@@ -79,7 +79,7 @@ ARMOR-NETWORK/
 **Requisitos:** Python 3.11+ (standard library only), a machine on the network to be watched (Linux, Windows or macOS)
 
 ```bash
-python -m unittest discover -s tests                  # 167 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 168 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched
