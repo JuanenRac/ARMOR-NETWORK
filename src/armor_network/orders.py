@@ -86,7 +86,7 @@ class PublicTracker:
                 saved = json.loads(path.read_text(encoding="utf-8"))
                 self.info = clean_public_info(saved.get("info"))
                 self.changed_ms = int(saved["changed_ms"]) if isinstance(saved.get("changed_ms"), int) else None
-            except (OSError, ValueError, TypeError, KeyError):
+            except (OSError, ValueError, TypeError, KeyError, AttributeError):   # AttributeError: valid JSON that is not an object (a list, a number)
                 self.info = None
 
     def update(self, info: dict | None, now_ms: int) -> None:

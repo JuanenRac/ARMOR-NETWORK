@@ -14,6 +14,7 @@ It only reads: see the notes at the top of system_io.py for everything it sends.
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
 import re
@@ -72,11 +73,20 @@ def _print_summary(message: dict) -> None:
 def _is_local(server: str) -> bool:
     from urllib.parse import urlparse
     host = (urlparse(server).hostname or "").lower()
-    return host in ("localhost", "::1") or host.startswith("127.")
+    if host == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback   # an address, not a name that merely starts with "127." (127.evil.example is somebody else's machine)
+    except ValueError:
+        return False
 
 
 def _run_loop(agent: Agent, args: argparse.Namespace, *, forever: bool) -> int:
-    server = check_server_url(args.server_url) if args.server_url else None
+    try:
+        server = check_server_url(args.server_url) if args.server_url else None
+    except ValueError as error:      # a login or a path in the address: said as a message, not as a traceback
+        print(str(error), file=sys.stderr)
+        return 2
     token = args.ingest_token or os.environ.get("ARMOR_INGEST_TOKEN", "")
     if bool(server) != bool(token):
         print("--server-url and --ingest-token (or ARMOR_INGEST_TOKEN) must be supplied together", file=sys.stderr)
@@ -179,8 +189,13 @@ def main(argv: list[str] | None = None) -> int:
             if not args.json:
                 _print_summary(message)
             return 0
+        try:
+            public_url = check_public_url(args.public_info_url)
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            return 2
         config = Config(node_id=args.node_id, profile=args.profile, no_ports=args.no_ports, skip=skip, data_dir=args.data_dir, scan_every_s=args.scan_every,
-                        internet_every_s=args.internet_every, public_info=not args.no_public_info, public_url=check_public_url(args.public_info_url))
+                        internet_every_s=args.internet_every, public_info=not args.no_public_info, public_url=public_url)
         if args.command == "demo":
             io = SimIO(tick_ms=args.tick_s * 1000)
             config.scan_every_s, config.internet_every_s, config.publish_every_s = args.tick_s, max(2, args.tick_s // 2), max(2, args.tick_s // 2)

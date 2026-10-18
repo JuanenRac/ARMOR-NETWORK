@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here.
 
+## [0.1.2] - A broken saved file, a name that only looks like this machine and a bad address no longer end in a traceback
+
+- A saved public-address file that holds valid JSON that is not an object (a list, a number) no longer stops the watcher at start: it is forgotten like any damaged file.
+- A server address that starts with `127.` but is a name (`127.evil.example`) was taken for this machine, so the warning about plain HTTP across the network was skipped for it; only a real loopback address counts now.
+- A bad `--server-url` (a login or a path in it) or a bad `--public-info-url` is said as a message with exit code 2 instead of a Python traceback.
+- The real system layer, the manual orders and the command line have tests of their own (the probes are replaced, nothing touches a network): 167 tests.
+
 ## [0.1.1] - Logins that are never opened in the clear, and a service that keeps up with its network
 
 - **A saved login is not opened over plain HTTP across the network:** the seal is keyed with the token the node sends in clear, so anyone who saw one request could open it. The node now opens a login only when the server is `https://` or on the same machine; otherwise the `inspect` says the login was not used. USAGE explains the node's own token and a hardened unit with its own environment file.
