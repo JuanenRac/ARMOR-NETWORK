@@ -354,7 +354,11 @@ def _inspect_one(ip: str, port: int, user: str | None, password: str | None, tim
         status, server = error.code, error.headers.get("Server", "")
         challenge = error.headers.get("WWW-Authenticate", "")
         needs = error.code == 401
-        body = error.read(16_384).decode("utf-8", "replace") if error.fp else ""
+        try:
+            raw = error.read(16_384) if error.fp else b""
+        finally:
+            error.close()                     # an answer that was read is closed: a connection is never left open by a refusal
+        body = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else str(raw)
     except OSError:
         return None
     login = "not required"

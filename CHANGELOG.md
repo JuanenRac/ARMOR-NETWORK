@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+- Looking at the web page of a device closes the answer of a refusal once it has been read, and the test of the login that is not sent to a device whose certificate changed no longer leaves one open; the whole suite passes with unclosed resources treated as errors.
+
 ## [0.1.3] - A large network is looked at as the /24 of this machine, and a down server is retried less often
 
 - On a network larger than a /22 (an office /16, a home mesh) the node no longer refuses to start: it looks at the /24 its own address is in, and the `internet` command works there. A network named with `--cidr` is still checked as before.

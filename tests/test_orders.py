@@ -1,6 +1,7 @@
 """Tests of the public address and of the manual orders: what is kept of a public service's answer, which orders and addresses are refused, and the whole agent
 doing each order against the scripted network, with every message checked by ARMOR-COMMON's contract. Nothing here touches a network."""
 import json
+import io
 import os
 import sys
 import tempfile
@@ -317,7 +318,7 @@ class InspectTests(unittest.TestCase):
             if user is None:
                 headers = Message()
                 headers["WWW-Authenticate"] = 'Digest realm="Cam"'
-                raise HTTPError(url, 401, "Unauthorized", headers, None)
+                raise HTTPError(url, 401, "Unauthorized", headers, io.BytesIO(b""))
             sent.append((url, user))
 
             class Page:
