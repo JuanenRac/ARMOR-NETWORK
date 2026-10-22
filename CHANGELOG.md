@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- The banner follows the animated style of the ecosystem banners, with the name, the kind and the technologies of the project.
 - Looking at the web page of a device closes the answer of a refusal once it has been read, and the test of the login that is not sent to a device whose certificate changed no longer leaves one open; the whole suite passes with unclosed resources treated as errors.
 
 ## [0.1.3] - A large network is looked at as the /24 of this machine, and a down server is retried less often
