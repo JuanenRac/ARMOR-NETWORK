@@ -76,7 +76,7 @@ ARMOR-NETWORK/
 
 ## 🛠️ 开发环境
 
-**环境要求:** Python 3.11+ (standard library only), a machine on the network to be watched (Linux, Windows or macOS)
+**环境要求:** Python 3.11+（仅标准库）, 网络上需要监控的机器（Linux、Windows 或 macOS）
 
 ```bash
 python -m unittest discover -s tests                  # 181 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
