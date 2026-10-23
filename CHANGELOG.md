@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **Every message says which version of the contract the node speaks:** the network message carries `contract` (1 today, `CONTRACT_VERSION`), so that the server can tell a node that is older than itself from a current one.
+
 - **The state can also go to an MQTT broker:** `--mqtt-url` (`mqtt://` or `mqtts://`) and `--mqtt-user`, with the password in `ARMOR_NETWORK_MQTT_PASSWORD`, publish every message on `armor/network/<node>/state` (MQTT 3.1.1, QoS 0, a small client of its own, no new dependency). It can be used with the server's route or alone; the manual orders only travel in the answer of the server's route.
 - **The name the house is reached by can be checked:** `--dns-name NAME` resolves the dynamic DNS name each time the public address is asked for, and the message carries `public.dns` (the name, the addresses and whether one is the public address), so the server can warn when the address changed and the name did not follow. Off unless given.
 - The repository has a security policy, a code of conduct, a contributing guide and a support file.

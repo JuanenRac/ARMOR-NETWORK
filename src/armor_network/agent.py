@@ -23,6 +23,9 @@ from .inventory import EventLog, Inventory, Observation
 from .orders import DEFAULT_PUBLIC_URL, OUTPUT_LIMIT, Order, PublicTracker, target_allowed
 from .services import PROFILES
 
+#: The version of the network contract this node speaks. It goes in every message, so that the server can tell a node older than itself from a current one.
+CONTRACT_VERSION = 1
+
 
 class NetworkIO(Protocol):
     settle_s: float
@@ -266,7 +269,7 @@ class Agent:
             interface["gateway"] = info["gateway"]
         if self._bps is not None:
             interface["rx_bps"], interface["tx_bps"] = self._bps
-        message = {"kind": "network", "node_id": self.config.node_id, "timestamp_ms": now, "interface": interface, "internet": self.monitor.status(now),
+        message = {"kind": "network", "node_id": self.config.node_id, "contract": CONTRACT_VERSION, "timestamp_ms": now, "interface": interface, "internet": self.monitor.status(now),
                    "devices": self.inventory.snapshot(), "events": list(self.log.events)}
         if self._scan_info is not None:
             message["scan"] = dict(self._scan_info)

@@ -1,9 +1,9 @@
-# The message of a network node (contract version 0)
+# The message of a network node (contract version 1)
 
 `armor/network/{node_id}/state` (the topic name of the contract; this program delivers it only by HTTP), one message per node every ten seconds or when something happened; JSON, no retained flag; or `POST /api/v1/network/state` with the ingest token. The schema, the topic rule and the conformance vectors are in ARMOR-COMMON (`network.schema.json`, `conformance/network.json`, 64 vectors); the server takes it, keeps the latest state of every node, a history of the internet and of the traffic, the list of outages, and raises the alarms.
 
 ```json
-{"kind":"network","node_id":"network-1","timestamp_ms":1790000060000,
+{"kind":"network","node_id":"network-1","contract":1,"timestamp_ms":1790000060000,
  "interface":{"name":"Ethernet","ip":"192.168.0.10","cidr":"192.168.0.0/24","gateway":"192.168.0.1","rx_bps":1200000,"tx_bps":340000},
  "internet":{"state":"up","since_ms":1789990000000,"gateway_ok":true,"latency_ms":12.5,"loss_percent":0.0,
              "probes":[{"target":"1.1.1.1","kind":"dns","ok":true,"latency_ms":13.8}],
@@ -15,6 +15,7 @@
  "scan":{"last_ms":1790000050000,"hosts":254,"duration_ms":9000}}
 ```
 
+* **`contract`** is the version of this message the node speaks (`CONTRACT_VERSION` in `agent.py`, 1 today). The server compares it with its own and says in its overview whether a node is older; a message without it is taken as the first version.
 * **`internet.state`**: `up`, `degraded`, `down` (the router answers and nothing beyond it does: the provider's side), `lan_down` (the router does not answer either: this side) or `unknown` (just started).
 * **A device** is its MAC in lowercase with colons, or `ip-<address with dashes>` until the MAC is known; a device with a MAC has it as its id. `randomized_mac` says the MAC is locally administered (a phone that changes it on purpose): it is not an identity, and it has no maker. `kind`, `os` and `vendor` are guesses.
 * **Events** keep their id, oldest first, at most 64, so a reader that sees the same event twice counts it once. `new_device`, `device_online`, `device_offline`, `ip_changed`, `arp_conflict`, `port_opened` and `port_closed` are about a device (`device_id` required, `port` on the port events); `internet_down`, `internet_up`, `gateway_down` and `gateway_up` are not (no `device_id`, no `port`), and only the two `_up` events say how long it was down (`outage_s`).

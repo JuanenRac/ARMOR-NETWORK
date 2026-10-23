@@ -20,7 +20,7 @@ if COMMON.is_dir():
     sys.path.insert(0, str(COMMON))
 
 from armor_network import cli, dnswire, ipnet, neighbors, oui, parsers, services  # noqa: E402
-from armor_network.agent import Agent, Config  # noqa: E402
+from armor_network.agent import CONTRACT_VERSION, Agent, Config  # noqa: E402
 from armor_network.internet import InternetMonitor, ProbeResult  # noqa: E402
 from armor_network.inventory import EventLog, Inventory, Observation  # noqa: E402
 from armor_network.publisher import DeliveryError, check_server_url, post  # noqa: E402
@@ -724,6 +724,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(code, 0)
             message = json.loads(out.splitlines()[0])
             self.assertEqual(message["kind"], "network")
+            self.assertEqual(message["contract"], CONTRACT_VERSION, "every message says which version of the contract the node speaks")
             checked(message)
 
 
