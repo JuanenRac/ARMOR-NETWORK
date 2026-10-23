@@ -25,7 +25,7 @@ from pathlib import Path
 from . import __version__, oui
 from .agent import Agent, Config
 from .ipnet import ScanRefused, check_scan_range
-from .orders import DEFAULT_PUBLIC_URL, check_public_url
+from .orders import DEFAULT_PUBLIC_URL, check_dns_name, check_public_url
 from .publisher import DeliveryError, check_server_url, deliver
 from .services import PROFILES
 from .sim_io import SimIO
@@ -151,6 +151,7 @@ def main(argv: list[str] | None = None) -> int:
         watch.add_argument("--count", type=int, default=0, help="stop after this many messages (0: never)")
         watch.add_argument("--validate", action="store_true", help="check every message against ARMOR-COMMON before it is sent")
         watch.add_argument("--no-public-info", action="store_true", help="do not ask a public service for the public address (the one request this program makes that leaves the house)")
+        watch.add_argument("--dns-name", default="", help="the name the house is reached by from outside (the dynamic DNS name): it is resolved each time the public address is asked for and the message says whether it points to it")
         watch.add_argument("--public-info-url", default=DEFAULT_PUBLIC_URL, help="the https service that tells the public address (default: ipinfo.io)")
         if name == "demo":
             watch.add_argument("--tick-s", type=int, default=10, help="seconds of the made-up house's clock per real second's scripted step")
@@ -197,11 +198,12 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         try:
             public_url = check_public_url(args.public_info_url)
+            dns_name = check_dns_name(args.dns_name) if args.dns_name else ""
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
         config = Config(node_id=args.node_id, profile=args.profile, no_ports=args.no_ports, skip=skip, data_dir=args.data_dir, scan_every_s=args.scan_every,
-                        internet_every_s=args.internet_every, public_info=not args.no_public_info, public_url=public_url)
+                        internet_every_s=args.internet_every, public_info=not args.no_public_info, public_url=public_url, dns_name=dns_name)
         if args.command == "demo":
             io = SimIO(tick_ms=args.tick_s * 1000)
             config.scan_every_s, config.internet_every_s, config.publish_every_s = args.tick_s, max(2, args.tick_s // 2), max(2, args.tick_s // 2)

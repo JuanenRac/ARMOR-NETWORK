@@ -46,6 +46,31 @@ def check_public_url(url: str) -> str:
     return url
 
 
+def check_dns_name(name: str) -> str:
+    """The name the house is reached by from outside: a host name of letters, digits, hyphens and dots, as long as DNS allows."""
+    if not re.fullmatch(r"(?=.{1,253}$)([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)*[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?", name or ""):
+        raise ValueError("--dns-name must be a host name such as home.example.net")
+    return name.lower()
+
+
+def resolve_dns_name(name: str, timeout: float = 5.0) -> list[str]:
+    """What the name resolves to now (at most eight addresses, sorted; empty when it does not resolve or the resolver is slower than the timeout). Never raises."""
+    import socket
+    import threading
+    found: list[str] = []
+
+    def work() -> None:
+        try:
+            found.extend(sorted({str(item[4][0]) for item in socket.getaddrinfo(name, None, proto=socket.IPPROTO_TCP)})[:8])
+        except (OSError, UnicodeError):
+            pass
+
+    thread = threading.Thread(target=work, daemon=True)
+    thread.start()
+    thread.join(timeout)
+    return list(found) if not thread.is_alive() else []
+
+
 def fetch_public_info(url: str = DEFAULT_PUBLIC_URL, timeout: float = 6.0) -> dict | None:
     """The public address and what the service says of it (city, provider...), or None when it could not be had. Never raises."""
     try:

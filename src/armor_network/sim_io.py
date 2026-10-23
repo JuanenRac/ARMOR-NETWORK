@@ -157,6 +157,10 @@ class SimIO:
 
     # the manual orders, scripted
     public_ip = "203.0.113.9"
+    dns_answer: list[str] | None = None   # what a name resolves to; the public address when not set
+
+    def resolve_name(self, name: str) -> list[str]:
+        return list(self.dns_answer) if self.dns_answer is not None else [self.public_ip]
 
     def public_info(self, url: str) -> dict | None:
         return {"ip": self.public_ip, "city": "Madrid", "region": "Madrid", "country": "ES", "org": "AS64496 EXAMPLE TELECOM", "timezone": "Europe/Madrid"}

@@ -41,6 +41,7 @@ class NetworkIO(Protocol):
     def probe_internet(self) -> list[ProbeResult]: ...
     def traffic(self) -> tuple[int, int] | None: ...
     def public_info(self, url: str) -> dict | None: ...
+    def resolve_name(self, name: str) -> list[str]: ...
     def traceroute(self, ip: str) -> str: ...
     def wake(self, mac: str, broadcast: str) -> str: ...
     def http_look(self, ip: str, port: int) -> dict: ...
@@ -64,6 +65,7 @@ class Config:
     public_info: bool = True               # ask a public service for the public address now and then (one https request, nothing about the house)
     public_url: str = DEFAULT_PUBLIC_URL
     public_every_s: int = 600
+    dns_name: str = ""                       # the name the house is reached by from outside: checked against the public address each time it is asked for
     skip: set[str] = field(default_factory=set)
     data_dir: Path | None = None
 
@@ -77,6 +79,7 @@ class Agent:
         self.inventory = Inventory(directory / "inventory.json" if directory else None, offline_after_s=self.config.offline_after_s, log=self.log)
         self.monitor = InternetMonitor(directory / "internet.json" if directory else None, log=self.log)
         self._next = {"internet": 0, "scan": 0, "discovery": 0, "publish": 0, "traffic": 0, "public": 0}
+        self._dns_addresses: list[str] | None = None
         self._public = PublicTracker(directory / "public.json" if directory else None)
         self._orders: list[Order] = []
         self._results: list[dict] = []
@@ -102,6 +105,8 @@ class Agent:
             self._next["internet"] = now + self.config.internet_every_s * 1000
         if self.config.public_info and now >= self._next["public"]:
             self._public.update(self.io.public_info(self.config.public_url), now)
+            if self.config.dns_name:
+                self._dns_addresses = self.io.resolve_name(self.config.dns_name)[:8]
             self._next["public"] = now + self.config.public_every_s * 1000
         if now >= self._next["discovery"]:
             self._announced.update(self.io.discover())
@@ -267,6 +272,8 @@ class Agent:
             message["scan"] = dict(self._scan_info)
         public = self._public.block() if self.config.public_info else None
         if public is not None:
+            if self.config.dns_name and self._dns_addresses is not None:
+                public["dns"] = {"name": self.config.dns_name, "addresses": list(self._dns_addresses), "matches": public["ip"] in self._dns_addresses}
             message["public"] = public
         # A result goes out in every message for two minutes, so one that is lost on the way is not lost (the server counts a result it reads twice once).
         recent = [r for r in self._results if now - r["finished_ms"] <= 120_000]

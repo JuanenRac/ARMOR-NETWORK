@@ -25,7 +25,7 @@ from .internet import ProbeResult
 from .ipnet import MAX_HOSTS, check_scan_range, hosts_of, is_private_address, network_of
 from .neighbors import in_network, parse_arp_windows, parse_ip_neigh, parse_proc_net_arp
 from .oui import normalize_mac
-from .orders import _open, fetch_public_info, http_look, inspect_web, send_magic_packet
+from .orders import _open, fetch_public_info, http_look, inspect_web, resolve_dns_name, send_magic_packet
 from .services import clean_banner, parse_http, service_name
 
 INTERFACE_REFRESH_S = 60.0   # the address, network and router of this machine are read again this often: a lease renewed or a cable moved must not stay wrong for ever
@@ -355,6 +355,9 @@ class SystemIO:
     # ---- the manual orders ---------------------------------------------------------------------------------------------------------------------
     def public_info(self, url: str) -> dict | None:
         return fetch_public_info(url)
+
+    def resolve_name(self, name: str) -> list[str]:
+        return resolve_dns_name(name)
 
     def traceroute(self, ip: str) -> str:
         """The route to a device of the network, as the system's own tool prints it (a fixed argument list, never a shell), trimmed."""

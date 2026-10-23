@@ -159,6 +159,17 @@ class WatchTests(unittest.TestCase):
             self.assertEqual(code, 2, url)
             self.assertIn("--public-info-url", err)
 
+    def test_a_name_that_is_not_a_host_name_is_a_message_not_a_traceback(self):
+        for name in ("http://home.example.net", "a b", "-x.net"):
+            code, _out, err = run_cli("demo", "--count", "1", f"--dns-name={name}")
+            self.assertEqual(code, 2, name)
+            self.assertIn("--dns-name", err)
+
+    def test_a_good_name_is_checked_against_the_public_address_in_the_demo(self):
+        with tempfile.TemporaryDirectory() as folder:
+            code, _out, err = run_cli("demo", "--count", "1", "--tick-s", "2", "--data-dir", folder, "--dns-name", "home.example.net", "--validate")
+            self.assertEqual(code, 0, err)
+
     def test_a_server_address_with_a_path_or_a_login_is_a_message_not_a_traceback(self):
         for url in ("http://user:pass@127.0.0.1:1", "http://127.0.0.1:1/api", "ftp://x", "nonsense"):
             code, _out, err = run_cli("demo", "--count", "1", "--server-url", url, "--ingest-token", "tok")

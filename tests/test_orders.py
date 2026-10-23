@@ -50,6 +50,42 @@ def run_agent(*order_list: orders.Order, config: Config | None = None):
     return agent, io, clock, message
 
 
+class DnsNameTests(unittest.TestCase):
+    def test_only_a_host_name_is_taken(self):
+        self.assertEqual(orders.check_dns_name("Home.Example.NET"), "home.example.net")
+        for bad in ("", "-bad.example.net", "a b.example.net", "http://home.example.net", "home..example.net", "x" * 64 + ".net", "a;rm.net"):
+            with self.subTest(bad), self.assertRaises(ValueError):
+                orders.check_dns_name(bad)
+
+    def test_a_name_that_does_not_resolve_gives_nothing_and_never_raises(self):
+        with mock.patch("socket.getaddrinfo", side_effect=OSError("no such name")):
+            self.assertEqual(orders.resolve_dns_name("home.example.net"), [])
+        with mock.patch("socket.getaddrinfo", return_value=[(2, 1, 6, "", ("203.0.113.9", 0)), (2, 1, 6, "", ("203.0.113.9", 0)), (10, 1, 6, "", ("2001:db8::1", 0, 0, 0))]):
+            self.assertEqual(orders.resolve_dns_name("home.example.net"), ["2001:db8::1", "203.0.113.9"])
+
+    def test_the_message_says_whether_the_name_follows_the_public_address(self):
+        _agent, io, _clock, message = run_agent(config=Config(scan_every_s=10, publish_every_s=10, internet_every_s=5, dns_name="home.example.net"))
+        self.assertEqual(message["public"]["dns"], {"name": "home.example.net", "addresses": ["203.0.113.9"], "matches": True})
+        clock = Clock()
+        sim = SimIO(clock)
+        sim.dns_answer = ["198.51.100.4"]
+        agent = Agent(sim, Config(scan_every_s=10, publish_every_s=10, internet_every_s=5, dns_name="home.example.net"))
+        clock.now = sim._t0
+        message = agent.step()
+        self.assertEqual(message["public"]["dns"], {"name": "home.example.net", "addresses": ["198.51.100.4"], "matches": False})
+        if validate_network_message is not None:
+            validate_network_message(f"armor/network/{message['node_id']}/state", message)
+        sim.dns_answer = []
+        clock.now = sim._t0 + 700_000
+        message = agent.step()
+        self.assertEqual(message["public"]["dns"]["addresses"], [])
+        self.assertFalse(message["public"]["dns"]["matches"])
+
+    def test_without_a_name_the_message_has_no_dns(self):
+        _agent, _io, _clock, message = run_agent()
+        self.assertNotIn("dns", message["public"])
+
+
 class PublicInfoTests(unittest.TestCase):
     def test_what_a_service_answers_is_reduced_to_what_the_contract_holds(self):
         info = orders.clean_public_info({"ip": " 203.0.113.9 ", "city": "Madrid", "org": "AS64496 EXAMPLE TELECOM", "readme": "x", "hostname": "h" * 500, "region": 3})
