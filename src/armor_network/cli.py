@@ -25,6 +25,7 @@ from pathlib import Path
 from . import __version__, oui
 from .agent import Agent, Config
 from .ipnet import ScanRefused, check_scan_range
+from .mqtt_out import NODE_ID, MqttError, check_mqtt_url, publish as mqtt_publish
 from .orders import DEFAULT_PUBLIC_URL, check_dns_name, check_public_url
 from .publisher import DeliveryError, check_server_url, deliver
 from .services import PROFILES
@@ -88,6 +89,15 @@ def _run_loop(agent: Agent, args: argparse.Namespace, *, forever: bool) -> int:
         print(str(error), file=sys.stderr)
         return 2
     token = args.ingest_token or os.environ.get("ARMOR_INGEST_TOKEN", "")
+    try:
+        mqtt_url = check_mqtt_url(args.mqtt_url) if getattr(args, "mqtt_url", "") else ""
+    except ValueError as error:
+        print(str(error), file=sys.stderr)
+        return 2
+    mqtt_password = os.environ.get("ARMOR_NETWORK_MQTT_PASSWORD", "")
+    if mqtt_url and (not NODE_ID.fullmatch(args.node_id) or (mqtt_password and not args.mqtt_user)):
+        print("--mqtt-url needs a node id of lowercase letters, digits, - and _, and a password needs --mqtt-user", file=sys.stderr)
+        return 2
     if bool(server) != bool(token):
         print("--server-url and --ingest-token (or ARMOR_INGEST_TOKEN) must be supplied together", file=sys.stderr)
         return 2
@@ -116,8 +126,13 @@ def _run_loop(agent: Agent, args: argparse.Namespace, *, forever: bool) -> int:
                             failures += 1
                             retry_at = time.monotonic() + min(300, 10 * 2 ** min(failures, 5))
                             print(f"ARMOR_NETWORK=UNDELIVERED {error} (next try in {int(retry_at - time.monotonic())} s)", file=sys.stderr)
-                else:
+                elif not mqtt_url:
                     print(json.dumps(message, separators=(",", ":")))
+                if mqtt_url:
+                    try:
+                        mqtt_publish(mqtt_url, f"armor/network/{message['node_id']}/state", json.dumps(message, separators=(",", ":")).encode(), args.mqtt_user, mqtt_password, f"armor-network-{message['node_id']}")
+                    except MqttError as error:
+                        print(f"ARMOR_NETWORK=MQTT_UNDELIVERED {error}", file=sys.stderr)
                 published += 1
                 if args.count and published >= args.count:
                     return 0
@@ -152,6 +167,8 @@ def main(argv: list[str] | None = None) -> int:
         watch.add_argument("--validate", action="store_true", help="check every message against ARMOR-COMMON before it is sent")
         watch.add_argument("--no-public-info", action="store_true", help="do not ask a public service for the public address (the one request this program makes that leaves the house)")
         watch.add_argument("--dns-name", default="", help="the name the house is reached by from outside (the dynamic DNS name): it is resolved each time the public address is asked for and the message says whether it points to it")
+        watch.add_argument("--mqtt-url", default="", help="also publish every message to this MQTT broker (mqtt:// or mqtts://, on armor/network/<node>/state); the manual orders do not travel this way. The password is read from ARMOR_NETWORK_MQTT_PASSWORD")
+        watch.add_argument("--mqtt-user", default="", help="the user name for --mqtt-url (the account of a network node, e.g. network-node-network-1)")
         watch.add_argument("--public-info-url", default=DEFAULT_PUBLIC_URL, help="the https service that tells the public address (default: ipinfo.io)")
         if name == "demo":
             watch.add_argument("--tick-s", type=int, default=10, help="seconds of the made-up house's clock per real second's scripted step")

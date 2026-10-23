@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0-blue.svg" alt="GPL 3.0">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-174-00E5FF.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-181-00E5FF.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.3-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
@@ -38,7 +38,7 @@
 |---|---|
 | 版本 | `0.1.3` |
 | 成熟度 | 成熟 |
-| 测试 | 174 (`python -m unittest discover -s tests`) |
+| 测试 | 181 (`python -m unittest discover -s tests`) |
 | 技术栈 | Python 3.11+ (standard library only) |
 | 真实硬件 | 在 CM5 测试台上作为服务运行，监视其真实网络（路由器、住宅的手机和节点） |
 
@@ -79,7 +79,7 @@ ARMOR-NETWORK/
 **环境要求:** Python 3.11+ (standard library only), a machine on the network to be watched (Linux, Windows or macOS)
 
 ```bash
-python -m unittest discover -s tests                  # 174 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                  # 181 tests: the parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                # a made-up house: nothing on any network is touched

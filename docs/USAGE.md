@@ -26,6 +26,7 @@ armor-network demo --count 3 --validate  # a made-up house; --validate checks ev
 | `--scan-every`, `--internet-every` | seconds between sweeps (60) and internet checks (5) |
 | `--count N` | stop after N messages (0: never) |
 | `--no-public-info` | do not ask a public service for the public address |
+| `--mqtt-url URL` and `--mqtt-user NAME` | also publish every message to this MQTT broker (`mqtt://` or `mqtts://`, on `armor/network/<node>/state`, one short connection per message, QoS 0); the password is read from `ARMOR_NETWORK_MQTT_PASSWORD`, never from an argument. The manual orders of Studio travel in the answer of the server's route and not over MQTT, so a node that publishes only here does not receive them |
 | `--dns-name NAME` | the name the house is reached by from outside (the dynamic DNS name): each time the public address is asked for, the node resolves it and the message says whether it points to that address, so the server can warn when the address changed and the name did not follow. Resolve it from the house to the public address (a name that the house resolves to a private address never matches) |
 | `--public-info-url URL` | the https service that tells it (default `https://ipinfo.io/json`) |
 
