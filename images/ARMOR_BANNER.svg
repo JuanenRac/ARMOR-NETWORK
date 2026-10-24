@@ -238,7 +238,7 @@
 
     <text x="0" y="182" font-family="'Inter', 'Segoe UI', 'Roboto', sans-serif" font-weight="700" font-size="22" fill="url(#greenGlow)" letter-spacing="4" filter="url(#glowGreen)">FIELD NODES</text>
 
-    <text x="0" y="212" font-family="'Inter', 'Segoe UI', 'Roboto', sans-serif" font-weight="500" font-size="12" fill="#8B949E" letter-spacing="1.5">PYTHON · ARP / ICMP / TCP / MDNS / SSDP · IEEE OUI REGISTER · MQT...</text>
+    <text x="0" y="212" font-family="'Inter', 'Segoe UI', 'Roboto', sans-serif" font-weight="500" font-size="12" fill="#8B949E" letter-spacing="1.5">PYTHON · ARP / ICMP / TCP / MDNS / SSDP · IEEE OUI REGISTER</text>
 
     <g transform="translate(0, 232)">
       <rect x="0" y="0" width="73" height="22" rx="11" fill="#161B22" stroke="#30363D" stroke-width="1"/>
