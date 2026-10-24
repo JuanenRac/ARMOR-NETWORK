@@ -84,8 +84,8 @@ ARMOR-NETWORK/
 ├── src/armor_network/  ipnet (what may be probed), oui (makers), neighbors + parsers + dnswire (what the system and the devices say), services (ports and guesses), inventory (devices and their events),
 │                       internet (the outage state machine), agent (what to look at and how often), system_io (the real network), sim_io (a scripted one), publisher, cli
 │   └── data/           oui.tsv.gz, the IEEE register of makers
-├── tools/              fetch_oui.py
-├── tests/              test_network.py
+├── tools/              fetch_oui.py (refreshes the register of makers), the shared CI checks (armor_ci_validate.py, armor_project_tool.py, _armor_readme_parity.py)
+├── tests/              8 test modules (network, orders, seal, MQTT out, the CLI, the system layer)
 ├── docs/               DESIGN, SAFETY, USAGE, MESSAGES
 └── images/             brand assets
 ```
