@@ -42,6 +42,22 @@
 | Tecnologia | Python 3.11+ (standard library only) |
 | Su hardware reale | Gira come servizio sul banco di prova CM5, sorvegliando la sua rete reale (un router, i telefoni e i nodi della casa) |
 
+## 🚦 Stato del progetto
+
+Ogni riga è una parte di questo repository e il semaforo dice a che punto è oggi. È scritta in base a ciò che il repository può mostrare (test, compilazioni, esecuzioni), non a ciò che è previsto.
+
+🟢 Fatto e verificato · 🟡 Funziona, con limiti noti · 🟠 Fatto a metà o non ancora verificato · 🔴 Non fatto o non funzionante
+
+| Area | Stato | Cosa significa qui |
+|---|---|---|
+| Software | 🟢 | Lo scanner, l'inventario che dice cosa è cambiato, il controllo di internet, la ricerca dell'indirizzo pubblico e gli ordini di Studio girano come servizio sul banco di prova CM5. |
+| Test | 🟢 | Superano 181 test contro una rete simulata da script, e ogni messaggio è accettato dal contratto di ARMOR-COMMON. |
+| Protocolli e dati | 🟡 | Cosa sia un dispositivo (tipo, sistema, produttore) è un'ipotesi, e nulla cattura pacchetti: il traffico per dispositivo e il rilevamento di intrusioni in senso stretto non sono fatti. |
+| Hardware | 🟡 | Sorveglia la rete reale del banco di prova CM5 (un router, i telefoni e i nodi di casa) ma non ha sorvegliato un'intera casa per settimane. |
+| Sicurezza | 🟡 | Interroga soltanto il router e non lo configura mai; gli accessi sigillati sono testati sull'host e non c'è stata una revisione indipendente. |
+| Integrazione | 🟡 | I suoi messaggi arrivano al server del banco di prova CM5 e a Studio; gli ordini di Studio sono provati contro una rete simulata da script. |
+| Documentazione | 🟢 | Otto lingue e il registro delle modifiche sono aggiornati. |
+
 ## 🎯 Panoramica
 
 * **Cosa c'è in rete:** la tabella dei vicini della macchina, un tocco a ogni indirizzo perché si riempia, un'eco a ogni dispositivo trovato (latenza e TTL) e ciò che i dispositivi annunciano di sé (mDNS, UPnP, NetBIOS, DNS inverso). Per ciascuno: indirizzo, MAC, produttore (dal registro IEEE, 40.000 blocchi), nome, tipo, sistema, porte aperte con ciò che dice ognuna e quando è stato visto la prima e l'ultima volta.

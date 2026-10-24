@@ -42,6 +42,22 @@
 | Stack | Python 3.11+ (standard library only) |
 | On real hardware | Runs as a service on the CM5 test bench, watching its real network (a router, the phones and nodes of the house) |
 
+## 🚦 Project status
+
+Each line is one part of this repository and the light says how far it is today. It is written from what the repository can show (tests, builds, runs), not from what is planned.
+
+🟢 Done and verified · 🟡 Works, with known limits · 🟠 Partly done or not verified yet · 🔴 Not done or not working
+
+| Area | State | What it means here |
+|---|---|---|
+| Software | 🟢 | The scanner, the inventory that tells what changed, the internet check, the public-address look-up and the orders from Studio run as a service on the CM5 test bench. |
+| Tests | 🟢 | 181 tests pass against a scripted network, and every message is accepted by the contract of ARMOR-COMMON. |
+| Protocols and data | 🟡 | What a device is (its kind, its system, its maker) is a guess, and nothing captures packets: traffic per device and intrusion detection in the strict sense are not done. |
+| Hardware | 🟡 | It watches the real network of the CM5 test bench (a router, the phones and nodes of the house) but has not watched a whole house for weeks. |
+| Security | 🟡 | It only asks the router and never configures it; the sealed logins are tested on the host, and there has been no independent review. |
+| Integration | 🟡 | Its messages reach the CM5 test bench server and Studio; the commands from Studio are tested against a scripted network. |
+| Documentation | 🟢 | Eight languages and the changelog are up to date. |
+
 ## 🎯 Overview
 
 * **What is on the network:** the neighbour table of the machine, a poke of every address so that it fills, an echo to each device found (latency and TTL) and what devices announce about themselves (mDNS, UPnP, NetBIOS, reverse DNS). For each device: address, MAC, maker (from the IEEE register of 40,000 blocks), name, kind, system, open ports with what each says, and when it was first and last seen.

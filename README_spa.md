@@ -42,6 +42,22 @@
 | Tecnología | Python 3.11+ (standard library only) |
 | En hardware real | Corre como servicio en el banco de pruebas de la CM5, vigilando su red real (un router, los móviles y los nodos de la casa) |
 
+## 🚦 Estado del proyecto
+
+Cada línea es una parte de este repositorio y la luz dice hasta dónde llega hoy. Se escribe con lo que el repositorio puede demostrar (pruebas, compilaciones, ejecuciones), no con lo previsto.
+
+🟢 Hecho y verificado · 🟡 Funciona, con límites conocidos · 🟠 Hecho a medias o sin verificar · 🔴 Sin hacer o sin funcionar
+
+| Área | Estado | Qué significa aquí |
+|---|---|---|
+| Software | 🟢 | El escáner, el inventario que dice qué cambió, la comprobación de internet, la consulta de la dirección pública y las órdenes de Studio funcionan como servicio en el banco de pruebas CM5. |
+| Pruebas | 🟢 | Pasan 181 pruebas contra una red guionizada, y cada mensaje lo acepta el contrato de ARMOR-COMMON. |
+| Protocolos y datos | 🟡 | Qué es un dispositivo (su tipo, su sistema, su fabricante) es una suposición, y nada captura paquetes: el tráfico por dispositivo y la detección de intrusiones en sentido estricto no están hechos. |
+| Hardware | 🟡 | Vigila la red real del banco de pruebas CM5 (un router, los móviles y nodos de la casa) pero no ha vigilado una casa entera durante semanas. |
+| Seguridad | 🟡 | Solo pregunta al router y nunca lo configura; los accesos sellados están probados en el host y no ha habido una revisión independiente. |
+| Integración | 🟡 | Sus mensajes llegan al servidor del banco de pruebas CM5 y a Studio; las órdenes de Studio se prueban contra una red guionizada. |
+| Documentación | 🟢 | Ocho idiomas y el historial de cambios están al día. |
+
 ## 🎯 Descripción general
 
 * **Qué hay en la red:** la tabla de vecinos de la máquina, un toque a cada dirección para que se llene, un eco a cada dispositivo encontrado (latencia y TTL) y lo que los dispositivos anuncian de sí mismos (mDNS, UPnP, NetBIOS, DNS inverso). De cada uno: dirección, MAC, fabricante (del registro de la IEEE, 40.000 bloques), nombre, tipo, sistema, puertos abiertos con lo que dice cada uno y cuándo se vio por primera y por última vez.

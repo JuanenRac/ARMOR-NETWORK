@@ -42,6 +42,22 @@
 | Tecnologia | Python 3.11+ (standard library only) |
 | Em hardware real | Corre como serviço na bancada de testes do CM5, vigiando a sua rede real (um router, os telemóveis e os nós da casa) |
 
+## 🚦 Estado do projeto
+
+Cada linha é uma parte deste repositório e a luz diz até onde chega hoje. É escrita com o que o repositório consegue demonstrar (testes, compilações, execuções), não com o que está previsto.
+
+🟢 Feito e verificado · 🟡 Funciona, com limites conhecidos · 🟠 Feito a meio ou ainda por verificar · 🔴 Por fazer ou a não funcionar
+
+| Área | Estado | O que significa aqui |
+|---|---|---|
+| Software | 🟢 | O leitor da rede, o inventário que diz o que mudou, a verificação da internet, a consulta do endereço público e as ordens do Studio funcionam como serviço na bancada de testes CM5. |
+| Testes | 🟢 | Passam 181 testes contra uma rede com guião, e cada mensagem é aceite pelo contrato do ARMOR-COMMON. |
+| Protocolos e dados | 🟡 | O que um dispositivo é (o tipo, o sistema, o fabricante) é um palpite, e nada captura pacotes: o tráfego por dispositivo e a deteção de intrusões em sentido estrito não estão feitos. |
+| Hardware | 🟡 | Vigia a rede real da bancada de testes CM5 (um router, os telemóveis e os nós da casa), mas não vigiou uma casa inteira durante semanas. |
+| Segurança | 🟡 | Só pergunta ao router e nunca o configura; os acessos selados estão testados no anfitrião e não houve revisão independente. |
+| Integração | 🟡 | As suas mensagens chegam ao servidor da bancada de testes CM5 e ao Studio; as ordens do Studio são testadas contra uma rede com guião. |
+| Documentação | 🟢 | Oito idiomas e o registo de alterações estão atualizados. |
+
 ## 🎯 Visão geral
 
 * **O que há na rede:** a tabela de vizinhos da máquina, um toque a cada endereço para que se preencha, um eco a cada dispositivo encontrado (latência e TTL) e o que os dispositivos anunciam sobre si (mDNS, UPnP, NetBIOS, DNS inverso). Para cada dispositivo: endereço, MAC, fabricante (do registo IEEE de 40 000 blocos), nome, tipo, sistema, portas abertas com o que cada uma diz, e quando foi visto pela primeira e última vez.

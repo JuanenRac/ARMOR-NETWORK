@@ -42,6 +42,22 @@
 | Technologie | Python 3.11+ (standard library only) |
 | Sur matériel réel | Tourne comme service sur le banc de test CM5, en surveillant son vrai réseau (un routeur, les téléphones et les nœuds de la maison) |
 
+## 🚦 État du projet
+
+Chaque ligne est une partie de ce dépôt et le feu dit où elle en est aujourd'hui. Elle est écrite d'après ce que le dépôt peut montrer (tests, compilations, exécutions), pas d'après ce qui est prévu.
+
+🟢 Fait et vérifié · 🟡 Fonctionne, avec des limites connues · 🟠 À moitié fait ou pas encore vérifié · 🔴 Pas fait ou ne fonctionne pas
+
+| Domaine | État | Ce que cela veut dire ici |
+|---|---|---|
+| Logiciel | 🟢 | Le scanner, l'inventaire qui dit ce qui a changé, le contrôle d'internet, la recherche de l'adresse publique et les ordres de Studio tournent comme service sur le banc d'essai CM5. |
+| Tests | 🟢 | 181 tests réussissent contre un réseau scénarisé, et chaque message est accepté par le contrat d'ARMOR-COMMON. |
+| Protocoles et données | 🟡 | Ce qu'est un appareil (son type, son système, son fabricant) est une supposition, et rien ne capture de paquets : le trafic par appareil et la détection d'intrusion au sens strict ne sont pas faits. |
+| Matériel | 🟡 | Il surveille le réseau réel du banc d'essai CM5 (un routeur, les téléphones et les nœuds de la maison) mais n'a pas surveillé une maison entière pendant des semaines. |
+| Sécurité | 🟡 | Il ne fait qu'interroger le routeur et ne le configure jamais ; les identifiants scellés sont testés sur l'hôte et il n'y a pas eu de revue indépendante. |
+| Intégration | 🟡 | Ses messages arrivent au serveur du banc d'essai CM5 et à Studio ; les ordres de Studio sont testés contre un réseau scénarisé. |
+| Documentation | 🟢 | Huit langues et le journal des modifications sont à jour. |
+
 ## 🎯 Présentation
 
 * **Ce qu'il y a sur le réseau :** la table de voisins de la machine, un coup sur chaque adresse pour qu'elle se remplisse, un écho à chaque appareil trouvé (latence et TTL) et ce que les appareils annoncent d'eux-mêmes (mDNS, UPnP, NetBIOS, DNS inverse). Pour chacun : adresse, MAC, fabricant (du registre de l'IEEE, 40 000 blocs), nom, type, système, ports ouverts avec ce que dit chacun, et quand il a été vu pour la première et la dernière fois.
