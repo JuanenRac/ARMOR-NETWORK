@@ -22,7 +22,7 @@
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
   <img src="https://img.shields.io/badge/Tests-181-00E5FF.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.1.3-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.1.4-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
@@ -36,7 +36,7 @@
 
 | | |
 |---|---|
-| バージョン | `0.1.3` |
+| バージョン | `0.1.4` |
 | 成熟度 | 確立 |
 | テスト | 181 (`python -m unittest discover -s tests`) |
 | 技術 | Python 3.11+ (standard library only) |

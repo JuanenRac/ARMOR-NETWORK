@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [0.1.4] - Every message says which version of the contract the node speaks and the state can also go to an MQTT broker
 
 - **Every message says which version of the contract the node speaks:** the network message carries `contract` (1 today, `CONTRACT_VERSION`), so that the server can tell a node that is older than itself from a current one.
 
