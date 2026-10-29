@@ -1,0 +1,409 @@
+{
+ "repo": "ARMOR-NETWORK",
+ "ecosystem": "armor",
+ "svg": "en",
+ "cards": [
+  {
+   "name": "src/armor_network/",
+   "span": 3,
+   "accent": "a",
+   "sub": {
+    "en": "the node, standard library only",
+    "es": "el nodo, solo biblioteca estándar",
+    "de": "der Knoten, nur Standardbibliothek",
+    "fr": "le nœud, bibliothèque standard seule",
+    "it": "il nodo, solo libreria standard",
+    "ja": "ノード（標準ライブラリのみ）",
+    "zh": "节点，仅用标准库",
+    "pt": "o nó, só biblioteca padrão"
+   },
+   "rows": [
+    {
+     "name": "ipnet.py  oui.py",
+     "desc": {
+      "en": "what may be probed; the makers",
+      "es": "qué se puede sondear; los fabricantes",
+      "de": "was geprüft werden darf; die Hersteller",
+      "fr": "ce qu'on peut sonder ; les fabricants",
+      "it": "cosa si può sondare; i produttori",
+      "ja": "調べてよい範囲、メーカー",
+      "zh": "可探测的范围；厂商",
+      "pt": "o que se pode sondar; os fabricantes"
+     },
+     "tree_name": "ipnet.py oui.py"
+    },
+    {
+     "name": "system_io.py  sim_io.py",
+     "desc": {
+      "en": "the real network; a scripted one",
+      "es": "la red real; una guionizada",
+      "de": "das echte Netz; ein geskriptetes",
+      "fr": "le réseau réel ; un réseau scripté",
+      "it": "la rete reale; una guidata",
+      "ja": "実ネットワークとスクリプト版",
+      "zh": "真实网络；脚本网络",
+      "pt": "a rede real; uma com guião"
+     },
+     "tree_name": "system_io.py sim_io.py"
+    },
+    {
+     "name": "neighbors.py  parsers.py  dnswire.py",
+     "desc": {
+      "en": "what the system and devices say",
+      "es": "lo que dicen el sistema y los equipos",
+      "de": "was System und Geräte sagen",
+      "fr": "ce que disent le système et les appareils",
+      "it": "cosa dicono il sistema e i dispositivi",
+      "ja": "システムと機器の応答",
+      "zh": "系统和设备的回应",
+      "pt": "o que dizem o sistema e os equipamentos"
+     },
+     "tree_name": "neighbors.py parsers.py dnswire.py"
+    },
+    {
+     "name": "services.py",
+     "desc": {
+      "en": "ports and guesses",
+      "es": "puertos y suposiciones",
+      "de": "Ports und Vermutungen",
+      "fr": "ports et suppositions",
+      "it": "porte e supposizioni",
+      "ja": "ポートと推測",
+      "zh": "端口与推测",
+      "pt": "portas e suposições"
+     }
+    },
+    {
+     "name": "inventory.py  internet.py",
+     "desc": {
+      "en": "devices and events; the outage machine",
+      "es": "equipos y eventos; la máquina de caídas",
+      "de": "Geräte und Ereignisse; die Ausfallmaschine",
+      "fr": "appareils et événements ; la machine des pannes",
+      "it": "dispositivi ed eventi; la macchina dei guasti",
+      "ja": "機器とイベント、障害の状態機械",
+      "zh": "设备与事件；中断状态机",
+      "pt": "equipamentos e eventos; a máquina de quedas"
+     },
+     "tree_name": "inventory.py internet.py"
+    },
+    {
+     "name": "agent.py  publisher.py  mqtt_out.py",
+     "desc": {
+      "en": "what to look at; how it reports",
+      "es": "qué mirar; cómo informa",
+      "de": "was zu beobachten ist; wie berichtet wird",
+      "fr": "quoi regarder ; comment il rapporte",
+      "it": "cosa guardare; come riferisce",
+      "ja": "見る対象、報告方法",
+      "zh": "看什么；如何上报",
+      "pt": "o que olhar; como reporta"
+     },
+     "tree_name": "agent.py publisher.py mqtt_out.py"
+    },
+    {
+     "name": "orders.py  seal.py",
+     "desc": {
+      "en": "orders from Studio; sealed logins",
+      "es": "órdenes de Studio; accesos sellados",
+      "de": "Aufträge aus Studio; versiegelte Logins",
+      "fr": "ordres de Studio ; identifiants scellés",
+      "it": "ordini da Studio; accessi sigillati",
+      "ja": "Studio からのオーダーと封印した認証情報",
+      "zh": "来自 Studio 的指令；密封凭据",
+      "pt": "ordens do Studio; credenciais seladas"
+     },
+     "tree_name": "orders.py seal.py"
+    },
+    {
+     "name": "cli.py  __main__.py",
+     "desc": {
+      "en": "scan, watch and demo",
+      "es": "scan, watch y demo",
+      "de": "scan, watch und demo",
+      "fr": "scan, watch et demo",
+      "it": "scan, watch e demo",
+      "ja": "scan・watch・demo",
+      "zh": "scan、watch 和 demo",
+      "pt": "scan, watch e demo"
+     },
+     "tree_name": "cli.py __main__.py"
+    },
+    {
+     "name": "data/",
+     "desc": {
+      "en": "oui.tsv.gz, the IEEE register",
+      "es": "oui.tsv.gz, el registro IEEE",
+      "de": "oui.tsv.gz, das IEEE-Register",
+      "fr": "oui.tsv.gz, le registre IEEE",
+      "it": "oui.tsv.gz, il registro IEEE",
+      "ja": "oui.tsv.gz（IEEE 登録簿）",
+      "zh": "oui.tsv.gz（IEEE 注册表）",
+      "pt": "oui.tsv.gz, o registo IEEE"
+     }
+    }
+   ]
+  },
+  {
+   "name": {
+    "en": "tests, docs and tools",
+    "es": "pruebas, docs y herramientas",
+    "de": "Tests, Doku und Werkzeuge",
+    "fr": "tests, docs et outils",
+    "it": "test, documenti e strumenti",
+    "ja": "テスト・文書・ツール",
+    "zh": "测试、文档和工具",
+    "pt": "testes, docs e ferramentas"
+   },
+   "kind": "group",
+   "span": 3,
+   "accent": "b",
+   "columns": 2,
+   "sub": {
+    "en": "checked in CI",
+    "es": "comprobado en CI",
+    "de": "in der CI geprüft",
+    "fr": "vérifié en CI",
+    "it": "verificato in CI",
+    "ja": "CI で検証",
+    "zh": "CI 检查",
+    "pt": "verificado na CI"
+   },
+   "rows": [
+    {
+     "name": "tests/",
+     "desc": {
+      "en": "181 tests in 8 modules",
+      "es": "181 pruebas en 8 módulos",
+      "de": "181 Tests in 8 Modulen",
+      "fr": "181 tests en 8 modules",
+      "it": "181 test in 8 moduli",
+      "ja": "8 モジュール 181 件",
+      "zh": "8 个模块 181 项测试",
+      "pt": "181 testes em 8 módulos"
+     }
+    },
+    {
+     "name": "docs/",
+     "desc": {
+      "en": "DESIGN, SAFETY, USAGE, MESSAGES",
+      "es": "DESIGN, SAFETY, USAGE, MESSAGES",
+      "de": "DESIGN, SAFETY, USAGE, MESSAGES",
+      "fr": "DESIGN, SAFETY, USAGE, MESSAGES",
+      "it": "DESIGN, SAFETY, USAGE, MESSAGES",
+      "ja": "DESIGN、SAFETY、USAGE、MESSAGES",
+      "zh": "DESIGN、SAFETY、USAGE、MESSAGES",
+      "pt": "DESIGN, SAFETY, USAGE, MESSAGES"
+     }
+    },
+    {
+     "name": "tools/",
+     "desc": {
+      "en": "fetch_oui.py and the shared CI checks",
+      "es": "fetch_oui.py y las comprobaciones de CI",
+      "de": "fetch_oui.py und die CI-Prüfungen",
+      "fr": "fetch_oui.py et les vérifications CI",
+      "it": "fetch_oui.py e i controlli CI",
+      "ja": "fetch_oui.py と CI 検査",
+      "zh": "fetch_oui.py 与 CI 检查",
+      "pt": "fetch_oui.py e as verificações de CI"
+     },
+     "tree_desc": {
+      "en": "fetch_oui.py refreshes the register of makers; the shared CI checks and launcher",
+      "es": "fetch_oui.py renueva el registro de fabricantes; las comprobaciones de CI y el lanzador",
+      "de": "fetch_oui.py erneuert das Herstellerregister; die gemeinsamen CI-Prüfungen und der Starter",
+      "fr": "fetch_oui.py rafraîchit le registre des fabricants ; les vérifications CI et le lanceur",
+      "it": "fetch_oui.py aggiorna il registro dei produttori; i controlli CI e l'avviatore",
+      "ja": "fetch_oui.py がメーカー登録簿を更新、共通の CI 検査とランチャー",
+      "zh": "fetch_oui.py 刷新厂商注册表；共用的 CI 检查与启动器",
+      "pt": "fetch_oui.py renova o registo de fabricantes; as verificações de CI e o lançador"
+     }
+    },
+    {
+     "name": "images/",
+     "desc": {
+      "en": "banner, icon, README pictures",
+      "es": "banner, icono, imágenes del README",
+      "de": "Banner, Symbol, README-Bilder",
+      "fr": "bannière, icône, images du README",
+      "it": "banner, icona, immagini del README",
+      "ja": "バナー、アイコン、README の画像",
+      "zh": "横幅图、图标、README 图片",
+      "pt": "faixa, ícone, imagens do README"
+     },
+     "tree_desc": {
+      "en": "banner, icon and the pictures of the README",
+      "es": "banner, icono y las imágenes del README",
+      "de": "Banner, Symbol und die Bilder des READMEs",
+      "fr": "bannière, icône et images du README",
+      "it": "banner, icona e immagini del README",
+      "ja": "バナー、アイコン、README の画像",
+      "zh": "横幅图、图标和 README 的图片",
+      "pt": "faixa, ícone e as imagens do README"
+     }
+    },
+    {
+     "name": ".github/",
+     "desc": {
+      "en": "CI, dashboard notice, templates",
+      "es": "CI, aviso al panel, plantillas",
+      "de": "CI, Dashboard-Hinweis, Vorlagen",
+      "fr": "CI, avis au tableau de bord, modèles",
+      "it": "CI, avviso alla dashboard, modelli",
+      "ja": "CI、ダッシュボード通知、テンプレート",
+      "zh": "CI、仪表板通知、模板",
+      "pt": "CI, aviso ao painel, modelos"
+     },
+     "tree_desc": {
+      "en": "CI workflow, dashboard notice, issue and pull-request templates",
+      "es": "flujo de CI, aviso al panel, plantillas de incidencias y pull requests",
+      "de": "CI-Workflow, Dashboard-Hinweis, Vorlagen für Issues und Pull Requests",
+      "fr": "workflow CI, avis au tableau de bord, modèles d'issues et de pull requests",
+      "it": "workflow CI, avviso alla dashboard, modelli per issue e pull request",
+      "ja": "CI ワークフロー、ダッシュボード通知、Issue と Pull Request のテンプレート",
+      "zh": "CI 工作流、仪表板通知、议题和 pull request 模板",
+      "pt": "fluxo de CI, aviso ao painel, modelos de issues e pull requests"
+     }
+    }
+   ]
+  },
+  {
+   "name": {
+    "en": "project files",
+    "es": "ficheros del proyecto",
+    "de": "Projektdateien",
+    "fr": "fichiers du projet",
+    "it": "file del progetto",
+    "ja": "プロジェクトのファイル",
+    "zh": "项目文件",
+    "pt": "ficheiros do projeto"
+   },
+   "kind": "group",
+   "span": 3,
+   "accent": "c",
+   "columns": 2,
+   "sub": {
+    "en": "at the root",
+    "es": "en la raíz",
+    "de": "im Stammordner",
+    "fr": "à la racine",
+    "it": "alla radice",
+    "ja": "ルート",
+    "zh": "根目录",
+    "pt": "na raiz"
+   },
+   "rows": [
+    {
+     "name": "armor.project.json",
+     "desc": {
+      "en": "manifest: version, role, maturity",
+      "es": "manifiesto: versión, función, madurez",
+      "de": "Manifest: Version, Rolle, Reife",
+      "fr": "manifeste : version, rôle, maturité",
+      "it": "manifesto: versione, ruolo, maturità",
+      "ja": "マニフェスト：版・役割・成熟度",
+      "zh": "清单：版本、角色、成熟度",
+      "pt": "manifesto: versão, função, maturidade"
+     }
+    },
+    {
+     "name": "pyproject.toml",
+     "desc": {
+      "en": "package metadata, entry points",
+      "es": "metadatos del paquete, entradas",
+      "de": "Paket-Metadaten, Einstiege",
+      "fr": "métadonnées du paquet, entrées",
+      "it": "metadati del pacchetto, ingressi",
+      "ja": "パッケージ情報とエントリー",
+      "zh": "包元数据、入口",
+      "pt": "metadados do pacote, entradas"
+     }
+    },
+    {
+     "name": "CHANGELOG.md",
+     "desc": {
+      "en": "what changed in each version",
+      "es": "qué cambió en cada versión",
+      "de": "was sich in jeder Version geändert hat",
+      "fr": "ce qui a changé à chaque version",
+      "it": "cosa è cambiato in ogni versione",
+      "ja": "各バージョンの変更点",
+      "zh": "每个版本的变化",
+      "pt": "o que mudou em cada versão"
+     }
+    },
+    {
+     "name": "run.sh  run.bat",
+     "tree_name": "run.sh run.bat",
+     "desc": {
+      "en": "start, shared workflow",
+      "es": "arrancar, flujo compartido",
+      "de": "Start, gemeinsamer Ablauf",
+      "fr": "démarrer, flux partagé",
+      "it": "avvio, flusso condiviso",
+      "ja": "起動（共通フロー）",
+      "zh": "启动（共用流程）",
+      "pt": "arrancar, fluxo partilhado"
+     }
+    },
+    {
+     "name": "build.sh  build.bat",
+     "tree_name": "build.sh build.bat",
+     "desc": {
+      "en": "build and test, shared workflow",
+      "es": "construir y probar, flujo compartido",
+      "de": "Bauen und Testen, gemeinsamer Ablauf",
+      "fr": "construire et tester, flux partagé",
+      "it": "compila e prova, flusso condiviso",
+      "ja": "ビルドとテスト（共通フロー）",
+      "zh": "构建并测试（共用流程）",
+      "pt": "compilar e testar, fluxo partilhado"
+     }
+    },
+    {
+     "name": "build-test.sh  build-test.bat",
+     "tree_name": "build-test.sh build-test.bat",
+     "desc": {
+      "en": "build, test and package",
+      "es": "construir, probar y empaquetar",
+      "de": "Bauen, Testen und Verpacken",
+      "fr": "construire, tester, empaqueter",
+      "it": "compila, prova e impacchetta",
+      "ja": "ビルド、テスト、パッケージ化",
+      "zh": "构建、测试并打包",
+      "pt": "compilar, testar e empacotar"
+     }
+    },
+    {
+     "name": "test.sh  test.bat",
+     "tree_name": "test.sh test.bat",
+     "desc": {
+      "en": "only the tests, never the version",
+      "es": "solo las pruebas, nunca la versión",
+      "de": "nur die Tests, nie die Version",
+      "fr": "seulement les tests, jamais la version",
+      "it": "solo i test, mai la versione",
+      "ja": "テストのみ（版は変えません）",
+      "zh": "只运行测试，不改版本",
+      "pt": "só os testes, nunca a versão"
+     }
+    },
+    {
+     "name": "SECURITY  SUPPORT  CONTRIBUTING  LICENSE",
+     "tree_name": "SECURITY.md SUPPORT.md CONTRIBUTING.md CODE_OF_CONDUCT.md LICENSE",
+     "desc": {
+      "en": "community and licence files",
+      "es": "comunidad y licencia",
+      "de": "Community und Lizenz",
+      "fr": "communauté et licence",
+      "it": "comunità e licenza",
+      "ja": "コミュニティとライセンス",
+      "zh": "社区与许可证",
+      "pt": "comunidade e licença"
+     },
+     "tree_desc": ""
+    }
+   ]
+  }
+ ]
+}

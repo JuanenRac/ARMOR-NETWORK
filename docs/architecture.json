@@ -1,0 +1,216 @@
+{
+  "repo": "ARMOR-NETWORK",
+  "ecosystem": "armor",
+  "tagline": "The family's eye on the local network: it looks, it tells, it never configures.",
+  "description": "ARMOR-NETWORK runs on a machine of the local network. It looks at the private network only (neighbour table, echoes, a few TCP ports, what the devices announce), keeps an inventory that tells what changed, watches the internet with an outage state machine and reports to ARMOR-SERVER, or by MQTT; Studio can hand it orders in the answer to its own message, and a login given for an inspection travels sealed for this node alone.",
+  "columns": [
+    "WHAT IT LOOKS AT",
+    "THE NETWORK NODE",
+    "WHAT IT TELLS"
+  ],
+  "nodes": [
+    {
+      "id": "lan",
+      "column": 0,
+      "level": "external",
+      "title": "The local network",
+      "lines": [
+        "the router, the devices, the",
+        "phones and the nodes of the",
+        "house: private ranges only"
+      ]
+    },
+    {
+      "id": "oui",
+      "column": 0,
+      "level": "tested",
+      "title": "oui.tsv.gz",
+      "lines": [
+        "the IEEE register of makers,",
+        "about 40 000 blocks, refreshed",
+        "by tools/fetch_oui.py"
+      ],
+      "code": [
+        "src/armor_network/data/oui.tsv.gz",
+        "tools/fetch_oui.py"
+      ]
+    },
+    {
+      "id": "system_io",
+      "column": 1,
+      "level": "tested",
+      "title": "system_io.py",
+      "lines": [
+        "the real network: neighbours,",
+        "echo, 12 TCP connections at",
+        "a time; sim_io is a scripted one"
+      ],
+      "code": [
+        "src/armor_network/system_io.py",
+        "src/armor_network/sim_io.py"
+      ]
+    },
+    {
+      "id": "ipnet",
+      "column": 1,
+      "level": "contract",
+      "title": "ipnet.py",
+      "lines": [
+        "what may be probed: private",
+        "ranges and no more than a /22;",
+        "a skip list for the fragile"
+      ],
+      "code": [
+        "src/armor_network/ipnet.py"
+      ]
+    },
+    {
+      "id": "inventory",
+      "column": 1,
+      "level": "tested",
+      "title": "inventory.py",
+      "lines": [
+        "devices and the events that",
+        "tell what changed, each with",
+        "an id so it is told once"
+      ],
+      "code": [
+        "src/armor_network/inventory.py"
+      ]
+    },
+    {
+      "id": "internet",
+      "column": 1,
+      "level": "tested",
+      "title": "internet.py",
+      "lines": [
+        "outage state machine: three",
+        "failed rounds, two good ones;",
+        "says whose fault it is"
+      ],
+      "code": [
+        "src/armor_network/internet.py"
+      ]
+    },
+    {
+      "id": "agent",
+      "column": 1,
+      "level": "tested",
+      "title": "agent.py",
+      "lines": [
+        "what to look at and how often;",
+        "ports of a new device at once,",
+        "the others every quarter hour"
+      ],
+      "code": [
+        "src/armor_network/agent.py"
+      ]
+    },
+    {
+      "id": "orders",
+      "column": 1,
+      "level": "contract",
+      "title": "orders.py + seal.py",
+      "lines": [
+        "orders from Studio, checked and",
+        "never run by a shell; logins",
+        "sealed for this node alone"
+      ],
+      "code": [
+        "src/armor_network/orders.py",
+        "src/armor_network/seal.py"
+      ],
+      "title_size": 13
+    },
+    {
+      "id": "server",
+      "column": 2,
+      "level": "external",
+      "title": "ARMOR-SERVER",
+      "lines": [
+        "armor/network/<node>/state out;",
+        "the orders come back in the",
+        "answer to that message"
+      ]
+    },
+    {
+      "id": "studio",
+      "column": 2,
+      "level": "external",
+      "title": "ARMOR-STUDIO",
+      "lines": [
+        "the Network menu and the",
+        "Network Designer show it,",
+        "through the server"
+      ]
+    },
+    {
+      "id": "broker",
+      "column": 2,
+      "level": "config",
+      "title": "MQTT broker",
+      "lines": [
+        "optional: --mqtt-url, with",
+        "mqtt:// or mqtts://"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "lan",
+      "to": "system_io",
+      "level": "tested",
+      "label": "looks at"
+    },
+    {
+      "from": "oui",
+      "to": "inventory",
+      "level": "tested",
+      "label": "makers"
+    },
+    {
+      "from": "ipnet",
+      "to": "system_io",
+      "level": "contract"
+    },
+    {
+      "from": "system_io",
+      "to": "inventory",
+      "level": "tested"
+    },
+    {
+      "from": "agent",
+      "to": "inventory",
+      "level": "tested"
+    },
+    {
+      "from": "inventory",
+      "to": "internet",
+      "level": "tested"
+    },
+    {
+      "from": "agent",
+      "to": "orders",
+      "level": "contract"
+    },
+    {
+      "from": "inventory",
+      "to": "server",
+      "level": "tested",
+      "label": "state"
+    },
+    {
+      "from": "orders",
+      "to": "server",
+      "level": "contract",
+      "label": "orders"
+    },
+    {
+      "from": "agent",
+      "to": "broker",
+      "level": "config",
+      "label": "--mqtt-url"
+    }
+  ],
+  "footer": "A device's kind, system and maker are guesses; nothing captures packets."
+}
