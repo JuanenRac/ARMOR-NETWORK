@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+- **The pictures of the README come from shared tools:** `tools/make_architecture.py` draws `images/architecture.svg` from `docs/architecture.json` and `tools/make_structure.py` draws the Repository Structure (the text tree and the animated picture) from `docs/structure.json`; both measure every text, and `--check` fails when a picture, its description or the code it points to disagree. They are vendored from ARMOR-COMMON like the shared CI checks.
+
 ## [0.1.4] - Every message says which version of the contract the node speaks and the state can also go to an MQTT broker
 
 - **Every message says which version of the contract the node speaks:** the network message carries `contract` (1 today, `CONTRACT_VERSION`), so that the server can tell a node that is older than itself from a current one.
