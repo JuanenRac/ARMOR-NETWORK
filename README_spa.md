@@ -22,7 +22,7 @@
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Lenguaje">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
   <img src="https://img.shields.io/badge/Tests-181%20passing-2ea44f.svg" alt="Pruebas">
-  <img src="https://img.shields.io/badge/Version-0.1.4-0f6cbd.svg" alt="Versión">
+  <img src="https://img.shields.io/badge/Version-0.1.5-0f6cbd.svg" alt="Versión">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Madurez">
 </p>
 
@@ -36,7 +36,7 @@
 
 | | |
 |---|---|
-| Versión | `0.1.4` |
+| Versión | `0.1.5` |
 | Madurez | Establecido |
 | Función | Nodo de red local: qué hay en la red, qué cambió, internet, órdenes de Studio |
 | Tecnología | Python 3.11+, solo biblioteca estándar |

@@ -22,7 +22,7 @@
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
   <img src="https://img.shields.io/badge/Tests-181%20passing-2ea44f.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.1.4-0f6cbd.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.1.5-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
@@ -36,7 +36,7 @@
 
 | | |
 |---|---|
-| 版本 | `0.1.4` |
+| 版本 | `0.1.5` |
 | 成熟度 | 成熟 |
 | 角色 | 本地网络节点：网络上有什么、发生了什么变化、互联网、来自 Studio 的指令 |
 | 技术栈 | Python 3.11+，仅用标准库 |
