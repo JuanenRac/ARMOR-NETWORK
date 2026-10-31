@@ -1,6 +1,5 @@
 """The real system layer of the network watcher, with the system replaced by stand-ins: nothing here sends a packet or runs a network tool.
 What matters most is checked: that nothing outside the private ranges is ever probed, and that what the system prints is read correctly."""
-import io
 import socket
 import sys
 import time

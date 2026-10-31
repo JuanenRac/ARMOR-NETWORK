@@ -382,7 +382,7 @@ class InspectTests(unittest.TestCase):
         self.assertEqual(len(sent), 1, "the login went only to the device whose certificate was first seen")
 
     def test_a_login_is_never_opened_over_plain_http_across_the_network(self):
-        from armor_network import publisher, seal
+        from armor_network import publisher
         self.assertTrue(publisher.login_may_travel("https://192.168.0.180:18080"))
         self.assertTrue(publisher.login_may_travel("http://127.0.0.1:18080"))
         self.assertFalse(publisher.login_may_travel("http://192.168.0.180:18080"))

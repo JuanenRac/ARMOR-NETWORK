@@ -3,7 +3,6 @@ scripted network, with every message checked by ARMOR-COMMON's contract. Nothing
 import contextlib
 import io
 import json
-import socket
 import struct
 import sys
 import tempfile
