@@ -35,6 +35,6 @@ def open_sealed(token: str, sealed: str) -> str | None:
     if not hmac.compare_digest(tag, expected):
         return None
     try:
-        return bytes(a ^ b for a, b in zip(cipher, _stream(_sub_key(token, "enc"), nonce, len(cipher)))).decode("utf-8")
+        return bytes(a ^ b for a, b in zip(cipher, _stream(_sub_key(token, "enc"), nonce, len(cipher)), strict=False)).decode("utf-8")
     except UnicodeDecodeError:
         return None

@@ -25,7 +25,7 @@ class SealTest(unittest.TestCase):
 
         def seal_for(token, text, nonce=b"" * 16):   # the same construction as ARMOR-SERVER's credential_seal.ts, with a fixed nonce
             data = text.encode()
-            cipher = bytes(a ^ b for a, b in zip(data, sealing._stream(sealing._sub_key(token, "enc"), nonce, len(data))))
+            cipher = bytes(a ^ b for a, b in zip(data, sealing._stream(sealing._sub_key(token, "enc"), nonce, len(data)), strict=False))
             tag = hmac.new(sealing._sub_key(token, "mac"), nonce + cipher, hashlib.sha256).digest()
             return base64.b64encode(nonce + cipher + tag).decode()
 

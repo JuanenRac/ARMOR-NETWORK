@@ -26,7 +26,3 @@ ignore_missing_imports = false
 # The shared contract package lives in a sibling checkout and is imported only when present.
 module = ["armor_common"]
 ignore_missing_imports = true
-
-[tool.armor]
-# ruff still reports a few bugbear findings; the shared lint and type-check step stays off until they are fixed
-ci_lint = false
