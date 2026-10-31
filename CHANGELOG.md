@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.1.6] - Sources that pass the type checker and the type check in the documentation
+
 - **The sources pass the type checker:** the scan guard, the order parser and the vendor tables are annotated so `mypy` (configured in `pyproject.toml`) reports nothing, with tests that fix the behaviour they keep.
 - **The documentation covers the type check:** the README (eight languages) says the sources pass `python -m mypy`, lists `test_typing_behaviour.py` and counts 187 tests in 9 modules.
 
