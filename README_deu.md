@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 oder neuer">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Sprache">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-181%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-187%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.5-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Reifegrad">
 </p>
 
 ---
 
-**Ehrlichkeitsprüfung - was heute läuft:** Der Scanner, das Inventar, das sagt, was sich geändert hat, die Internetprüfung, die Abfrage der öffentlichen Adresse, die Aufträge aus Studio und die versiegelten Logins werden auf einem Computer gegen ein geskriptetes Netz getestet (181 Tests; jede Nachricht wird vom Vertrag von ARMOR-COMMON akzeptiert), und das Programm läuft als Dienst am CM5-Testaufbau und beobachtet das echte Netz, in dem der Aufbau steht (ein Router, die Telefone und Knoten des Hauses). Es hat noch kein ganzes Haus wochenlang beobachtet, es fragt nur den Router und konfiguriert ihn nie, und was ein Gerät ist (Art, System, Hersteller), ist eine Vermutung. Es fängt keine Pakete ab: Es sieht nicht, wer mit wem spricht, und Verkehr pro Gerät und Einbruchserkennung im strengen Sinn brauchen die Zähler des Routers oder einen Mirror-Port, was ein späterer Schritt ist.
+**Ehrlichkeitsprüfung - was heute läuft:** Der Scanner, das Inventar, das sagt, was sich geändert hat, die Internetprüfung, die Abfrage der öffentlichen Adresse, die Aufträge aus Studio und die versiegelten Logins werden auf einem Computer gegen ein geskriptetes Netz getestet (187 Tests; jede Nachricht wird vom Vertrag von ARMOR-COMMON akzeptiert), und das Programm läuft als Dienst am CM5-Testaufbau und beobachtet das echte Netz, in dem der Aufbau steht (ein Router, die Telefone und Knoten des Hauses). Es hat noch kein ganzes Haus wochenlang beobachtet, es fragt nur den Router und konfiguriert ihn nie, und was ein Gerät ist (Art, System, Hersteller), ist eine Vermutung. Es fängt keine Pakete ab: Es sieht nicht, wer mit wem spricht, und Verkehr pro Gerät und Einbruchserkennung im strengen Sinn brauchen die Zähler des Routers oder einen Mirror-Port, was ein späterer Schritt ist.
 
 ---
 
@@ -40,7 +40,7 @@
 | Reifegrad | Etabliert |
 | Rolle | Knoten für das lokale Netz: was im Netz ist, was sich änderte, das Internet, Aufträge aus Studio |
 | Technik | Python 3.11+, nur Standardbibliothek |
-| Tests | 181 (`python -m unittest discover -s tests`) |
+| Tests | 187 (`python -m unittest discover -s tests`) |
 | Vertrag | Nachricht `armor/network/<Knoten>/state`, 111 Konformitätsvektoren (Nachrichten und Aufträge) |
 | Läuft auf | Ein Rechner des überwachten Netzes (Linux, Windows oder macOS); der CM5-Prüfstand als Dienst |
 | Auf echter Hardware | Läuft als Dienst am CM5-Testaufbau und beobachtet sein echtes Netz (einen Router, die Telefone und Knoten des Hauses) |
@@ -57,7 +57,7 @@ Jede Zeile ist ein Teil dieses Repositorys, und die Ampel sagt, wie weit er heut
 | Bereich | Stand | Was das hier bedeutet |
 |---|---|---|
 | Software | 🟢 | Der Scanner, das Inventar, das sagt, was sich geändert hat, die Internetprüfung, die Abfrage der öffentlichen Adresse und die Befehle von Studio laufen als Dienst auf dem CM5-Prüfstand. |
-| Tests | 🟢 | 181 Tests bestehen gegen ein geskriptetes Netz, und jede Nachricht wird vom Vertrag von ARMOR-COMMON akzeptiert. |
+| Tests | 🟢 | 187 Tests bestehen gegen ein geskriptetes Netz, und jede Nachricht wird vom Vertrag von ARMOR-COMMON akzeptiert. |
 | Protokolle und Daten | 🟡 | Was ein Gerät ist (Art, System, Hersteller), ist eine Vermutung, und nichts fängt Pakete ab: Verkehr pro Gerät und Einbruchserkennung im strengen Sinn gibt es nicht. |
 | Hardware | 🟡 | Er überwacht das echte Netz des CM5-Prüfstands (ein Router, die Telefone und Knoten des Hauses), hat aber noch nie wochenlang ein ganzes Haus überwacht. |
 | Sicherheit | 🟡 | Er fragt den Router nur ab und konfiguriert ihn nie; die versiegelten Zugangsdaten sind auf dem Host getestet, und es gab keine unabhängige Prüfung. |
@@ -141,7 +141,7 @@ Alles wird mit Kommandozeilenoptionen gesetzt (siehe [docs/USAGE.md](docs/USAGE.
 **Voraussetzungen:** Python 3.11+ (nur Standardbibliothek) und ein Rechner im zu überwachenden Netz (Linux, Windows oder macOS).
 
 ```powershell
-python -m unittest discover -s tests                                                 # 181 Tests: Parser mit echten Proben, die Sperre dessen, was geprüft werden darf, das Inventar, das Internet, der ganze Agent gegen ein geskriptetes Haus
+python -m unittest discover -s tests                                                 # 187 Tests: Parser mit echten Proben, die Sperre dessen, was geprüft werden darf, das Inventar, das Internet, der ganze Agent gegen ein geskriptetes Haus
 python -m armor_network scan                                                         # das Netz einmal ansehen und ausgeben (nur das private Netz dieses Rechners)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...  # weiter beobachten und ARMOR-SERVER melden
 python -m armor_network demo --count 3                                               # ein erfundenes Haus: kein Netz wird berührt
@@ -153,7 +153,7 @@ Siehe die [Benutzung](docs/USAGE.md) und den [Entwurf](docs/DESIGN.md).
 ## 🧪 Tests
 
 ```powershell
-python -m unittest discover -s tests  # 181 Tests
+python -m unittest discover -s tests  # 187 Tests
 python -I tools/armor_ci_validate.py
 ```
 
@@ -164,8 +164,9 @@ python -I tools/armor_ci_validate.py
 | `test_orders.py`  `test_orders_edges.py` | 56 | die Aufträge aus Studio und ihre Grenzen |
 | `test_cli_commands.py` | 20 | die Kommandozeile |
 | `test_mqtt_out.py`  `test_seal.py` | 10 | die MQTT-Ausgabe und die versiegelten Logins |
+| `test_typing_behaviour.py` | 6 | das Verhalten, das die Typannotationen beibehalten: die Scan-Schranke, der Auftragsparser und die Herstellertabellen |
 
-GitHub Actions führt bei jedem Push und Pull Request die A.R.M.O.R.-Basis aus: die Prüfung von Manifest, Version, Änderungsprotokoll und README-Parität, dann den eigenen Build und die eigenen Tests des Projekts.
+GitHub Actions führt bei jedem Push und Pull Request die A.R.M.O.R.-Basis aus: die Prüfung von Manifest, Version, Änderungsprotokoll und README-Parität, dann den eigenen Build und die eigenen Tests des Projekts. Die Quellen bestehen auch die Typprüfung: `python -m mypy` (in `pyproject.toml` konfiguriert) meldet nichts, und `test_typing_behaviour.py` hält das Verhalten fest, das die Annotationen beibehalten.
 
 ## 🏗️ Build und Veröffentlichung
 
@@ -201,7 +202,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    Aufträge aus Studio; versiegelte Logins
 │   ├── cli.py __main__.py                   scan, watch und demo
 │   └── data/                                oui.tsv.gz, das IEEE-Register
-├── tests/                                   181 Tests in 8 Modulen
+├── tests/                                   187 Tests in 9 Modulen
 ├── docs/                                    DESIGN, SAFETY, USAGE, MESSAGES
 ├── tools/                                   fetch_oui.py erneuert das Herstellerregister; die gemeinsamen CI-Prüfungen und der Starter
 ├── images/                                  Banner, Symbol und die Bilder des READMEs

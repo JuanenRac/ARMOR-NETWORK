@@ -173,14 +173,14 @@
     {
      "name": "tests/",
      "desc": {
-      "en": "181 tests in 8 modules",
-      "es": "181 pruebas en 8 módulos",
-      "de": "181 Tests in 8 Modulen",
-      "fr": "181 tests en 8 modules",
-      "it": "181 test in 8 moduli",
-      "ja": "8 モジュール 181 件",
-      "zh": "8 个模块 181 项测试",
-      "pt": "181 testes em 8 módulos"
+      "en": "187 tests in 9 modules",
+      "es": "187 pruebas en 9 módulos",
+      "de": "187 Tests in 9 Modulen",
+      "fr": "187 tests en 9 modules",
+      "it": "187 test in 9 moduli",
+      "ja": "9 モジュール 187 件",
+      "zh": "9 个模块 187 项测试",
+      "pt": "187 testes em 9 módulos"
      }
     },
     {

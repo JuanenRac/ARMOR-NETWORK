@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-181%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-187%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.5-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**Verificação de honestidade - o que funciona hoje:** O scanner, o inventário que diz o que mudou, a verificação da internet, a consulta do endereço público, as ordens do Studio e os acessos selados são testados num computador contra uma rede guionizada (181 testes; cada mensagem é aceite pelo contrato do ARMOR-COMMON), e o programa corre como serviço na bancada de testes do CM5, vigiando a rede real em que a bancada está (um router, os telemóveis e os nós da casa). Não vigiou uma casa inteira durante semanas, só pergunta ao router e nunca o configura, e o que é um dispositivo (o tipo, o sistema, o fabricante) é um palpite. Não captura pacotes: não pode ver quem fala com quem, e o tráfego por dispositivo e a deteção de intrusos em sentido estrito precisam dos contadores do router ou de uma porta espelho, que é um passo posterior.
+**Verificação de honestidade - o que funciona hoje:** O scanner, o inventário que diz o que mudou, a verificação da internet, a consulta do endereço público, as ordens do Studio e os acessos selados são testados num computador contra uma rede guionizada (187 testes; cada mensagem é aceite pelo contrato do ARMOR-COMMON), e o programa corre como serviço na bancada de testes do CM5, vigiando a rede real em que a bancada está (um router, os telemóveis e os nós da casa). Não vigiou uma casa inteira durante semanas, só pergunta ao router e nunca o configura, e o que é um dispositivo (o tipo, o sistema, o fabricante) é um palpite. Não captura pacotes: não pode ver quem fala com quem, e o tráfego por dispositivo e a deteção de intrusos em sentido estrito precisam dos contadores do router ou de uma porta espelho, que é um passo posterior.
 
 ---
 
@@ -40,7 +40,7 @@
 | Maturidade | Estabelecido |
 | Função | Nó da rede local: o que há na rede, o que mudou, a internet, ordens do Studio |
 | Tecnologia | Python 3.11+, só biblioteca padrão |
-| Testes | 181 (`python -m unittest discover -s tests`) |
+| Testes | 187 (`python -m unittest discover -s tests`) |
 | Contrato | Mensagem `armor/network/<nó>/state`, 111 vetores de conformidade (mensagens e ordens) |
 | Funciona em | Uma máquina da rede a vigiar (Linux, Windows ou macOS); a bancada do CM5 como serviço |
 | Em hardware real | Corre como serviço na bancada de testes do CM5, vigiando a sua rede real (um router, os telemóveis e os nós da casa) |
@@ -57,7 +57,7 @@ Cada linha é uma parte deste repositório e a luz diz até onde chega hoje. É 
 | Área | Estado | O que significa aqui |
 |---|---|---|
 | Software | 🟢 | O leitor da rede, o inventário que diz o que mudou, a verificação da internet, a consulta do endereço público e as ordens do Studio funcionam como serviço na bancada de testes CM5. |
-| Testes | 🟢 | Passam 181 testes contra uma rede com guião, e cada mensagem é aceite pelo contrato do ARMOR-COMMON. |
+| Testes | 🟢 | Passam 187 testes contra uma rede com guião, e cada mensagem é aceite pelo contrato do ARMOR-COMMON. |
 | Protocolos e dados | 🟡 | O que um dispositivo é (o tipo, o sistema, o fabricante) é um palpite, e nada captura pacotes: o tráfego por dispositivo e a deteção de intrusões em sentido estrito não estão feitos. |
 | Hardware | 🟡 | Vigia a rede real da bancada de testes CM5 (um router, os telemóveis e os nós da casa), mas não vigiou uma casa inteira durante semanas. |
 | Segurança | 🟡 | Só pergunta ao router e nunca o configura; os acessos selados estão testados no anfitrião e não houve revisão independente. |
@@ -141,7 +141,7 @@ Tudo se define com opções da linha de comandos (veja [docs/USAGE.md](docs/USAG
 **Requisitos:** Python 3.11+ (só biblioteca padrão) e uma máquina na rede a vigiar (Linux, Windows ou macOS).
 
 ```powershell
-python -m unittest discover -s tests                                                 # 181 testes: analisadores com amostras reais, a guarda do que se pode sondar, o inventário, a internet, o agente completo contra uma casa com guião
+python -m unittest discover -s tests                                                 # 187 testes: analisadores com amostras reais, a guarda do que se pode sondar, o inventário, a internet, o agente completo contra uma casa com guião
 python -m armor_network scan                                                         # olha para a rede uma vez e imprime-a (só a rede privada desta máquina)
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...  # continua a vigiar e informa o ARMOR-SERVER
 python -m armor_network demo --count 3                                               # uma casa inventada: nenhuma rede é tocada
@@ -153,7 +153,7 @@ Consulte a [utilização](docs/USAGE.md) e o [desenho](docs/DESIGN.md).
 ## 🧪 Testes
 
 ```powershell
-python -m unittest discover -s tests  # 181 testes
+python -m unittest discover -s tests  # 187 testes
 python -I tools/armor_ci_validate.py
 ```
 
@@ -164,8 +164,9 @@ python -I tools/armor_ci_validate.py
 | `test_orders.py`  `test_orders_edges.py` | 56 | as ordens do Studio e os seus limites |
 | `test_cli_commands.py` | 20 | a linha de comandos |
 | `test_mqtt_out.py`  `test_seal.py` | 10 | a saída MQTT e as credenciais seladas |
+| `test_typing_behaviour.py` | 6 | o comportamento que as anotações de tipos mantêm: a guarda da varredura, o analisador de ordens e as tabelas de fabricantes |
 
-O GitHub Actions executa a base do A.R.M.O.R. em cada push e pull request: a validação do manifesto, da versão, do registo de alterações e da paridade dos README, e depois a compilação e os testes do próprio projeto.
+O GitHub Actions executa a base do A.R.M.O.R. em cada push e pull request: a validação do manifesto, da versão, do registo de alterações e da paridade dos README, e depois a compilação e os testes do próprio projeto. As fontes também passam o verificador de tipos: `python -m mypy` (configurado em `pyproject.toml`) não reporta nada, e `test_typing_behaviour.py` fixa o comportamento que as anotações mantêm.
 
 ## 🏗️ Compilação e publicação
 
@@ -201,7 +202,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    ordens do Studio; credenciais seladas
 │   ├── cli.py __main__.py                   scan, watch e demo
 │   └── data/                                oui.tsv.gz, o registo IEEE
-├── tests/                                   181 testes em 8 módulos
+├── tests/                                   187 testes em 9 módulos
 ├── docs/                                    DESIGN, SAFETY, USAGE, MESSAGES
 ├── tools/                                   fetch_oui.py renova o registo de fabricantes; as verificações de CI e o lançador
 ├── images/                                  faixa, ícone e as imagens do README

@@ -5,6 +5,7 @@ All notable changes to this project are documented here.
 ## [Unreleased]
 
 - **The sources pass the type checker:** the scan guard, the order parser and the vendor tables are annotated so `mypy` (configured in `pyproject.toml`) reports nothing, with tests that fix the behaviour they keep.
+- **The documentation covers the type check:** the README (eight languages) says the sources pass `python -m mypy`, lists `test_typing_behaviour.py` and counts 187 tests in 9 modules.
 
 ## [0.1.5] - The lights of Project status follow the evidence of the manifest, the universal README in the eight languages and the pictures from shared tools
 

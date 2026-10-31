@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-181%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-187%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.5-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**诚实性检查 - 今天真正能运行的部分：** 扫描器、说明发生了什么变化的清单、互联网检查、公网地址查询、来自 Studio 的指令和加密封装的登录信息，都在计算机上对照脚本化网络测试（181 个测试；每条消息都被 ARMOR-COMMON 的契约接受），程序在 CM5 测试台上作为服务运行，监视测试台所在的真实网络（一台路由器、住宅的手机和节点）。它还没有连续数周监视整个住宅，只询问路由器而从不配置它，设备是什么（类型、系统、厂商）只是猜测。它不抓包：看不到谁与谁通信，每个设备的流量和严格意义上的入侵检测需要路由器的计数器或镜像端口，那是以后的一步。
+**诚实性检查 - 今天真正能运行的部分：** 扫描器、说明发生了什么变化的清单、互联网检查、公网地址查询、来自 Studio 的指令和加密封装的登录信息，都在计算机上对照脚本化网络测试（187 个测试；每条消息都被 ARMOR-COMMON 的契约接受），程序在 CM5 测试台上作为服务运行，监视测试台所在的真实网络（一台路由器、住宅的手机和节点）。它还没有连续数周监视整个住宅，只询问路由器而从不配置它，设备是什么（类型、系统、厂商）只是猜测。它不抓包：看不到谁与谁通信，每个设备的流量和严格意义上的入侵检测需要路由器的计数器或镜像端口，那是以后的一步。
 
 ---
 
@@ -40,7 +40,7 @@
 | 成熟度 | 成熟 |
 | 角色 | 本地网络节点：网络上有什么、发生了什么变化、互联网、来自 Studio 的指令 |
 | 技术栈 | Python 3.11+，仅用标准库 |
-| 测试 | 181 项（`python -m unittest discover -s tests`） |
+| 测试 | 187 项（`python -m unittest discover -s tests`） |
 | 契约 | 消息 `armor/network/<节点>/state`，111 个一致性向量（消息与指令） |
 | 运行位置 | 被监视网络中的一台机器（Linux、Windows 或 macOS）；CM5 测试台上作为服务 |
 | 真实硬件 | 在 CM5 测试台上作为服务运行，监视其真实网络（路由器、住宅的手机和节点） |
@@ -57,7 +57,7 @@
 | 领域 | 状态 | 在这里的含义 |
 |---|---|---|
 | 软件 | 🟢 | 扫描器、记录变化的清单、互联网检查、公网地址查询和来自 Studio 的指令在 CM5 测试台上作为服务运行。 |
-| 测试 | 🟢 | 181 项测试针对脚本化网络通过，每条消息都被 ARMOR-COMMON 的契约接受。 |
+| 测试 | 🟢 | 187 项测试针对脚本化网络通过，每条消息都被 ARMOR-COMMON 的契约接受。 |
 | 协议与数据 | 🟡 | 设备是什么（类型、系统、厂商）只是猜测，也不抓包：按设备统计流量和严格意义上的入侵检测尚未实现。 |
 | 硬件 | 🟡 | 它监视 CM5 测试台所在的真实网络（一台路由器以及家里的手机和节点），但还没有连续数周监视整栋房子。 |
 | 安全 | 🟡 | 它只查询路由器，从不配置路由器；密封的登录信息已在主机上测试，没有经过独立审查。 |
@@ -141,7 +141,7 @@ ARMOR-NETWORK 是家族观察本地网络的眼睛。它运行在网络中的一
 **要求：** Python 3.11+（仅标准库）和被监视网络中的一台机器（Linux、Windows 或 macOS）。
 
 ```powershell
-python -m unittest discover -s tests                                                 # 181 项：用真实样本的解析器、可探测范围的防护、清单、互联网、对脚本化房子运行的完整代理
+python -m unittest discover -s tests                                                 # 187 项：用真实样本的解析器、可探测范围的防护、清单、互联网、对脚本化房子运行的完整代理
 python -m armor_network scan                                                         # 查看一次网络并打印（仅本机所在的私有网络）
 python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...  # 持续监视并通知 ARMOR-SERVER
 python -m armor_network demo --count 3                                               # 虚构的房子：不碰任何网络
@@ -153,7 +153,7 @@ python tools/fetch_oui.py                                                       
 ## 🧪 测试
 
 ```powershell
-python -m unittest discover -s tests  # 181 项
+python -m unittest discover -s tests  # 187 项
 python -I tools/armor_ci_validate.py
 ```
 
@@ -164,8 +164,9 @@ python -I tools/armor_ci_validate.py
 | `test_orders.py`  `test_orders_edges.py` | 56 | 来自 Studio 的指令及其限制 |
 | `test_cli_commands.py` | 20 | 命令行 |
 | `test_mqtt_out.py`  `test_seal.py` | 10 | MQTT 输出与密封凭据 |
+| `test_typing_behaviour.py` | 6 | 类型注解所保持的行为：扫描保护、指令解析器和厂商表 |
 
-GitHub Actions 在每次推送和拉取请求时运行 A.R.M.O.R. 基线：清单、版本、更新日志和 README 一致性的校验，然后是项目自身的构建和测试。
+GitHub Actions 在每次推送和拉取请求时运行 A.R.M.O.R. 基线：清单、版本、更新日志和 README 一致性的校验，然后是项目自身的构建和测试。 源代码也通过类型检查：`python -m mypy`（在 `pyproject.toml` 中配置）没有任何报告，`test_typing_behaviour.py` 固定了注解所保持的行为。
 
 ## 🏗️ 构建与发布
 
@@ -201,7 +202,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    来自 Studio 的指令；密封凭据
 │   ├── cli.py __main__.py                   scan、watch 和 demo
 │   └── data/                                oui.tsv.gz（IEEE 注册表）
-├── tests/                                   8 个模块 181 项测试
+├── tests/                                   9 个模块 187 项测试
 ├── docs/                                    DESIGN、SAFETY、USAGE、MESSAGES
 ├── tools/                                   fetch_oui.py 刷新厂商注册表；共用的 CI 检查与启动器
 ├── images/                                  横幅图、图标和 README 的图片
