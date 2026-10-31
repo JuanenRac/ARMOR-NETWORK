@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import ipaddress
 
-PRIVATE_RANGES = tuple(ipaddress.ip_network(net) for net in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"))
+PRIVATE_RANGES: tuple[ipaddress.IPv4Network, ...] = tuple(ipaddress.IPv4Network(net) for net in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"))
 MAX_HOSTS = 1024
 
 
@@ -33,7 +33,7 @@ def check_scan_range(cidr: str) -> ipaddress.IPv4Network:
         network = ipaddress.ip_network(cidr, strict=False)
     except ValueError as error:
         raise ScanRefused(f"{cidr!r} is not a network") from error
-    if network.version != 4:
+    if not isinstance(network, ipaddress.IPv4Network):
         raise ScanRefused("only IPv4 networks are scanned")
     if not any(network.subnet_of(private) for private in PRIVATE_RANGES):
         raise ScanRefused(f"{network} is not a private network: this program only looks at the network it is connected to")

@@ -23,7 +23,7 @@ import time
 from pathlib import Path
 
 from . import __version__, oui
-from .agent import Agent, Config
+from .agent import Agent, Config, NetworkIO
 from .ipnet import ScanRefused, check_scan_range
 from .mqtt_out import NODE_ID, MqttError, check_mqtt_url, publish as mqtt_publish
 from .orders import DEFAULT_PUBLIC_URL, check_dns_name, check_public_url
@@ -221,13 +221,14 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         config = Config(node_id=args.node_id, profile=args.profile, no_ports=args.no_ports, skip=skip, data_dir=args.data_dir, scan_every_s=args.scan_every,
                         internet_every_s=args.internet_every, public_info=not args.no_public_info, public_url=public_url, dns_name=dns_name)
+        loop_io: NetworkIO
         if args.command == "demo":
-            io = SimIO(tick_ms=args.tick_s * 1000)
+            loop_io = SimIO(tick_ms=args.tick_s * 1000)
             config.scan_every_s, config.internet_every_s, config.publish_every_s = args.tick_s, max(2, args.tick_s // 2), max(2, args.tick_s // 2)
             config.offline_after_s = args.tick_s * 3
         else:
-            io = SystemIO(cidr=args.cidr)
-        return _run_loop(Agent(io, config), args, forever=True)
+            loop_io = SystemIO(cidr=args.cidr)
+        return _run_loop(Agent(loop_io, config), args, forever=True)
     except ScanRefused as error:
         print(f"refused: {error}", file=sys.stderr)
         return 2

@@ -125,7 +125,7 @@ class SimIO:
     def ping_many(self, ips: list[str]) -> dict[str, tuple[float, int | None]]:
         if self._lan_down():
             return {}
-        found = {}
+        found: dict[str, tuple[float, int | None]] = {}
         by_ip = {d.ip: d for d in self.devices}
         for ip in ips:
             device = by_ip.get(ip)

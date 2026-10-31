@@ -218,7 +218,7 @@ class Inventory:
     def _create(self, obs: Observation, now_ms: int, gateway_ip: str | None) -> Device:
         mac = obs.mac
         ident = mac or f"ip-{dashed(obs.ip)}"
-        randomized = bool(mac) and oui.is_randomized(mac)
+        randomized = bool(mac and oui.is_randomized(mac))
         vendor = oui.vendor(mac) if mac else None
         device = Device(id=ident, ip=obs.ip, mac=mac, randomized=randomized, vendor=vendor, hostname=None, kind="unknown", os=None, online=True, first_seen_ms=now_ms,
                         last_seen_ms=now_ms)

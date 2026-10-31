@@ -23,6 +23,7 @@ import ssl
 from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.error import HTTPError, URLError
+from typing import Any
 from urllib.parse import urlparse
 from http.client import HTTPSConnection
 from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, urlopen
@@ -169,7 +170,8 @@ def parse_orders(body: object, token: str = "", allow_login: bool = True) -> lis
         if not isinstance(identifier, str) or not ORDER_ID.match(identifier):
             continue
         ip, mac, device_id, port = item.get("ip"), item.get("mac"), item.get("device_id"), item.get("port")
-        auth = item.get("auth") if item["type"] == "inspect" and isinstance(item.get("auth"), dict) else {}
+        raw_auth = item.get("auth")
+        auth: dict[str, Any] = raw_auth if item["type"] == "inspect" and isinstance(raw_auth, dict) else {}
         withheld = False
         if item["type"] == "inspect" and (auth or isinstance(item.get("auth_sealed"), str)) and not allow_login:
             auth, withheld = {}, True
@@ -295,8 +297,8 @@ class _PinnedHandler(HTTPSHandler):
 
 def _open(url: str, user: str | None, password: str | None, context: ssl.SSLContext | None, timeout: float, pin: tuple[str, int] | None = None):
     """One GET, with the login when there is one (Basic or Digest, whichever the device asks for). With `pin` (ip, port) the certificate is checked in the same connection that carries the login."""
-    from urllib.request import HTTPBasicAuthHandler, HTTPDigestAuthHandler, HTTPPasswordMgrWithDefaultRealm, build_opener
-    handlers = []
+    from urllib.request import BaseHandler, HTTPBasicAuthHandler, HTTPDigestAuthHandler, HTTPPasswordMgrWithDefaultRealm, build_opener
+    handlers: list[BaseHandler] = []
     if user is not None:
         manager = HTTPPasswordMgrWithDefaultRealm()
         manager.add_password(None, url, user, password or "")

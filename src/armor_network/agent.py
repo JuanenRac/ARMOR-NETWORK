@@ -16,7 +16,7 @@ import ipaddress
 import socket
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Protocol
+from typing import Protocol, cast
 
 from .internet import InternetMonitor, ProbeResult
 from .inventory import EventLog, Inventory, Observation
@@ -155,7 +155,7 @@ class Agent:
         if order.type == "scan_now":
             self._next["scan"] = 0
             return {"ok": True, "output": "a sweep of the network was started"}
-        network = ipaddress.ip_network(info["cidr"], strict=False)
+        network = cast(ipaddress.IPv4Network, ipaddress.ip_network(info["cidr"], strict=False))
         if order.type == "wake":
             if not order.mac:
                 return {"ok": False, "output": "the device has no MAC address"}

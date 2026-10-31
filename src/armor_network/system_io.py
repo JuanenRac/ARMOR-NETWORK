@@ -263,9 +263,9 @@ class SystemIO:
                             entry(ip)["hostname"] = answer["name"][:-len(".local")][:63]
                 elif port == 1900:
                     headers = parsers.parse_ssdp_response(data)
-                    service = parsers.ssdp_service(headers.get("ST", ""))
-                    if service and service not in entry(ip)["services"]:
-                        entry(ip)["services"].append(service)
+                    ssdp_name = parsers.ssdp_service(headers.get("ST", ""))
+                    if ssdp_name and ssdp_name not in entry(ip)["services"]:
+                        entry(ip)["services"].append(ssdp_name)
                     if headers.get("LOCATION", "").startswith(f"http://{ip}:"):
                         locations.setdefault(ip, headers["LOCATION"])
         finally:

@@ -71,7 +71,7 @@ def guess_os(ttl: int | None) -> str | None:
     return "network equipment"
 
 
-_VENDOR_KINDS = (
+_VENDOR_KINDS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("camera", ("hikvision", "dahua", "reolink", "amcrest", "axis communications", "foscam", "wyze", "eufy", "ezviz", "annke", "uniview")),
     ("printer", ("brother", "canon", "epson", "lexmark", "xerox", "kyocera", "ricoh", "konica", "hp inc")),
     ("tv", ("roku", "vizio", "tcl", "hisense", "sonos", "nvidia shield")),
@@ -86,13 +86,13 @@ def _has_word(text: str, word: str) -> bool:
     return re.search(r"(?<![a-z0-9])" + re.escape(word) + r"(?![a-z0-9])", text) is not None
 
 
-_SERVICE_KINDS = (
+_SERVICE_KINDS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("tv", ("_googlecast._tcp", "_roku", "_spotify-connect._tcp", "urn:dial-multiscreen-org:service:dial", "mediarenderer")),
     ("printer", ("_ipp._tcp", "_printer._tcp", "_pdl-datastream._tcp", "_scanner._tcp", "printer")),
     ("iot", ("_hap._tcp", "_homekit._tcp", "_hue._tcp", "_shelly._tcp", "_esphomelib._tcp", "_mqtt._tcp", "_matter._tcp")),
     ("computer", ("_workstation._tcp", "_smb._tcp", "_device-info._tcp", "_rdp._tcp")),
 )
-_NAME_KINDS = (
+_NAME_KINDS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("phone", ("iphone", "ipad", "android", "galaxy", "pixel", "redmi", "oneplus", "huawei-p", "oppo")),
     ("computer", ("macbook", "imac", "desktop", "laptop", "pc-", "-pc", "windows", "ubuntu", "thinkpad", "surface")),
     ("tv", ("tv", "chromecast", "roku", "bravia", "firetv", "appletv")),
