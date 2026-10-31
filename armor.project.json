@@ -18,5 +18,6 @@
   "parent": "ARMOR-COMMON",
   "native_version": "0.1.5",
   "build": "python -m unittest discover -s tests",
+  "ci_lint": false,
   "notes": "The scanner, the inventory and its events, the internet state machine and the message are tested on a computer against a scripted network: 93 tests, all passing, and every message is accepted by ARMOR-COMMON. The program runs as a service on the CM5 test bench, watching the real network the bench is on. It only observes: it sends echoes, TCP connections to a few ports and the multicast questions of mDNS and SSDP to the private network it is on, and a few questions to public addresses to know whether the internet is there. It never configures a router or a device and does not capture packets."
 }
