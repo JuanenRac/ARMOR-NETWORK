@@ -65,6 +65,7 @@ def publish(url: str, topic: str, payload: bytes, user: str = "", password: str 
     port = parsed.port or (8883 if secure else 1883)
     try:
         with socket.create_connection((parsed.hostname, port), timeout=timeout) as plain:
+            connection: socket.socket
             if secure:
                 context = ssl.create_default_context()
                 context.minimum_version = ssl.TLSVersion.TLSv1_2
