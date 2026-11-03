@@ -215,6 +215,7 @@ def http_look(ip: str, port: int, timeout: float = 3.0) -> dict:
     """One GET of the front page of a device: the status, the server it says it is and the title. A device's own certificate is not checked (it is almost always its own)."""
     scheme = "https" if port in (443, 8443, 4443) else "http"
     context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
     try:
