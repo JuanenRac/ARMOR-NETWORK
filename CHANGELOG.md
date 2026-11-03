@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The launchers find the shared repository through `ARMOR_COMMON_DIR`:** `build`, `build-test`, `test` and `run` (`.sh` and `.bat`) use the folder named by that variable when it is set and the sibling `ARMOR-COMMON` folder otherwise, so a checkout with another layout builds without changing a file.
 - **The examples of `watch --server-url` point at port 18080:** the server listens on 18080 in every way of running A.R.M.O.R. (the Docker stack used 8080).
 
 ## [0.1.6] - Sources that pass the type checker and the type check in the documentation
