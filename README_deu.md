@@ -141,11 +141,11 @@ Alles wird mit Kommandozeilenoptionen gesetzt (siehe [docs/USAGE.md](docs/USAGE.
 **Voraussetzungen:** Python 3.11+ (nur Standardbibliothek) und ein Rechner im zu überwachenden Netz (Linux, Windows oder macOS).
 
 ```powershell
-python -m unittest discover -s tests                                                 # 187 Tests: Parser mit echten Proben, die Sperre dessen, was geprüft werden darf, das Inventar, das Internet, der ganze Agent gegen ein geskriptetes Haus
-python -m armor_network scan                                                         # das Netz einmal ansehen und ausgeben (nur das private Netz dieses Rechners)
-python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...  # weiter beobachten und ARMOR-SERVER melden
-python -m armor_network demo --count 3                                               # ein erfundenes Haus: kein Netz wird berührt
-python tools/fetch_oui.py                                                            # die Herstellertabelle aus dem IEEE-Register erneuern (von Hand, ab und zu)
+python -m unittest discover -s tests                                                  # 187 Tests: Parser mit echten Proben, die Sperre dessen, was geprüft werden darf, das Inventar, das Internet, der ganze Agent gegen ein geskriptetes Haus
+python -m armor_network scan                                                          # das Netz einmal ansehen und ausgeben (nur das private Netz dieses Rechners)
+python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # weiter beobachten und ARMOR-SERVER melden
+python -m armor_network demo --count 3                                                # ein erfundenes Haus: kein Netz wird berührt
+python tools/fetch_oui.py                                                             # die Herstellertabelle aus dem IEEE-Register erneuern (von Hand, ab und zu)
 ```
 
 Siehe die [Benutzung](docs/USAGE.md) und den [Entwurf](docs/DESIGN.md).

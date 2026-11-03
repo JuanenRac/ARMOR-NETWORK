@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The examples of `watch --server-url` point at port 18080:** the server listens on 18080 in every way of running A.R.M.O.R. (the Docker stack used 8080).
+
 ## [0.1.6] - Sources that pass the type checker and the type check in the documentation
 
 - **The sources pass the type checker:** the scan guard, the order parser and the vendor tables are annotated so `mypy` (configured in `pyproject.toml`) reports nothing, with tests that fix the behaviour they keep.

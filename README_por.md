@@ -141,11 +141,11 @@ Tudo se define com opções da linha de comandos (veja [docs/USAGE.md](docs/USAG
 **Requisitos:** Python 3.11+ (só biblioteca padrão) e uma máquina na rede a vigiar (Linux, Windows ou macOS).
 
 ```powershell
-python -m unittest discover -s tests                                                 # 187 testes: analisadores com amostras reais, a guarda do que se pode sondar, o inventário, a internet, o agente completo contra uma casa com guião
-python -m armor_network scan                                                         # olha para a rede uma vez e imprime-a (só a rede privada desta máquina)
-python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...  # continua a vigiar e informa o ARMOR-SERVER
-python -m armor_network demo --count 3                                               # uma casa inventada: nenhuma rede é tocada
-python tools/fetch_oui.py                                                            # renova a tabela de fabricantes a partir do registo IEEE (uma pessoa executa-o, de vez em quando)
+python -m unittest discover -s tests                                                  # 187 testes: analisadores com amostras reais, a guarda do que se pode sondar, o inventário, a internet, o agente completo contra uma casa com guião
+python -m armor_network scan                                                          # olha para a rede uma vez e imprime-a (só a rede privada desta máquina)
+python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # continua a vigiar e informa o ARMOR-SERVER
+python -m armor_network demo --count 3                                                # uma casa inventada: nenhuma rede é tocada
+python tools/fetch_oui.py                                                             # renova a tabela de fabricantes a partir do registo IEEE (uma pessoa executa-o, de vez em quando)
 ```
 
 Consulte a [utilização](docs/USAGE.md) e o [desenho](docs/DESIGN.md).

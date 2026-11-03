@@ -141,11 +141,11 @@ All of it is set by command-line flags (see [docs/USAGE.md](docs/USAGE.md), whic
 **Requirements:** Python 3.11+ (standard library only) and a machine on the network to be watched (Linux, Windows or macOS).
 
 ```powershell
-python -m unittest discover -s tests                                                 # 187 tests: parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
-python -m armor_network scan                                                         # look at the network once and print it (only the private network of this machine)
-python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...  # keep watching and tell ARMOR-SERVER
-python -m armor_network demo --count 3                                               # a made-up house: nothing on any network is touched
-python tools/fetch_oui.py                                                            # refresh the table of makers from the IEEE register (a person runs it, now and then)
+python -m unittest discover -s tests                                                  # 187 tests: parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m armor_network scan                                                          # look at the network once and print it (only the private network of this machine)
+python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # keep watching and tell ARMOR-SERVER
+python -m armor_network demo --count 3                                                # a made-up house: nothing on any network is touched
+python tools/fetch_oui.py                                                             # refresh the table of makers from the IEEE register (a person runs it, now and then)
 ```
 
 See the [usage](docs/USAGE.md) and the [design](docs/DESIGN.md).

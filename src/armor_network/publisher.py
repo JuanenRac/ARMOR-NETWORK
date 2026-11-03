@@ -25,7 +25,7 @@ def check_server_url(server_url: str) -> str:
     """Only a plain http(s) origin is accepted: no credentials, path or query in the URL."""
     parsed = urlparse(server_url)
     if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.username or parsed.path not in ("", "/") or parsed.query:
-        raise ValueError("--server-url must be a plain http(s) origin such as http://127.0.0.1:8080")
+        raise ValueError("--server-url must be a plain http(s) origin such as http://127.0.0.1:18080")
     return f"{parsed.scheme}://{parsed.netloc}"
 
 

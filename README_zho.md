@@ -141,11 +141,11 @@ ARMOR-NETWORK 是家族观察本地网络的眼睛。它运行在网络中的一
 **要求：** Python 3.11+（仅标准库）和被监视网络中的一台机器（Linux、Windows 或 macOS）。
 
 ```powershell
-python -m unittest discover -s tests                                                 # 187 项：用真实样本的解析器、可探测范围的防护、清单、互联网、对脚本化房子运行的完整代理
-python -m armor_network scan                                                         # 查看一次网络并打印（仅本机所在的私有网络）
-python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...  # 持续监视并通知 ARMOR-SERVER
-python -m armor_network demo --count 3                                               # 虚构的房子：不碰任何网络
-python tools/fetch_oui.py                                                            # 从 IEEE 注册表刷新厂商表（由人工不定期运行）
+python -m unittest discover -s tests                                                  # 187 项：用真实样本的解析器、可探测范围的防护、清单、互联网、对脚本化房子运行的完整代理
+python -m armor_network scan                                                          # 查看一次网络并打印（仅本机所在的私有网络）
+python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # 持续监视并通知 ARMOR-SERVER
+python -m armor_network demo --count 3                                                # 虚构的房子：不碰任何网络
+python tools/fetch_oui.py                                                             # 从 IEEE 注册表刷新厂商表（由人工不定期运行）
 ```
 
 请参阅[用法](docs/USAGE.md)和[设计](docs/DESIGN.md)。

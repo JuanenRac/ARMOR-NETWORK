@@ -141,11 +141,11 @@ Studio からのオーダー（`scan_now`、`ping`、`traceroute`、`wake`、`po
 **要件：** Python 3.11+（標準ライブラリのみ）と、監視対象ネットワーク上のマシン（Linux、Windows、macOS）。
 
 ```powershell
-python -m unittest discover -s tests                                                 # 187 件：実サンプルのパーサ、調べてよい範囲のガード、インベントリ、インターネット、スクリプト版の家に対するエージェント全体
-python -m armor_network scan                                                         # ネットワークを 1 回調べて表示（このマシンのプライベートネットワークのみ）
-python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...  # 監視を続けて ARMOR-SERVER に通知
-python -m armor_network demo --count 3                                               # 架空の家：実ネットワークには触れない
-python tools/fetch_oui.py                                                            # IEEE 登録簿からメーカー表を更新（人が時々実行）
+python -m unittest discover -s tests                                                  # 187 件：実サンプルのパーサ、調べてよい範囲のガード、インベントリ、インターネット、スクリプト版の家に対するエージェント全体
+python -m armor_network scan                                                          # ネットワークを 1 回調べて表示（このマシンのプライベートネットワークのみ）
+python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # 監視を続けて ARMOR-SERVER に通知
+python -m armor_network demo --count 3                                                # 架空の家：実ネットワークには触れない
+python tools/fetch_oui.py                                                             # IEEE 登録簿からメーカー表を更新（人が時々実行）
 ```
 
 [使い方](docs/USAGE.md)と[設計](docs/DESIGN.md)を参照してください。

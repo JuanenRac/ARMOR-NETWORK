@@ -141,11 +141,11 @@ Tutto si imposta con opzioni da riga di comando (vedi [docs/USAGE.md](docs/USAGE
 **Requisiti:** Python 3.11+ (solo libreria standard) e una macchina nella rete da sorvegliare (Linux, Windows o macOS).
 
 ```powershell
-python -m unittest discover -s tests                                                 # 187 test: parser con campioni reali, la guardia su cosa si può sondare, l'inventario, internet, l'intero agente contro una casa guidata
-python -m armor_network scan                                                         # guarda la rete una volta e la stampa (solo la rete privata di questa macchina)
-python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...  # continua a sorvegliare e informa ARMOR-SERVER
-python -m armor_network demo --count 3                                               # una casa inventata: nessuna rete viene toccata
-python tools/fetch_oui.py                                                            # aggiorna la tabella dei produttori dal registro IEEE (la lancia una persona, ogni tanto)
+python -m unittest discover -s tests                                                  # 187 test: parser con campioni reali, la guardia su cosa si può sondare, l'inventario, internet, l'intero agente contro una casa guidata
+python -m armor_network scan                                                          # guarda la rete una volta e la stampa (solo la rete privata di questa macchina)
+python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # continua a sorvegliare e informa ARMOR-SERVER
+python -m armor_network demo --count 3                                                # una casa inventata: nessuna rete viene toccata
+python tools/fetch_oui.py                                                             # aggiorna la tabella dei produttori dal registro IEEE (la lancia una persona, ogni tanto)
 ```
 
 Vedi l'[uso](docs/USAGE.md) e il [progetto](docs/DESIGN.md).

@@ -4,7 +4,7 @@ Copyright (C) 2026 JuanenRac (Electro Hobby 3D). GPL-3.0-or-later.
 
     armor-network scan                      # look at the network once and print what is there
     armor-network internet                  # one round of the internet check
-    armor-network watch --server-url http://127.0.0.1:8080 --ingest-token ...    # keep watching and tell the server
+    armor-network watch --server-url http://127.0.0.1:18080 --ingest-token ...    # keep watching and tell the server
     armor-network demo  --server-url ...    # the same with a made-up house (nothing is probed)
     armor-network oui 24:0a:c4:11:22:33     # who made a network card
 
@@ -158,7 +158,7 @@ def main(argv: list[str] | None = None) -> int:
     for name, text in (("watch", "keep watching and tell the server"), ("demo", "the same with a made-up house: nothing on the network is probed")):
         watch = sub.add_parser(name, help=text)
         _common_arguments(watch)
-        watch.add_argument("--server-url", help="an ARMOR-SERVER, for example http://127.0.0.1:8080; without it the messages are printed")
+        watch.add_argument("--server-url", help="an ARMOR-SERVER, for example http://127.0.0.1:18080; without it the messages are printed")
         watch.add_argument("--ingest-token", help="this node's own token (Studio shows it), or the server's shared ingest token, which cannot open a saved login for `inspect`; never write it to a file (ARMOR_INGEST_TOKEN also works)")
         watch.add_argument("--data-dir", type=Path, default=Path("armor-network-data"), help="where the inventory and the outages are kept between runs")
         watch.add_argument("--scan-every", type=int, default=60, help="seconds between sweeps of the network")

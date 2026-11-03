@@ -141,11 +141,11 @@ Tout se règle par des options de ligne de commande (voir [docs/USAGE.md](docs/U
 **Prérequis :** Python 3.11+ (bibliothèque standard seule) et une machine sur le réseau à surveiller (Linux, Windows ou macOS).
 
 ```powershell
-python -m unittest discover -s tests                                                 # 187 tests : analyseurs avec échantillons réels, la garde de ce qu'on peut sonder, l'inventaire, internet, l'agent entier face à une maison scriptée
-python -m armor_network scan                                                         # regarde le réseau une fois et l'imprime (seulement le réseau privé de cette machine)
-python -m armor_network watch --server-url http://127.0.0.1:8080 --ingest-token ...  # continue de surveiller et informe ARMOR-SERVER
-python -m armor_network demo --count 3                                               # une maison fictive : aucun réseau n'est touché
-python tools/fetch_oui.py                                                            # rafraîchit la table des fabricants depuis le registre IEEE (lancé par une personne, de temps en temps)
+python -m unittest discover -s tests                                                  # 187 tests : analyseurs avec échantillons réels, la garde de ce qu'on peut sonder, l'inventaire, internet, l'agent entier face à une maison scriptée
+python -m armor_network scan                                                          # regarde le réseau une fois et l'imprime (seulement le réseau privé de cette machine)
+python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # continue de surveiller et informe ARMOR-SERVER
+python -m armor_network demo --count 3                                                # une maison fictive : aucun réseau n'est touché
+python tools/fetch_oui.py                                                             # rafraîchit la table des fabricants depuis le registre IEEE (lancé par une personne, de temps en temps)
 ```
 
 Voir l'[usage](docs/USAGE.md) et la [conception](docs/DESIGN.md).
