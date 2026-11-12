@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **A floor for the test coverage:** the workflow `coverage-floor.yml` runs the Python tests under coverage and fails when the lines or the branches fall below `docs/coverage_threshold.json`. Floor of src/armor_network: lines 94.8, branches 90.5 (measured 95.31 and 90.87). Raising it is a change of that file, made with a figure measured by the workflow.
+
 - **Tests for the discovery of what devices announce:** the reading of mDNS and SSDP answers through a stand-in socket (the services and the host name kept for the address that sent them, answers from outside the private ranges and unreadable ones ignored, a UPnP description fetched only from the address that announced it, a name given by mDNS not replaced).
 
 ## [0.1.7] - The launchers find the shared repository through ARMORCOMMONDIR: build, build-test, test and run (.sh and .bat) use the folder named by that variable when it is set and the sibling ARMOR-COMMON folder otherwise, so a checkout... (and 1 more changes)
