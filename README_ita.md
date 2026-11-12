@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 o successiva">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Linguaggio">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-196%20passing-2ea44f.svg" alt="Test">
+  <img src="https://img.shields.io/badge/Tests-226%20passing-2ea44f.svg" alt="Test">
   <img src="https://img.shields.io/badge/Version-0.1.7-0f6cbd.svg" alt="Versione">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturità">
 </p>
 
 ---
 
-**Controllo di onestà - cosa funziona oggi:** Lo scanner, l'inventario che dice cosa è cambiato, il controllo di internet, la ricerca dell'indirizzo pubblico, gli ordini da Studio e gli accessi sigillati sono provati su un computer contro una rete scriptata (196 test; ogni messaggio è accettato dal contratto di ARMOR-COMMON), e il programma gira come servizio sul banco di prova CM5, sorvegliando la rete reale su cui si trova il banco (un router, i telefoni e i nodi della casa). Non ha sorvegliato una casa intera per settimane, chiede solo al router e non lo configura mai, e cosa sia un dispositivo (il tipo, il sistema, il produttore) è una supposizione. Non cattura pacchetti: non può vedere chi parla con chi, e il traffico per dispositivo e il rilevamento delle intrusioni in senso stretto richiedono i contatori del router o una porta mirror, che è un passo successivo.
+**Controllo di onestà - cosa funziona oggi:** Lo scanner, l'inventario che dice cosa è cambiato, il controllo di internet, la ricerca dell'indirizzo pubblico, gli ordini da Studio e gli accessi sigillati sono provati su un computer contro una rete scriptata (226 test; ogni messaggio è accettato dal contratto di ARMOR-COMMON), e il programma gira come servizio sul banco di prova CM5, sorvegliando la rete reale su cui si trova il banco (un router, i telefoni e i nodi della casa). Non ha sorvegliato una casa intera per settimane, chiede solo al router e non lo configura mai, e cosa sia un dispositivo (il tipo, il sistema, il produttore) è una supposizione. Non cattura pacchetti: non può vedere chi parla con chi, e il traffico per dispositivo e il rilevamento delle intrusioni in senso stretto richiedono i contatori del router o una porta mirror, che è un passo successivo.
 
 ---
 
@@ -40,7 +40,7 @@
 | Maturità | Consolidato |
 | Ruolo | Nodo della rete locale: cosa c'è in rete, cosa è cambiato, internet, ordini da Studio |
 | Tecnologia | Python 3.11+, solo libreria standard |
-| Test | 196 (`python -m unittest discover -s tests`) |
+| Test | 226 (`python -m unittest discover -s tests`) |
 | Contratto | Messaggio `armor/network/<nodo>/state`, 111 vettori di conformità (messaggi e ordini) |
 | Gira su | Una macchina della rete da sorvegliare (Linux, Windows o macOS); il banco di prova CM5 come servizio |
 | Su hardware reale | Gira come servizio sul banco di prova CM5, sorvegliando la sua rete reale (un router, i telefoni e i nodi della casa) |
@@ -57,7 +57,7 @@ Ogni riga è una parte di questo repository e il semaforo dice a che punto è og
 | Area | Stato | Cosa significa qui |
 |---|---|---|
 | Software | 🟢 | Lo scanner, l'inventario che dice cosa è cambiato, il controllo di internet, la ricerca dell'indirizzo pubblico e gli ordini di Studio girano come servizio sul banco di prova CM5. |
-| Test | 🟢 | Superano 196 test contro una rete simulata da script, e ogni messaggio è accettato dal contratto di ARMOR-COMMON. |
+| Test | 🟢 | Superano 226 test contro una rete simulata da script, e ogni messaggio è accettato dal contratto di ARMOR-COMMON. |
 | Protocolli e dati | 🟡 | Cosa sia un dispositivo (tipo, sistema, produttore) è un'ipotesi, e nulla cattura pacchetti: il traffico per dispositivo e il rilevamento di intrusioni in senso stretto non sono fatti. |
 | Hardware | 🟡 | Sorveglia la rete reale del banco di prova CM5 (un router, i telefoni e i nodi di casa) ma non ha sorvegliato un'intera casa per settimane. |
 | Sicurezza | 🟡 | Interroga soltanto il router e non lo configura mai; gli accessi sigillati sono testati sull'host e non c'è stata una revisione indipendente. |
@@ -141,7 +141,7 @@ Tutto si imposta con opzioni da riga di comando (vedi [docs/USAGE.md](docs/USAGE
 **Requisiti:** Python 3.11+ (solo libreria standard) e una macchina nella rete da sorvegliare (Linux, Windows o macOS).
 
 ```powershell
-python -m unittest discover -s tests                                                  # 196 test: parser con campioni reali, la guardia su cosa si può sondare, l'inventario, internet, l'intero agente contro una casa guidata
+python -m unittest discover -s tests                                                  # 226 test: parser con campioni reali, la guardia su cosa si può sondare, l'inventario, internet, l'intero agente contro una casa guidata
 python -m armor_network scan                                                          # guarda la rete una volta e la stampa (solo la rete privata di questa macchina)
 python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # continua a sorvegliare e informa ARMOR-SERVER
 python -m armor_network demo --count 3                                                # una casa inventata: nessuna rete viene toccata
@@ -153,7 +153,7 @@ Vedi l'[uso](docs/USAGE.md) e il [progetto](docs/DESIGN.md).
 ## 🧪 Test
 
 ```powershell
-python -m unittest discover -s tests  # 196 test
+python -m unittest discover -s tests  # 226 test
 python -I tools/armor_ci_validate.py
 ```
 
@@ -202,7 +202,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    ordini da Studio; accessi sigillati
 │   ├── cli.py __main__.py                   scan, watch e demo
 │   └── data/                                oui.tsv.gz, il registro IEEE
-├── tests/                                   196 test in 9 moduli
+├── tests/                                   226 test in 9 moduli
 ├── docs/                                    DESIGN, SAFETY, USAGE, MESSAGES
 ├── tools/                                   fetch_oui.py aggiorna il registro dei produttori; i controlli CI e l'avviatore
 ├── images/                                  banner, icona e immagini del README
