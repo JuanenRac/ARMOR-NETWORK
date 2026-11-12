@@ -4,7 +4,9 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
-- **A floor for the test coverage:** the workflow `coverage-floor.yml` runs the Python tests under coverage and fails when the lines or the branches fall below `docs/coverage_threshold.json`. Floor of src/armor_network: lines 94.8, branches 90.5 (measured 95.31 and 90.87). Raising it is a change of that file, made with a figure measured by the workflow.
+- **Tests for the edges of what comes from the network:** a DNS message cut short, with a forward or looping pointer, an unknown label type or too many records is refused and each kind of record is read; a sealed login with a good tag over bytes that are not text opens to nothing; the MQTT sender reports a cut connection, a wrong answer and a refused login and wraps a secure connection in TLS 1.2 or later; the delivery to the server stops at a 4xx, tries a 5xx again and reads an answer with no body; a login travels only over https or to this machine; the vendor table and the guess of a device kind keep their edge cases. The floor rises with them.
+
+- **A floor for the test coverage:** the workflow `coverage-floor.yml` runs the Python tests under coverage and fails when the lines or the branches fall below `docs/coverage_threshold.json`. Floor of src/armor_network: lines 95.9, branches 92.9 (measured 96.44 and 93.44). Raising it is a change of that file, made with a figure measured by the workflow.
 
 - **Tests for the discovery of what devices announce:** the reading of mDNS and SSDP answers through a stand-in socket (the services and the host name kept for the address that sent them, answers from outside the private ranges and unreadable ones ignored, a UPnP description fetched only from the address that announced it, a name given by mDNS not replaced).
 
