@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **Tests for the discovery of what devices announce:** the reading of mDNS and SSDP answers through a stand-in socket (the services and the host name kept for the address that sent them, answers from outside the private ranges and unreadable ones ignored, a UPnP description fetched only from the address that announced it, a name given by mDNS not replaced).
+
 ## [0.1.7] - The launchers find the shared repository through ARMORCOMMONDIR: build, build-test, test and run (.sh and .bat) use the folder named by that variable when it is set and the sibling ARMOR-COMMON folder otherwise, so a checkout... (and 1 more changes)
 
 - **The launchers find the shared repository through `ARMOR_COMMON_DIR`:** `build`, `build-test`, `test` and `run` (`.sh` and `.bat`) use the folder named by that variable when it is set and the sibling `ARMOR-COMMON` folder otherwise, so a checkout with another layout builds without changing a file.
