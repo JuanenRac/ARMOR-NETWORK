@@ -34,7 +34,7 @@ armor-network demo --count 3 --validate  # a made-up house; --validate checks ev
 
 On the machine that is always on (the CM5, a Raspberry Pi, a PC): a systemd unit or a scheduled task that runs `armor-network watch` with the server's address, and `--data-dir` in a folder that survives reboots. The server needs the node to be allowed to write `armor/network/<node>/state` if it uses MQTT (`scripts/mqtt_identity.sh add network-node <node>` in ARMOR-DEVOPS); over HTTP it only needs the ingest token.
 
-A unit that works (the user, the paths and the server address are examples):
+On a CM5 bench the unit, the token file and the user are created for you by `scripts/install_cm5.sh --with-network` in ARMOR-DEVOPS (dry run by default, `--apply` installs). To install it by hand, this is a unit that works (the user, the paths and the server address are examples):
 
 ```ini
 [Unit]

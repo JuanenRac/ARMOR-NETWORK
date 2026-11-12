@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The usage guide points to the installer:** `docs/USAGE.md` says that on a CM5 bench the unit, the token file and the user of the network monitor are created by `scripts/install_cm5.sh --with-network` of ARMOR-DEVOPS, and keeps the unit for a manual installation.
+
 - **Tests for the edges of what comes from the network:** a DNS message cut short, with a forward or looping pointer, an unknown label type or too many records is refused and each kind of record is read; a sealed login with a good tag over bytes that are not text opens to nothing; the MQTT sender reports a cut connection, a wrong answer and a refused login and wraps a secure connection in TLS 1.2 or later; the delivery to the server stops at a 4xx, tries a 5xx again and reads an answer with no body; a login travels only over https or to this machine; the vendor table and the guess of a device kind keep their edge cases. The floor rises with them.
 
 - **A floor for the test coverage:** the workflow `coverage-floor.yml` runs the Python tests under coverage and fails when the lines or the branches fall below `docs/coverage_threshold.json`. Floor of src/armor_network: lines 95.9, branches 92.9 (measured 96.44 and 93.44). Raising it is a change of that file, made with a figure measured by the workflow.
