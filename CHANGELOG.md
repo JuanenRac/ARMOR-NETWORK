@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The look at a device's web page, the agent's orders and the text parsers are tried on their odd paths:** the connection that checks the certificate before the login is sent (same, new, changed and unreadable certificates), the login that is not sent (Basic over plain HTTP, a certificate that changed, an address that changed hands), refused and broken logins, a file of certificates that cannot be made private, an order that breaks, a ping nobody answers, a counter that went down, and route, NetBIOS and service-type texts that are cut short. The total coverage goes from 96% to 97% (`orders.py` 94% to 99%, `agent.py` 94% to 98%, `parsers.py` 94% to 99%).
+
 - **The usage guide points to the installer:** `docs/USAGE.md` says that on a CM5 bench the unit, the token file and the user of the network monitor are created by `scripts/install_cm5.sh --with-network` of ARMOR-DEVOPS, and keeps the unit for a manual installation.
 
 - **Tests for the edges of what comes from the network:** a DNS message cut short, with a forward or looping pointer, an unknown label type or too many records is refused and each kind of record is read; a sealed login with a good tag over bytes that are not text opens to nothing; the MQTT sender reports a cut connection, a wrong answer and a refused login and wraps a secure connection in TLS 1.2 or later; the delivery to the server stops at a 4xx, tries a 5xx again and reads an answer with no body; a login travels only over https or to this machine; the vendor table and the guess of a device kind keep their edge cases. The floor rises with them.
