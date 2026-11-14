@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-265%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-290%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.7-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**诚实性检查 - 今天真正能运行的部分：** 扫描器、说明发生了什么变化的清单、互联网检查、公网地址查询、来自 Studio 的指令和加密封装的登录信息，都在计算机上对照脚本化网络测试（265 个测试；每条消息都被 ARMOR-COMMON 的契约接受），程序在 CM5 测试台上作为服务运行，监视测试台所在的真实网络（一台路由器、住宅的手机和节点）。它还没有连续数周监视整个住宅，只询问路由器而从不配置它，设备是什么（类型、系统、厂商）只是猜测。它不抓包：看不到谁与谁通信，每个设备的流量和严格意义上的入侵检测需要路由器的计数器或镜像端口，那是以后的一步。
+**诚实性检查 - 今天真正能运行的部分：** 扫描器、说明发生了什么变化的清单、互联网检查、公网地址查询、来自 Studio 的指令和加密封装的登录信息，都在计算机上对照脚本化网络测试（290 个测试；每条消息都被 ARMOR-COMMON 的契约接受），程序在 CM5 测试台上作为服务运行，监视测试台所在的真实网络（一台路由器、住宅的手机和节点）。它还没有连续数周监视整个住宅，只询问路由器而从不配置它，设备是什么（类型、系统、厂商）只是猜测。它不抓包：看不到谁与谁通信，每个设备的流量和严格意义上的入侵检测需要路由器的计数器或镜像端口，那是以后的一步。
 
 ---
 
@@ -40,8 +40,8 @@
 | 成熟度 | 成熟 |
 | 角色 | 本地网络节点：网络上有什么、发生了什么变化、互联网、来自 Studio 的指令 |
 | 技术栈 | Python 3.11+，仅用标准库 |
-| 测试 | 265 项（`python -m unittest discover -s tests`） |
-| 契约 | 消息 `armor/network/<节点>/state`，111 个一致性向量（消息与指令） |
+| 测试 | 290 项（`python -m unittest discover -s tests`） |
+| 契约 | 消息 `armor/network/<节点>/state`，118 个一致性向量（消息与指令） |
 | 运行位置 | 被监视网络中的一台机器（Linux、Windows 或 macOS）；CM5 测试台上作为服务 |
 | 真实硬件 | 在 CM5 测试台上作为服务运行，监视其真实网络（路由器、住宅的手机和节点） |
 | 许可证 | GPL-3.0-or-later |
@@ -57,7 +57,7 @@
 | 领域 | 状态 | 在这里的含义 |
 |---|---|---|
 | 软件 | 🟢 | 扫描器、记录变化的清单、互联网检查、公网地址查询和来自 Studio 的指令在 CM5 测试台上作为服务运行。 |
-| 测试 | 🟢 | 265 项测试针对脚本化网络通过，每条消息都被 ARMOR-COMMON 的契约接受。 |
+| 测试 | 🟢 | 290 项测试针对脚本化网络通过，每条消息都被 ARMOR-COMMON 的契约接受。 |
 | 协议与数据 | 🟡 | 设备是什么（类型、系统、厂商）只是猜测，也不抓包：按设备统计流量和严格意义上的入侵检测尚未实现。 |
 | 硬件 | 🟡 | 它监视 CM5 测试台所在的真实网络（一台路由器以及家里的手机和节点），但还没有连续数周监视整栋房子。 |
 | 安全 | 🟡 | 它只查询路由器，从不配置路由器；密封的登录信息已在主机上测试，没有经过独立审查。 |
@@ -103,6 +103,7 @@ ARMOR-NETWORK 是家族观察本地网络的眼睛。它运行在网络中的一
 |---|---|
 | 扫描屋外或他人的网络 | 只扫描私有网段（10.0.0.0/8、172.16.0.0/12、192.168.0.0/16），且绝不超过 1024 个地址（/22）；`--cidr` 也必须是私有网段；防护是 `check_scan_range`，不是选项 |
 | 弄坏脆弱的设备 | 跳过列表（`--skip IP`，可重复）；不向设备发送任何不是提问的内容；绝不登录、绝不利用漏洞；同时 12 个连接，只读几百字节 |
+| 网络上无人要求的询问 | `--rogue-dhcp` 默认关闭；开启后每十分钟向广播地址发一次 DHCP 询问，从不索取地址，因此不会分配任何地址；没有使用 DHCP 客户端端口的权限时保持静默并说明；`--router-igd` 只读取计数器，无需登录 |
 | 高风险开放端口被忽略 | 会被标记：21、23、3389、5900、6379、3306、5432、7547 和 445 |
 | 注入命令的服务器指令 | 封闭列表：`scan_now`、`ping`、`traceroute`、`wake`、`ports`、`http`、`inspect`；同时最多 4 个；指令 ID 由字母、数字、`_` 和 `-` 组成（最多 32 个）；输出截断为 2000；校验 MAC；不经过 shell；指令随节点自己消息的响应到达，绝不通过连接到节点的方式 |
 | 检查所用登录信息泄露 | 仅为本节点密封传输，只通过 Digest 或 HTTPS（绝不在明文 HTTP 上用 Basic），只发给首次见到其 HTTPS 证书的设备，且绝不会在响应中重复；它尝试的出厂登录来自固定列表 |
@@ -120,7 +121,7 @@ ARMOR-NETWORK 是家族观察本地网络的眼睛。它运行在网络中的一
 | `python -m armor_network demo [--count N]` | - | 虚构的房子（设备加入、摄像头开放 Telnet、互联网中断）：不会触碰任何网络 |
 | `python -m armor_network internet`  `oui <mac>` | - | 一轮互联网检查；某张网卡的厂商 |
 
-来自 Studio 的指令（`scan_now`、`ping`、`traceroute`、`wake`、`ports`、`http`、`inspect`）由 ARMOR-SERVER 的 `/api/v1/network/...` 路由排队，并在对节点消息的响应中送达；消息与指令的契约在 ARMOR-COMMON（111 个一致性向量）。见 [docs/MESSAGES.md](docs/MESSAGES.md) 和 [docs/USAGE.md](docs/USAGE.md)。
+来自 Studio 的指令（`scan_now`、`ping`、`traceroute`、`wake`、`ports`、`http`、`inspect`）由 ARMOR-SERVER 的 `/api/v1/network/...` 路由排队，并在对节点消息的响应中送达；消息与指令的契约在 ARMOR-COMMON（118 个一致性向量）。见 [docs/MESSAGES.md](docs/MESSAGES.md) 和 [docs/USAGE.md](docs/USAGE.md)。
 
 ## ⚙️ 配置
 
@@ -132,6 +133,7 @@ ARMOR-NETWORK 是家族观察本地网络的眼睛。它运行在网络中的一
 | `--scan-every`  `--internet-every` | 60 s  5 s | 扫描与互联网检查的间隔秒数 |
 | `--server-url`  `--ingest-token`  `--mqtt-url`  `--mqtt-user` | - | 上报到哪里；本节点的令牌（Studio 会显示）或共享采集令牌，绝不写入文件 |
 | `--data-dir` | armor-network-data | 运行之间保存清单与中断记录的位置 |
+| `--rogue-dhcp`  `--allow-dhcp IP`  `--router-igd` | off | 查找第二台 DHCP 服务器（每十分钟向广播地址发一次 DHCP 询问，不分配任何地址；需要使用 DHCP 客户端端口的权限）、除路由器外属于该网络的 DHCP 服务器（可重复），并通过 UPnP 无需登录读取路由器的流量计数器；第一项和最后一项默认关闭 |
 | `--validate`  `--no-public-info`  `--public-info-url`  `--dns-name` | - | 用 ARMOR-COMMON 检查每条消息；公网地址查询（关闭、其地址、要检查的名称） |
 
 全部通过命令行选项设置（见 [docs/USAGE.md](docs/USAGE.md)，其中也给出让它常驻运行的 systemd 单元）。连续三轮失败才判定为中断，连续两轮成功才算结束；前三次扫描只用来了解有什么。
@@ -141,7 +143,7 @@ ARMOR-NETWORK 是家族观察本地网络的眼睛。它运行在网络中的一
 **要求：** Python 3.11+（仅标准库）和被监视网络中的一台机器（Linux、Windows 或 macOS）。
 
 ```powershell
-python -m unittest discover -s tests                                                  # 265 项：用真实样本的解析器、可探测范围的防护、清单、互联网、对脚本化房子运行的完整代理
+python -m unittest discover -s tests                                                  # 290 项：用真实样本的解析器、可探测范围的防护、清单、互联网、对脚本化房子运行的完整代理
 python -m armor_network scan                                                          # 查看一次网络并打印（仅本机所在的私有网络）
 python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # 持续监视并通知 ARMOR-SERVER
 python -m armor_network demo --count 3                                                # 虚构的房子：不碰任何网络
@@ -153,7 +155,7 @@ python tools/fetch_oui.py                                                       
 ## 🧪 测试
 
 ```powershell
-python -m unittest discover -s tests  # 265 项
+python -m unittest discover -s tests  # 290 项
 python -I tools/armor_ci_validate.py
 ```
 
@@ -202,7 +204,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    来自 Studio 的指令；密封凭据
 │   ├── cli.py __main__.py                   scan、watch 和 demo
 │   └── data/                                oui.tsv.gz（IEEE 注册表）
-├── tests/                                   9 个模块 265 项测试
+├── tests/                                   9 个模块 290 项测试
 ├── docs/                                    DESIGN、SAFETY、USAGE、MESSAGES
 ├── tools/                                   fetch_oui.py 刷新厂商注册表；共用的 CI 检查与启动器
 ├── images/                                  横幅图、图标和 README 的图片
