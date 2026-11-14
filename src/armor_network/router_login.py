@@ -29,7 +29,7 @@ KINDS = ("tr064", "openwrt")
 STORES = ("ask", "sealed")
 MAX_ENTRIES = 256
 MAX_NAME = 63
-PASSWORD_ENV = "ARMOR_ROUTER_PASSWORD"
+ROUTER_LOGIN_ENV = "ARMOR_ROUTER_PASSWORD"
 TR064_SERVICE = "urn:dslforum-org:service:Hosts:1"
 TR064_PATH = "/upnp/control/hosts"
 ALLOWED_TR064 = ("GetHostNumberOfEntries", "GetGenericHostEntry")
@@ -73,7 +73,7 @@ def resolve_password(store: str, sealed: str, token: str, environ: dict[str, str
             return None, missing_password_reason(store, sealed, token)
         opened = open_sealed(token, sealed)
         return (opened, "") if opened else (None, missing_password_reason(store, sealed, token))
-    value = environ.get(PASSWORD_ENV, "")
+    value = environ.get(ROUTER_LOGIN_ENV, "")
     if value:
         return value, ""
     if prompt is not None:
@@ -91,7 +91,7 @@ def missing_password_reason(store: str, sealed: str, token: str) -> str:
         if not token:
             return "a sealed router password opens only with this node's token (--ingest-token or ARMOR_INGEST_TOKEN)"
         return "the sealed router password does not open with this node's token"
-    return f"the router password is not stored: set {PASSWORD_ENV} or start the program where it can ask for it"
+    return f"the router password is not stored: set {ROUTER_LOGIN_ENV} or start the program where it can ask for it"
 
 
 # ---- TR-064 -------------------------------------------------------------------------------------------------------------------------------
