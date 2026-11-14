@@ -253,11 +253,12 @@ class Cli(unittest.TestCase):
     def test_the_login_comes_from_the_settings_and_not_without_a_password(self):
         settings = config_file.parse('{"router_login": true, "router_user": "fritz"}')
         with mock.patch.dict(os.environ, {router_login.ROUTER_LOGIN_ENV: SECRET}):
-            login, why = cli._router_from_settings(settings, "")
+            login = cli._router_from_settings(settings, "")
         self.assertEqual((login.user, login.password, login.kind), ("fritz", SECRET, "tr064"))
         with mock.patch.dict(os.environ, {}), mock.patch.object(cli, "_ask_password", return_value=""):
             os.environ.pop(router_login.ROUTER_LOGIN_ENV, None)
-            login, why = cli._router_from_settings(settings, "")
+            login = cli._router_from_settings(settings, "")
+            why = cli._router_login_problem(settings, "")
         self.assertIsNone(login)
         self.assertIn(router_login.ROUTER_LOGIN_ENV, why)
         self.assertNotIn(SECRET, why)
