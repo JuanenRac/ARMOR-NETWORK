@@ -166,9 +166,9 @@ def _router_seal(token: str) -> int:
     if not token:
         print("router-seal needs this node's token (--ingest-token or ARMOR_INGEST_TOKEN)", file=sys.stderr)
         return 2
-    password = os.environ.get(router_login.PASSWORD_ENV, "") or _ask_password()
+    password = os.environ.get(router_login.ROUTER_LOGIN_ENV, "") or _ask_password()
     if not password:
-        print(f"the password is read from {router_login.PASSWORD_ENV} or typed at the keyboard", file=sys.stderr)
+        print(f"the password is read from {router_login.ROUTER_LOGIN_ENV} or typed at the keyboard", file=sys.stderr)
         return 2
     sys.stdout.write(seal_text(token, password) + "\n")   # the sealed text is what the file is meant to hold; the password itself is never shown
     return 0

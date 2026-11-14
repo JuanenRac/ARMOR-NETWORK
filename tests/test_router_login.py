@@ -77,7 +77,7 @@ class Credential(unittest.TestCase):
     def test_the_default_is_not_to_keep_it_and_to_ask_each_time(self):
         self.assertEqual(config_file.FileSettings().router_credential, "ask")
         self.assertEqual(router_login.resolve_password("ask", "", "", {}, None)[0], None)
-        self.assertEqual(router_login.resolve_password("ask", "", "", {router_login.PASSWORD_ENV: SECRET}, None), (SECRET, ""))
+        self.assertEqual(router_login.resolve_password("ask", "", "", {router_login.ROUTER_LOGIN_ENV: SECRET}, None), (SECRET, ""))
         self.assertEqual(router_login.resolve_password("ask", "", "", {}, lambda: SECRET), (SECRET, ""))
         self.assertIsNone(router_login.resolve_password("ask", "", "", {}, lambda: "")[0])
 
@@ -237,14 +237,14 @@ class Wiring(unittest.TestCase):
 class Cli(unittest.TestCase):
     def test_router_seal_makes_a_seal_that_opens_and_never_prints_the_password(self):
         out, err = io.StringIO(), io.StringIO()
-        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err), mock.patch.dict(os.environ, {router_login.PASSWORD_ENV: SECRET}):
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err), mock.patch.dict(os.environ, {router_login.ROUTER_LOGIN_ENV: SECRET}):
             self.assertEqual(cli.main(["router-seal", "--ingest-token", TOKEN]), 0)
         self.assertEqual(open_sealed(TOKEN, out.getvalue().strip()), SECRET)
         self.assertNotIn(SECRET, out.getvalue() + err.getvalue())
 
     def test_router_seal_needs_a_token_and_a_password(self):
         with contextlib.redirect_stderr(io.StringIO()), mock.patch.dict(os.environ, {}, clear=False):
-            os.environ.pop(router_login.PASSWORD_ENV, None)
+            os.environ.pop(router_login.ROUTER_LOGIN_ENV, None)
             os.environ.pop("ARMOR_INGEST_TOKEN", None)
             self.assertEqual(cli.main(["router-seal"]), 2)
             with mock.patch.object(cli, "_ask_password", return_value=""):
@@ -252,14 +252,14 @@ class Cli(unittest.TestCase):
 
     def test_the_login_comes_from_the_settings_and_not_without_a_password(self):
         settings = config_file.parse('{"router_login": true, "router_user": "fritz"}')
-        with mock.patch.dict(os.environ, {router_login.PASSWORD_ENV: SECRET}):
+        with mock.patch.dict(os.environ, {router_login.ROUTER_LOGIN_ENV: SECRET}):
             login, why = cli._router_from_settings(settings, "")
         self.assertEqual((login.user, login.password, login.kind), ("fritz", SECRET, "tr064"))
         with mock.patch.dict(os.environ, {}), mock.patch.object(cli, "_ask_password", return_value=""):
-            os.environ.pop(router_login.PASSWORD_ENV, None)
+            os.environ.pop(router_login.ROUTER_LOGIN_ENV, None)
             login, why = cli._router_from_settings(settings, "")
         self.assertIsNone(login)
-        self.assertIn(router_login.PASSWORD_ENV, why)
+        self.assertIn(router_login.ROUTER_LOGIN_ENV, why)
         self.assertNotIn(SECRET, why)
 
 
