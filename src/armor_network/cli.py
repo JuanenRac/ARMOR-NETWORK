@@ -166,7 +166,7 @@ def _router_login_problem(settings: config_file.FileSettings, token_present: boo
     """Why there is no login to the router. Worked out from the settings alone, apart from the login itself, so the text can be shown."""
     if not settings.router_user:
         return "router_user is not set in the config file"
-    return router_login.missing_password_reason(settings.router_credential == "sealed", settings.router_credential_sealed != "", token_present)
+    return router_login.missing_login_reason(settings.router_credential == "sealed", settings.router_credential_sealed != "", token_present)
 
 
 def _router_seal(token: str) -> int:
