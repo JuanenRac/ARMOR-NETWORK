@@ -22,7 +22,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import __version__, oui
+from . import __version__, config_file, oui
 from .agent import Agent, Config, NetworkIO
 from .ipnet import ScanRefused, check_scan_range, is_private_address
 from .mqtt_out import NODE_ID, MqttError, check_mqtt_url, publish as mqtt_publish
@@ -170,6 +170,7 @@ def main(argv: list[str] | None = None) -> int:
         watch.add_argument("--rogue-dhcp", action="store_true", help="look for a second DHCP server: one DHCP question on the broadcast address every ten minutes, nothing is leased (off by default; needs permission to use the DHCP client port)")
         watch.add_argument("--dhcp-interface", metavar="IP", default="", help="the address of this machine, on the interface to look from, that the DHCP question is bound to (default: the address of the interface the default route leaves by); a private address only")
         watch.add_argument("--allow-dhcp", action="append", default=[], metavar="IP", help="a DHCP server that belongs on the network besides the router; repeatable")
+        watch.add_argument("--config", type=Path, default=None, metavar="FILE", help="the file with the settings of the checks that are off by default (default: config.json in --data-dir, when it exists); a flag on the command line wins over the file")
         watch.add_argument("--router-igd", action="store_true", help="read the traffic counters of the router over UPnP (no login, read only; off by default)")
         watch.add_argument("--mqtt-url", default="", help="also publish every message to this MQTT broker (mqtt:// or mqtts://, on armor/network/<node>/state); the manual orders do not travel this way. The password is read from ARMOR_NETWORK_MQTT_PASSWORD")
         watch.add_argument("--mqtt-user", default="", help="the user name for --mqtt-url (the account of a network node, e.g. network-node-network-1)")
@@ -223,11 +224,18 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
-        if args.dhcp_interface:
-            if not is_private_address(args.dhcp_interface):
-                print(f"--dhcp-interface {args.dhcp_interface!r} is not a private address", file=sys.stderr)
+        try:
+            settings = config_file.load(args.config or args.data_dir / config_file.FILE_NAME, required=args.config is not None)
+        except config_file.ConfigFileError as error:
+            print(f"config: {error}", file=sys.stderr)
+            return 2
+        dhcp_interface = args.dhcp_interface or settings.dhcp_interface   # the flags win over the file
+        if dhcp_interface:
+            if not is_private_address(dhcp_interface):
+                print(f"--dhcp-interface {dhcp_interface!r} is not a private address", file=sys.stderr)
                 return 2
-        allowed_dhcp = set(args.allow_dhcp)
+        allowed_dhcp = set(args.allow_dhcp or settings.allow_dhcp)
+        rogue_dhcp, router_igd = args.rogue_dhcp or settings.rogue_dhcp, args.router_igd or settings.router_igd
         for address in allowed_dhcp:
             try:
                 ipaddress.ip_address(address)
@@ -235,7 +243,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"--allow-dhcp {address!r} is not an address", file=sys.stderr)
                 return 2
         config = Config(node_id=args.node_id, profile=args.profile, no_ports=args.no_ports, skip=skip, data_dir=args.data_dir, scan_every_s=args.scan_every,
-                        rogue_dhcp=args.rogue_dhcp, dhcp_allowed=allowed_dhcp, router_igd=args.router_igd,
+                        rogue_dhcp=rogue_dhcp, dhcp_allowed=allowed_dhcp, router_igd=router_igd,
                         internet_every_s=args.internet_every, public_info=not args.no_public_info, public_url=public_url, dns_name=dns_name)
         loop_io: NetworkIO
         if args.command == "demo":
@@ -243,7 +251,7 @@ def main(argv: list[str] | None = None) -> int:
             config.scan_every_s, config.internet_every_s, config.publish_every_s = args.tick_s, max(2, args.tick_s // 2), max(2, args.tick_s // 2)
             config.offline_after_s = args.tick_s * 3
         else:
-            loop_io = SystemIO(cidr=args.cidr, dhcp_local=args.dhcp_interface or None)
+            loop_io = SystemIO(cidr=args.cidr, dhcp_local=dhcp_interface or None)
         return _run_loop(Agent(loop_io, config), args, forever=True)
     except ScanRefused as error:
         print(f"refused: {error}", file=sys.stderr)

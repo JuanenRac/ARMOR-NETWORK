@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 ou ultérieure">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Langage">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-290%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-304%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.7-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturité">
 </p>
 
 ---
 
-**Vérification d'honnêteté - ce qui fonctionne aujourd'hui :** Le scanner, l'inventaire qui dit ce qui a changé, le contrôle d'internet, la recherche de l'adresse publique, les ordres depuis Studio et les identifiants scellés sont testés sur un ordinateur contre un réseau scripté (290 tests ; chaque message est accepté par le contrat d'ARMOR-COMMON), et le programme tourne comme service sur le banc de test CM5, en surveillant le vrai réseau où se trouve le banc (un routeur, les téléphones et les nœuds de la maison). Il n'a pas surveillé une maison entière pendant des semaines, il ne fait que demander au routeur et ne le configure jamais, et ce qu'est un appareil (son type, son système, son fabricant) est une supposition. Il ne capture pas de paquets : il ne voit pas qui parle à qui, et le trafic par appareil et la détection d'intrusion au sens strict demandent les compteurs du routeur ou un port miroir, ce qui est une étape ultérieure.
+**Vérification d'honnêteté - ce qui fonctionne aujourd'hui :** Le scanner, l'inventaire qui dit ce qui a changé, le contrôle d'internet, la recherche de l'adresse publique, les ordres depuis Studio et les identifiants scellés sont testés sur un ordinateur contre un réseau scripté (304 tests ; chaque message est accepté par le contrat d'ARMOR-COMMON), et le programme tourne comme service sur le banc de test CM5, en surveillant le vrai réseau où se trouve le banc (un routeur, les téléphones et les nœuds de la maison). Il n'a pas surveillé une maison entière pendant des semaines, il ne fait que demander au routeur et ne le configure jamais, et ce qu'est un appareil (son type, son système, son fabricant) est une supposition. Il ne capture pas de paquets : il ne voit pas qui parle à qui, et le trafic par appareil et la détection d'intrusion au sens strict demandent les compteurs du routeur ou un port miroir, ce qui est une étape ultérieure.
 
 ---
 
@@ -40,7 +40,7 @@
 | Maturité | Établi |
 | Rôle | Nœud du réseau local : ce qu'il y a sur le réseau, ce qui a changé, internet, ordres de Studio |
 | Technologie | Python 3.11+, bibliothèque standard seule |
-| Tests | 290 (`python -m unittest discover -s tests`) |
+| Tests | 304 (`python -m unittest discover -s tests`) |
 | Contrat | Message `armor/network/<nœud>/state`, 118 vecteurs de conformité (messages et ordres) |
 | Fonctionne sur | Une machine du réseau à surveiller (Linux, Windows ou macOS) ; le banc d'essai CM5 en service |
 | Sur matériel réel | Tourne comme service sur le banc de test CM5, en surveillant son vrai réseau (un routeur, les téléphones et les nœuds de la maison) |
@@ -57,7 +57,7 @@ Chaque ligne est une partie de ce dépôt et le feu dit où elle en est aujourd'
 | Domaine | État | Ce que cela veut dire ici |
 |---|---|---|
 | Logiciel | 🟢 | Le scanner, l'inventaire qui dit ce qui a changé, le contrôle d'internet, la recherche de l'adresse publique et les ordres de Studio tournent comme service sur le banc d'essai CM5. |
-| Tests | 🟢 | 290 tests réussissent contre un réseau scénarisé, et chaque message est accepté par le contrat d'ARMOR-COMMON. |
+| Tests | 🟢 | 304 tests réussissent contre un réseau scénarisé, et chaque message est accepté par le contrat d'ARMOR-COMMON. |
 | Protocoles et données | 🟡 | Ce qu'est un appareil (son type, son système, son fabricant) est une supposition, et rien ne capture de paquets : le trafic par appareil et la détection d'intrusion au sens strict ne sont pas faits. |
 | Matériel | 🟡 | Il surveille le réseau réel du banc d'essai CM5 (un routeur, les téléphones et les nœuds de la maison) mais n'a pas surveillé une maison entière pendant des semaines. |
 | Sécurité | 🟡 | Il ne fait qu'interroger le routeur et ne le configure jamais ; les identifiants scellés sont testés sur l'hôte et il n'y a pas eu de revue indépendante. |
@@ -134,6 +134,7 @@ Les ordres de Studio (`scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http`,
 | `--server-url`  `--ingest-token`  `--mqtt-url`  `--mqtt-user` | - | où il informe ; le jeton de ce nœud (Studio l'affiche) ou le jeton d'ingestion partagé, jamais écrit dans un fichier |
 | `--data-dir` | armor-network-data | où l'inventaire et les pannes sont gardés entre les exécutions |
 | `--rogue-dhcp`  `--allow-dhcp IP`  `--router-igd` | off | cherche un second serveur DHCP (une question DHCP à l'adresse de diffusion toutes les dix minutes, rien n'est attribué ; demande l'autorisation d'utiliser le port client DHCP), un serveur DHCP qui a sa place sur le réseau en plus du routeur (répétable), et lit les compteurs de trafic du routeur par UPnP sans identifiant ; le premier et le dernier sont désactivés |
+| `--config FILE`  `--dhcp-interface IP` | `config.json` in `--data-dir` | un fichier avec `rogue_dhcp`, `allow_dhcp`, `router_igd` et `dhcp_interface` (un exemple est dans `docs/config.example.json`) ; tout est désactivé s'il ne dit rien et une option l'emporte sur le fichier ; l'adresse privée de cette machine à laquelle la question DHCP est liée |
 | `--validate`  `--no-public-info`  `--public-info-url`  `--dns-name` | - | vérifie chaque message avec ARMOR-COMMON ; la consultation de l'adresse publique (la couper, son adresse, le nom à vérifier) |
 
 Tout se règle par des options de ligne de commande (voir [docs/USAGE.md](docs/USAGE.md), qui montre aussi l'unité systemd qui le maintient en marche). Une panne est déclarée après trois rondes ratées et terminée après deux bonnes ; les trois premiers balayages apprennent seulement ce qui est là.
@@ -143,7 +144,7 @@ Tout se règle par des options de ligne de commande (voir [docs/USAGE.md](docs/U
 **Prérequis :** Python 3.11+ (bibliothèque standard seule) et une machine sur le réseau à surveiller (Linux, Windows ou macOS).
 
 ```powershell
-python -m unittest discover -s tests                                                  # 290 tests : analyseurs avec échantillons réels, la garde de ce qu'on peut sonder, l'inventaire, internet, l'agent entier face à une maison scriptée
+python -m unittest discover -s tests                                                  # 304 tests : analyseurs avec échantillons réels, la garde de ce qu'on peut sonder, l'inventaire, internet, l'agent entier face à une maison scriptée
 python -m armor_network scan                                                          # regarde le réseau une fois et l'imprime (seulement le réseau privé de cette machine)
 python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # continue de surveiller et informe ARMOR-SERVER
 python -m armor_network demo --count 3                                                # une maison fictive : aucun réseau n'est touché
@@ -155,7 +156,7 @@ Voir l'[usage](docs/USAGE.md) et la [conception](docs/DESIGN.md).
 ## 🧪 Tests
 
 ```powershell
-python -m unittest discover -s tests  # 290 tests
+python -m unittest discover -s tests  # 304 tests
 python -I tools/armor_ci_validate.py
 ```
 
@@ -204,7 +205,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    ordres de Studio ; identifiants scellés
 │   ├── cli.py __main__.py                   scan, watch et demo
 │   └── data/                                oui.tsv.gz, le registre IEEE
-├── tests/                                   290 tests en 9 modules
+├── tests/                                   304 tests en 9 modules
 ├── docs/                                    DESIGN, SAFETY, USAGE, MESSAGES
 ├── tools/                                   fetch_oui.py rafraîchit le registre des fabricants ; les vérifications CI et le lanceur
 ├── images/                                  bannière, icône et images du README

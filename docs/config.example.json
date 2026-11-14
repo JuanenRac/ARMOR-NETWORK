@@ -1,0 +1,6 @@
+{
+  "rogue_dhcp": false,
+  "allow_dhcp": [],
+  "router_igd": false,
+  "dhcp_interface": ""
+}

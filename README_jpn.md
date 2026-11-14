@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-290%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-304%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.7-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**正直さのチェック - 今日動いているもの:** スキャナー、何が変わったかを伝えるインベントリ、インターネットの検査、公開アドレスの問い合わせ、Studio からの指示、封印されたログインは、スクリプト化したネットワークに対してコンピューター上でテストされ（290 件。すべてのメッセージが ARMOR-COMMON のコントラクトに受け付けられる）、プログラムは CM5 テストベンチ上でサービスとして動き、ベンチがつながる実際のネットワーク（ルーター、家のスマートフォンとノード）を見張っています。家全体を数週間見張ったことはなく、ルーターに尋ねるだけで設定は一切せず、デバイスが何か（種類、システム、メーカー）は推測です。パケットは取得しません。誰が誰と話しているかは見えず、デバイスごとのトラフィックや厳密な意味での侵入検知にはルーターのカウンターかミラーポートが必要で、それは今後の段階です。
+**正直さのチェック - 今日動いているもの:** スキャナー、何が変わったかを伝えるインベントリ、インターネットの検査、公開アドレスの問い合わせ、Studio からの指示、封印されたログインは、スクリプト化したネットワークに対してコンピューター上でテストされ（304 件。すべてのメッセージが ARMOR-COMMON のコントラクトに受け付けられる）、プログラムは CM5 テストベンチ上でサービスとして動き、ベンチがつながる実際のネットワーク（ルーター、家のスマートフォンとノード）を見張っています。家全体を数週間見張ったことはなく、ルーターに尋ねるだけで設定は一切せず、デバイスが何か（種類、システム、メーカー）は推測です。パケットは取得しません。誰が誰と話しているかは見えず、デバイスごとのトラフィックや厳密な意味での侵入検知にはルーターのカウンターかミラーポートが必要で、それは今後の段階です。
 
 ---
 
@@ -40,7 +40,7 @@
 | 成熟度 | 確立 |
 | 役割 | ローカルネットワークのノード：ネットワーク上の機器、変化、インターネット、Studio からのオーダー |
 | 技術 | Python 3.11+（標準ライブラリのみ） |
-| テスト | 290 件（`python -m unittest discover -s tests`） |
+| テスト | 304 件（`python -m unittest discover -s tests`） |
 | 契約 | メッセージ `armor/network/<ノード>/state`、適合ベクター 118 件（メッセージとオーダー） |
 | 動作環境 | 監視対象ネットワーク上のマシン（Linux、Windows、macOS）。CM5 テストベンチではサービスとして |
 | 実機での確認 | CM5 テストベンチ上でサービスとして動き、実際のネットワーク（ルーター、家のスマートフォンとノード）を見張っています |
@@ -57,7 +57,7 @@
 | 領域 | 状態 | ここでの意味 |
 |---|---|---|
 | ソフトウェア | 🟢 | スキャナー、変更点を示すインベントリ、インターネット確認、公開アドレスの取得、Studio からの命令は、CM5 テストベンチ上でサービスとして動いています。 |
-| テスト | 🟢 | 290 件のテストがスクリプト化したネットワークに対して通り、すべてのメッセージが ARMOR-COMMON の契約に受理されます。 |
+| テスト | 🟢 | 304 件のテストがスクリプト化したネットワークに対して通り、すべてのメッセージが ARMOR-COMMON の契約に受理されます。 |
 | プロトコルとデータ | 🟡 | 機器の種類・システム・メーカーは推測で、パケットは取得しません。機器ごとのトラフィックと厳密な意味での侵入検知は未実装です。 |
 | ハードウェア | 🟡 | CM5 テストベンチの実際のネットワーク（ルーター、家の電話機とノード）を監視していますが、家全体を数週間監視したことはありません。 |
 | セキュリティ | 🟡 | ルーターに問い合わせるだけで設定は一切しません。封印されたログイン情報はホストでテスト済みで、独立したレビューはありません。 |
@@ -134,6 +134,7 @@ Studio からのオーダー（`scan_now`、`ping`、`traceroute`、`wake`、`po
 | `--server-url`  `--ingest-token`  `--mqtt-url`  `--mqtt-user` | - | 通知先、このノードのトークン（Studio に表示）または共有の取り込みトークン（ファイルには書かない） |
 | `--data-dir` | armor-network-data | 実行間でインベントリと障害を保持する場所 |
 | `--rogue-dhcp`  `--allow-dhcp IP`  `--router-igd` | off | 2 台目の DHCP サーバーを探し（10 分ごとにブロードキャストアドレスへ DHCP の問い合わせを 1 回送るだけで何も割り当てません。DHCP クライアントポートの使用許可が必要）、ルーター以外にネットワークに属する DHCP サーバーを指定し（複数指定可）、ログインなしで UPnP からルーターのトラフィックカウンターを読みます。最初と最後は既定でオフです |
+| `--config FILE`  `--dhcp-interface IP` | `config.json` in `--data-dir` | `rogue_dhcp`、`allow_dhcp`、`router_igd`、`dhcp_interface` を書くファイル（例は `docs/config.example.json`）。何も書かなければすべてオフで、コマンドラインのフラグがファイルより優先されます。DHCP の問い合わせを結び付けるこのマシンのプライベートアドレス |
 | `--validate`  `--no-public-info`  `--public-info-url`  `--dns-name` | - | 各メッセージを ARMOR-COMMON で検査、公開アドレスの照会（無効化、そのアドレス、確認する名前） |
 
 設定はすべてコマンドラインオプションで行います（常駐させる systemd ユニットも示す [docs/USAGE.md](docs/USAGE.md) を参照）。障害は 3 回連続の失敗で判定し、2 回の成功で終了とします。最初の 3 回のスイープは何があるかを学ぶだけです。
@@ -143,7 +144,7 @@ Studio からのオーダー（`scan_now`、`ping`、`traceroute`、`wake`、`po
 **要件：** Python 3.11+（標準ライブラリのみ）と、監視対象ネットワーク上のマシン（Linux、Windows、macOS）。
 
 ```powershell
-python -m unittest discover -s tests                                                  # 290 件：実サンプルのパーサ、調べてよい範囲のガード、インベントリ、インターネット、スクリプト版の家に対するエージェント全体
+python -m unittest discover -s tests                                                  # 304 件：実サンプルのパーサ、調べてよい範囲のガード、インベントリ、インターネット、スクリプト版の家に対するエージェント全体
 python -m armor_network scan                                                          # ネットワークを 1 回調べて表示（このマシンのプライベートネットワークのみ）
 python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # 監視を続けて ARMOR-SERVER に通知
 python -m armor_network demo --count 3                                                # 架空の家：実ネットワークには触れない
@@ -155,7 +156,7 @@ python tools/fetch_oui.py                                                       
 ## 🧪 テスト
 
 ```powershell
-python -m unittest discover -s tests  # 290 件
+python -m unittest discover -s tests  # 304 件
 python -I tools/armor_ci_validate.py
 ```
 
@@ -204,7 +205,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    Studio からのオーダーと封印した認証情報
 │   ├── cli.py __main__.py                   scan・watch・demo
 │   └── data/                                oui.tsv.gz（IEEE 登録簿）
-├── tests/                                   9 モジュール 290 件
+├── tests/                                   9 モジュール 304 件
 ├── docs/                                    DESIGN、SAFETY、USAGE、MESSAGES
 ├── tools/                                   fetch_oui.py がメーカー登録簿を更新、共通の CI 検査とランチャー
 ├── images/                                  バナー、アイコン、README の画像
