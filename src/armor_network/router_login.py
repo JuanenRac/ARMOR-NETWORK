@@ -70,9 +70,9 @@ def resolve_password(store: str, sealed: str, token: str, environ: dict[str, str
     """(the password, "") or (None, why not). Nothing is written anywhere."""
     if store == "sealed":
         if not sealed or not token:
-            return None, missing_password_reason(store, sealed, token)
+            return None, missing_password_reason(True, sealed != "", token != "")
         opened = open_sealed(token, sealed)
-        return (opened, "") if opened else (None, missing_password_reason(store, sealed, token))
+        return (opened, "") if opened else (None, missing_password_reason(True, True, True))
     value = environ.get(ROUTER_LOGIN_ENV, "")
     if value:
         return value, ""
@@ -80,15 +80,15 @@ def resolve_password(store: str, sealed: str, token: str, environ: dict[str, str
         value = prompt()
         if value:
             return value, ""
-    return None, missing_password_reason(store, sealed, token)
+    return None, missing_password_reason(False, sealed != "", token != "")
 
 
-def missing_password_reason(store: str, sealed: str, token: str) -> str:
-    """Why no password could be had, from the settings alone: it never sees the password, so the text is safe to show."""
-    if store == "sealed":
-        if not sealed:
+def missing_password_reason(sealed_mode: bool, sealed_present: bool, token_present: bool) -> str:
+    """Why no password could be had, from three yes/no facts about the settings: it never sees the password or the token, so the text is safe to show."""
+    if sealed_mode:
+        if not sealed_present:
             return "router_credential is sealed but router_credential_sealed is empty"
-        if not token:
+        if not token_present:
             return "a sealed router password opens only with this node's token (--ingest-token or ARMOR_INGEST_TOKEN)"
         return "the sealed router password does not open with this node's token"
     return f"the router password is not stored: set {ROUTER_LOGIN_ENV} or start the program where it can ask for it"

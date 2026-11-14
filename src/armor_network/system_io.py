@@ -414,6 +414,10 @@ class SystemIO:
         local = self._dhcp_local or str(info.get("ip") or "")
         if not is_private_address(local):
             return []
+        try:
+            local = str(ipaddress.ip_address(local))   # the address the socket is tied to is always a parsed private address, never an empty text (which would mean every interface)
+        except ValueError:
+            return []
         xid = int.from_bytes(os.urandom(4), "big")
         try:
             packet = rogue_dhcp.build_discover(bytes.fromhex(mac.replace(":", "")), xid)
