@@ -32,6 +32,7 @@ from .services import clean_banner, parse_http, service_name
 INTERFACE_REFRESH_S = 60.0   # the address, network and router of this machine are read again this often: a lease renewed or a cable moved must not stay wrong for ever
 
 WINDOWS = sys.platform.startswith("win")
+DHCP_BROADCAST = "255.255.255.255"
 NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 HTTP_PORTS = {80, 8000, 8008, 8080, 8081, 3000, 5000, 9000, 18080, 18081}
 TALKING_PORTS = {21, 22, 23, 25, 110, 143, 993, 1883}       # services that say something first
@@ -87,9 +88,10 @@ class SystemIO:
 
     settle_s = 1.5      # how long the system gets to learn the neighbours after they were poked
 
-    def __init__(self, cidr: str | None = None, interface_ip: str | None = None) -> None:
+    def __init__(self, cidr: str | None = None, interface_ip: str | None = None, dhcp_local: str | None = None) -> None:
         self._cidr_override = cidr
         self._interface_ip = interface_ip
+        self._dhcp_local = dhcp_local          # the address of this machine the DHCP question is bound to (default: the one of the interface the default route leaves by)
         self._info: dict | None = None
         self._info_at = 0.0
         self._locations: dict[str, str] = {}   # the UPnP description each device announced (the router's is where its counters are asked)
@@ -387,8 +389,12 @@ class SystemIO:
     def dhcp_offers(self, listen_s: float = 4.0) -> list[dict]:
         """One DHCPDISCOVER on the broadcast address and the offers that come back. It binds the DHCP client port, which needs permission on most systems (and is taken while a DHCP
         client runs): when it cannot, the answer is an empty list, never an error. The offers are never answered with a request, so no address is leased."""
-        mac = normalize_mac(str(self.interface().get("mac") or ""))
+        info = self.interface()
+        mac = normalize_mac(str(info.get("mac") or ""))
         if not mac:
+            return []
+        local = self._dhcp_local or str(info.get("ip") or "")
+        if not is_private_address(local):
             return []
         xid = int.from_bytes(os.urandom(4), "big")
         try:
@@ -401,8 +407,19 @@ class SystemIO:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.settimeout(0.5)
-            sock.bind(("", rogue_dhcp.CLIENT_PORT))
-            sock.sendto(packet, ("255.255.255.255", rogue_dhcp.SERVER_PORT))
+            # Never the wildcard address: the socket is tied to one interface. A DHCP server answers a client that owns no address to the broadcast address, so on Linux the
+            # socket listens on the broadcast address alone and is bound to the device (SO_BINDTODEVICE, a best effort that needs no more than the permission for port 68);
+            # elsewhere it is bound to the address of the chosen interface, which also receives the broadcasts of its own network.
+            device = str(info.get("name") or "")
+            if hasattr(socket, "SO_BINDTODEVICE") and device and not WINDOWS:
+                try:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BINDTODEVICE, device.encode("ascii") + b"\0")
+                except OSError:
+                    pass
+                sock.bind((DHCP_BROADCAST, rogue_dhcp.CLIENT_PORT))
+            else:
+                sock.bind((local, rogue_dhcp.CLIENT_PORT))
+            sock.sendto(packet, (DHCP_BROADCAST, rogue_dhcp.SERVER_PORT))
             end = time.monotonic() + listen_s
             while time.monotonic() < end and len(offers) < rogue_dhcp.MAX_OFFERS:
                 try:

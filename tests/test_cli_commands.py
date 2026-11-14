@@ -19,7 +19,7 @@ from armor_network.publisher import DeliveryError  # noqa: E402
 from armor_network.sim_io import SimIO  # noqa: E402
 
 
-def house(cidr=None):
+def house(cidr=None, dhcp_local=None):
     return SimIO(tick_ms=2000)
 
 
@@ -147,6 +147,16 @@ class WatchTests(unittest.TestCase):
             code, _out, err = run_cli("demo", "--data-dir", folder, "--no-public-info")
         self.assertEqual(code, 1)
         self.assertIn("ARMOR_NETWORK=ERROR no default route", err)
+
+    def test_the_address_of_the_dhcp_question_is_a_private_one_and_reaches_the_system_layer(self):
+        for text in ("8.8.8.8", "not an address"):
+            code, _out, err = run_cli("demo", "--count", "1", "--dhcp-interface", text)
+            self.assertEqual(code, 2, text)
+            self.assertIn("--dhcp-interface", err)
+        with mock.patch.object(cli, "SystemIO", side_effect=house) as system, mock.patch.object(cli, "_run_loop", return_value=0), tempfile.TemporaryDirectory() as folder:
+            code, _out, _err = run_cli("watch", "--rogue-dhcp", "--dhcp-interface", "192.168.0.7", "--data-dir", folder, "--no-public-info")
+        self.assertEqual(code, 0)
+        system.assert_called_once_with(cidr=None, dhcp_local="192.168.0.7")
 
     def test_a_demo_probes_nothing_real(self):
         with mock.patch.object(cli, "SystemIO", side_effect=AssertionError("the real network was touched")), tempfile.TemporaryDirectory() as folder:

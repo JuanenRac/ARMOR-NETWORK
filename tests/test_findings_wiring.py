@@ -177,8 +177,36 @@ class SystemDhcp(unittest.TestCase):
         self.assertEqual(len(fake.sent), 1)
         self.assertEqual(fake.sent[0][1], ("255.255.255.255", 67))
         self.assertEqual(fake.sent[0][0][0], 1, "a DISCOVER, never a REQUEST")
-        self.assertEqual(fake.bound, ("", 68))
+        self.assertNotIn(fake.bound[0], ("", "0.0.0.0"), "never bound to every interface")
+        self.assertEqual(fake.bound[1], 68)
         self.assertTrue(fake.closed)
+
+    def test_on_linux_it_listens_on_the_broadcast_address_tied_to_the_device(self):
+        fake = FakeDhcpSocket([])
+        options = []
+        fake.setsockopt = lambda *args: options.append(args)
+        with mock.patch.object(system_io.socket, "socket", return_value=fake), mock.patch.object(system_io, "WINDOWS", False),                 mock.patch.object(system_io.socket, "SO_BINDTODEVICE", 25, create=True):
+            self.io().dhcp_offers(listen_s=0.1)
+        self.assertEqual(fake.bound, ("255.255.255.255", 68))
+        self.assertIn((socket.SOL_SOCKET, 25, b"eth0\0"), options)
+
+    def test_elsewhere_it_is_bound_to_the_address_of_the_interface(self):
+        fake = FakeDhcpSocket([])
+        with mock.patch.object(system_io.socket, "socket", return_value=fake), mock.patch.object(system_io, "WINDOWS", True):
+            self.io().dhcp_offers(listen_s=0.1)
+        self.assertEqual(fake.bound, ("192.168.0.10", 68))
+
+    def test_the_address_given_wins_and_a_public_one_asks_nothing(self):
+        fake = FakeDhcpSocket([])
+        io = SystemIO(dhcp_local="192.168.0.77")
+        io.interface = self.io().interface
+        with mock.patch.object(system_io.socket, "socket", return_value=fake), mock.patch.object(system_io, "WINDOWS", True):
+            io.dhcp_offers(listen_s=0.1)
+        self.assertEqual(fake.bound, ("192.168.0.77", 68))
+        io = SystemIO(dhcp_local="8.8.8.8")
+        io.interface = self.io().interface
+        with mock.patch.object(system_io.socket, "socket", side_effect=AssertionError("no socket")):
+            self.assertEqual(io.dhcp_offers(), [])
 
     def test_without_permission_the_answer_is_an_empty_list(self):
         fake = FakeDhcpSocket([], bind_error=PermissionError("not allowed"))

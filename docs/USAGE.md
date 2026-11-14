@@ -27,6 +27,7 @@ armor-network demo --count 3 --validate  # a made-up house; --validate checks ev
 | `--count N` | stop after N messages (0: never) |
 | `--no-public-info` | do not ask a public service for the public address |
 | `--mqtt-url URL` and `--mqtt-user NAME` | also publish every message to this MQTT broker (`mqtt://` or `mqtts://`, on `armor/network/<node>/state`, one short connection per message, QoS 0); the password is read from `ARMOR_NETWORK_MQTT_PASSWORD`, never from an argument. The manual orders of Studio travel in the answer of the server's route and not over MQTT, so a node that publishes only here does not receive them |
+| `--dhcp-interface IP` | the private address of this machine, on the interface to look from, that the DHCP question of `--rogue-dhcp` is bound to (default: the address of the interface the default route leaves by); the socket is never bound to every interface: on Linux it is tied to the device and listens on the broadcast address, elsewhere it is bound to that address |
 | `--rogue-dhcp` | look for a second DHCP server: one DHCP question on the broadcast address every ten minutes (nothing is leased); off by default, and it needs permission to use the DHCP client port (without it the answer is simply no finding) |
 | `--allow-dhcp IP` | a DHCP server that belongs on the network besides the router; repeatable |
 | `--router-igd` | read the traffic counters of the router over UPnP (no login, read only); off by default |
