@@ -87,8 +87,9 @@ class SystemIO:
 
     settle_s = 1.5      # how long the system gets to learn the neighbours after they were poked
 
-    def __init__(self, cidr: str | None = None, interface_ip: str | None = None) -> None:
+    def __init__(self, cidr: str | None = None, interface_ip: str | None = None, dhcp_interface: str = "") -> None:
         self._cidr_override = cidr
+        self._dhcp_interface = dhcp_interface   # the interface the DHCP question leaves by (Linux); empty: the system chooses
         self._interface_ip = interface_ip
         self._info: dict | None = None
         self._info_at = 0.0
@@ -401,6 +402,9 @@ class SystemIO:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.settimeout(0.5)
+            bind_to_device = getattr(socket, "SO_BINDTODEVICE", None)
+            if self._dhcp_interface and bind_to_device is not None:
+                sock.setsockopt(socket.SOL_SOCKET, bind_to_device, self._dhcp_interface.encode("ascii"))
             sock.bind(("", rogue_dhcp.CLIENT_PORT))
             sock.sendto(packet, ("255.255.255.255", rogue_dhcp.SERVER_PORT))
             end = time.monotonic() + listen_s

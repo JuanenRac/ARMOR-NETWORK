@@ -19,7 +19,7 @@ from armor_network.publisher import DeliveryError  # noqa: E402
 from armor_network.sim_io import SimIO  # noqa: E402
 
 
-def house(cidr=None):
+def house(cidr=None, dhcp_interface=""):
     return SimIO(tick_ms=2000)
 
 

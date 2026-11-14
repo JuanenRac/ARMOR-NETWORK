@@ -30,6 +30,8 @@ armor-network demo --count 3 --validate  # a made-up house; --validate checks ev
 | `--rogue-dhcp` | look for a second DHCP server: one DHCP question on the broadcast address every ten minutes (nothing is leased); off by default, and it needs permission to use the DHCP client port (without it the answer is simply no finding) |
 | `--allow-dhcp IP` | a DHCP server that belongs on the network besides the router; repeatable |
 | `--router-igd` | read the traffic counters of the router over UPnP (no login, read only); off by default |
+| `--dhcp-interface NAME` | the network interface the DHCP question leaves by (Linux; empty: the system chooses) |
+| `--config FILE` | the file with `rogue_dhcp`, `allow_dhcp`, `router_igd` and `dhcp_interface` (default: `config.json` in `--data-dir`, when it exists; an example is in `docs/config.example.json`); everything is off when the file says nothing and a flag on the command line wins over the file |
 | `--dns-name NAME` | the name the house is reached by from outside (the dynamic DNS name): each time the public address is asked for, the node resolves it and the message says whether it points to that address, so the server can warn when the address changed and the name did not follow. Resolve it from the house to the public address (a name that the house resolves to a private address never matches) |
 | `--public-info-url URL` | the https service that tells it (default `https://ipinfo.io/json`) |
 
