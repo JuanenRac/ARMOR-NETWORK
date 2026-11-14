@@ -2,7 +2,6 @@
 import contextlib
 import io
 import os
-import socket
 import sys
 import tempfile
 import unittest
@@ -14,7 +13,6 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from armor_network import cli, config_file  # noqa: E402
 from armor_network.sim_io import SimIO  # noqa: E402
-from armor_network.system_io import SystemIO  # noqa: E402
 
 
 def run(*argv):
@@ -33,14 +31,14 @@ class Parsing(unittest.TestCase):
         self.assertEqual((defaults.allow_dhcp, defaults.dhcp_interface), ([], ""))
 
     def test_a_complete_file(self):
-        settings = config_file.parse('{"rogue_dhcp": true, "allow_dhcp": ["192.168.0.2", "fe80::1"], "router_igd": true, "dhcp_interface": "eth0"}')
-        self.assertEqual((settings.rogue_dhcp, settings.router_igd, settings.dhcp_interface), (True, True, "eth0"))
+        settings = config_file.parse('{"rogue_dhcp": true, "allow_dhcp": ["192.168.0.2", "fe80::1"], "router_igd": true, "dhcp_interface": "192.168.0.10"}')
+        self.assertEqual((settings.rogue_dhcp, settings.router_igd, settings.dhcp_interface), (True, True, "192.168.0.10"))
         self.assertEqual(settings.allow_dhcp, ["192.168.0.2", "fe80::1"])
 
     def test_what_is_wrong_is_refused_with_the_key(self):
         for text, word in (("[]", "object"), ("nope", "JSON"), ('{"rogue": true}', "unknown key"), ('{"rogue_dhcp": "yes"}', "rogue_dhcp"), ('{"router_igd": 1}', "router_igd"),
                            ('{"allow_dhcp": "192.168.0.2"}', "allow_dhcp"), ('{"allow_dhcp": ["not-an-address"]}', "not an address"), ('{"allow_dhcp": ' + str(["10.0.0.1"] * 33).replace("'", '"') + "}", "at most"),
-                           ('{"dhcp_interface": "eth0; rm"}', "dhcp_interface"), ('{"dhcp_interface": 5}', "dhcp_interface")):
+                           ('{"dhcp_interface": "eth0"}', "dhcp_interface"), ('{"dhcp_interface": "8.8.8.8"}', "dhcp_interface"), ('{"dhcp_interface": 5}', "dhcp_interface")):
             with self.assertRaises(config_file.ConfigFileError, msg=text) as caught:
                 config_file.parse(text)
             self.assertIn(word, str(caught.exception))
@@ -68,7 +66,7 @@ class OnTheCommandLine(unittest.TestCase):
                 captured["config"] = config
 
         with tempfile.TemporaryDirectory() as directory, mock.patch.object(cli, "Agent", Spy), mock.patch.object(cli, "_run_loop", lambda agent, args, forever: 0), \
-                mock.patch.object(cli, "SystemIO", lambda cidr=None, dhcp_interface="": SimIO(tick_ms=2000)):
+                mock.patch.object(cli, "SystemIO", lambda cidr=None, dhcp_local=None: SimIO(tick_ms=2000)):
             data = Path(directory) / "data"
             data.mkdir()
             if file_text is not None:
@@ -104,34 +102,12 @@ class OnTheCommandLine(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("does not exist", err)
 
-    def test_the_interface_name_is_checked(self):
-        code, err, _config = self.seen_config("--dhcp-interface", "eth0 && reboot")
+    def test_the_address_of_the_file_is_checked_like_the_flag(self):
+        code, err, _config = self.seen_config(file_text='{"dhcp_interface": "8.8.8.8"}')
         self.assertEqual(code, 2)
-        self.assertIn("not the name of an interface", err)
-
-
-class TheInterfaceOfTheQuestion(unittest.TestCase):
-    def test_the_socket_is_bound_to_the_interface_when_the_system_can(self):
-        options = []
-
-        class Socket:
-            def setsockopt(self, level, name, value):
-                options.append((name, value))
-
-            def settimeout(self, _):
-                pass
-
-            def bind(self, _):
-                raise OSError("no permission")
-
-            def close(self):
-                pass
-
-        io = SystemIO(dhcp_interface="eth1")
-        with mock.patch.object(socket, "socket", lambda *a, **k: Socket()), mock.patch.object(socket, "SO_BINDTODEVICE", 25, create=True), \
-                mock.patch.object(io, "interface", lambda: {"mac": "02:00:00:00:00:01"}):
-            self.assertEqual(io.dhcp_offers(), [])
-        self.assertIn((25, b"eth1"), options)
+        self.assertIn("config:", err)
+        code, _err, _config = self.seen_config(file_text='{"dhcp_interface": "192.168.0.10"}')
+        self.assertEqual(code, 0)
 
 
 if __name__ == "__main__":

@@ -7,21 +7,21 @@ Copyright (C) 2026 JuanenRac (Electro Hobby 3D). GPL-3.0-or-later.
       "rogue_dhcp": false,        look for a second DHCP server (one DHCP question on the broadcast address every ten minutes; nothing is leased)
       "allow_dhcp": [],           DHCP servers that belong on the network besides the router
       "router_igd": false,        read the traffic counters of the router over UPnP (no login, read only)
-      "dhcp_interface": ""        the network interface the DHCP question leaves by (Linux; empty: the system chooses)
+      "dhcp_interface": ""        the private address of this machine, on the interface to look from, that the DHCP question is bound to (empty: the interface the default route leaves by)
     }
 """
 from __future__ import annotations
 
 import ipaddress
 import json
-import re
 from dataclasses import dataclass, field
 from pathlib import Path
+
+from .ipnet import is_private_address
 
 FILE_NAME = "config.json"
 MAX_BYTES = 16_384
 MAX_ALLOWED = 32
-_INTERFACE = re.compile(r"[A-Za-z0-9_.:-]{1,15}")
 
 
 class ConfigFileError(ValueError):
@@ -64,8 +64,8 @@ def parse(text: str) -> FileSettings:
         settings.allow_dhcp = list(allowed)
     if "dhcp_interface" in document:
         name = document["dhcp_interface"]
-        if not isinstance(name, str) or (name and not _INTERFACE.fullmatch(name)):
-            raise ConfigFileError("dhcp_interface must be the name of an interface (up to 15 letters, digits, . : _ -)")
+        if not isinstance(name, str) or (name and not is_private_address(name)):
+            raise ConfigFileError("dhcp_interface must be a private address of this machine, such as 192.168.0.10")
         settings.dhcp_interface = name
     return settings
 
