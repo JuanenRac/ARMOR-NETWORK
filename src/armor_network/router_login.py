@@ -70,9 +70,9 @@ def resolve_password(store: str, sealed: str, token: str, environ: dict[str, str
     """(the password, "") or (None, why not). Nothing is written anywhere."""
     if store == "sealed":
         if not sealed or not token:
-            return None, missing_password_reason(True, sealed != "", token != "")
+            return None, missing_login_reason(True, sealed != "", token != "")
         opened = open_sealed(token, sealed)
-        return (opened, "") if opened else (None, missing_password_reason(True, True, True))
+        return (opened, "") if opened else (None, missing_login_reason(True, True, True))
     value = environ.get(ROUTER_LOGIN_ENV, "")
     if value:
         return value, ""
@@ -80,10 +80,10 @@ def resolve_password(store: str, sealed: str, token: str, environ: dict[str, str
         value = prompt()
         if value:
             return value, ""
-    return None, missing_password_reason(False, sealed != "", token != "")
+    return None, missing_login_reason(False, sealed != "", token != "")
 
 
-def missing_password_reason(sealed_mode: bool, sealed_present: bool, token_present: bool) -> str:
+def missing_login_reason(sealed_mode: bool, sealed_present: bool, token_present: bool) -> str:
     """Why no password could be had, from three yes/no facts about the settings: it never sees the password or the token, so the text is safe to show."""
     if sealed_mode:
         if not sealed_present:
