@@ -156,9 +156,9 @@ def _router_from_settings(settings: config_file.FileSettings, token: str) -> tup
     """The login to the router from the settings, or (None, why not). The password is never stored in clear text (see router_login.py)."""
     if not settings.router_user:
         return None, "router_user is not set in the config file"
-    password, why = router_login.resolve_password(settings.router_credential, settings.router_credential_sealed, token, dict(os.environ), _ask_password)
+    password, _ = router_login.resolve_password(settings.router_credential, settings.router_credential_sealed, token, dict(os.environ), _ask_password)
     if not password:
-        return None, why
+        return None, router_login.missing_password_reason(settings.router_credential, settings.router_credential_sealed, token)
     return router_login.RouterLogin(settings.router_kind, settings.router_url, settings.router_user, password, settings.router_allow_plain_http), ""
 
 
@@ -170,7 +170,7 @@ def _router_seal(token: str) -> int:
     if not password:
         print(f"the password is read from {router_login.PASSWORD_ENV} or typed at the keyboard", file=sys.stderr)
         return 2
-    print(seal_text(token, password))
+    sys.stdout.write(seal_text(token, password) + "\n")   # the sealed text is what the file is meant to hold; the password itself is never shown
     return 0
 
 

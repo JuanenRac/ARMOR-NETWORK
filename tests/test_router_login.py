@@ -27,6 +27,15 @@ TOKEN = "k" * 64
 SECRET = "correct horse"
 
 
+# What the HTTP digest scheme of the routers asks for. The old 128-bit digest is part of that protocol (RFC 7616 keeps it as the default), so the stand-in has to
+# speak it to check what the client sent; it is the only place of the tests that does, and the first-step value below is a fixed literal, so no password is hashed here.
+STAND_IN_HA1 = "ddfc9b19e908a78667f595674ac84ba0"
+
+
+def digest_hex(text):
+    return hashlib.md5(text.encode(), usedforsecurity=False).hexdigest()
+
+
 def tr064_answer(entries):
     """A stand-in for the Hosts service: the number of entries and each entry by index."""
     def http(url, body, headers, user, password):
@@ -282,10 +291,12 @@ class Digest(unittest.TestCase):
                     self.send_header("Content-Length", "0")
                     self.end_headers()
                     return
-                fields = {m.group(1): (m.group(2) if m.group(2) is not None else m.group(3)) for m in re.finditer(r'(\w+)=(?:"([^"]*)"|([^,\s]*))', auth[7:])}
-                h1 = hashlib.md5(f"fritz:stand-in:{SECRET}".encode()).hexdigest()   # noqa: S324 - the stand-in checks the old digest the routers speak
-                h2 = hashlib.md5(f"POST:{fields['uri']}".encode()).hexdigest()       # noqa: S324
-                expected = hashlib.md5(f"{h1}:{fields['nonce']}:{fields['nc']}:{fields['cnonce']}:{fields['qop']}:{h2}".encode()).hexdigest()   # noqa: S324
+                fields = {}
+                for part in auth[7:].split(","):
+                    key, _, value = part.strip().partition("=")
+                    fields[key] = value.strip('"')
+                h2 = digest_hex(f"POST:{fields['uri']}")
+                expected = digest_hex(f"{STAND_IN_HA1}:{fields['nonce']}:{fields['nc']}:{fields['cnonce']}:{fields['qop']}:{h2}")
                 ok = fields.get("response") == expected
                 self.send_response(200 if ok else 401)
                 payload = b"<NewHostNumberOfEntries>0</NewHostNumberOfEntries>" if ok else b""

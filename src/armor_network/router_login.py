@@ -69,12 +69,10 @@ def check_url(url: str, kind: str, allow_plain_http: bool) -> str | None:
 def resolve_password(store: str, sealed: str, token: str, environ: dict[str, str], prompt: Callable[[], str] | None) -> tuple[str | None, str]:
     """(the password, "") or (None, why not). Nothing is written anywhere."""
     if store == "sealed":
-        if not sealed:
-            return None, "router_credential is sealed but router_credential_sealed is empty"
-        if not token:
-            return None, "a sealed router password opens only with this node's token (--ingest-token or ARMOR_INGEST_TOKEN)"
+        if not sealed or not token:
+            return None, missing_password_reason(store, sealed, token)
         opened = open_sealed(token, sealed)
-        return (opened, "") if opened else (None, "the sealed router password does not open with this node's token")
+        return (opened, "") if opened else (None, missing_password_reason(store, sealed, token))
     value = environ.get(PASSWORD_ENV, "")
     if value:
         return value, ""
@@ -82,7 +80,18 @@ def resolve_password(store: str, sealed: str, token: str, environ: dict[str, str
         value = prompt()
         if value:
             return value, ""
-    return None, f"the router password is not stored: set {PASSWORD_ENV} or start the program where it can ask for it"
+    return None, missing_password_reason(store, sealed, token)
+
+
+def missing_password_reason(store: str, sealed: str, token: str) -> str:
+    """Why no password could be had, from the settings alone: it never sees the password, so the text is safe to show."""
+    if store == "sealed":
+        if not sealed:
+            return "router_credential is sealed but router_credential_sealed is empty"
+        if not token:
+            return "a sealed router password opens only with this node's token (--ingest-token or ARMOR_INGEST_TOKEN)"
+        return "the sealed router password does not open with this node's token"
+    return f"the router password is not stored: set {PASSWORD_ENV} or start the program where it can ask for it"
 
 
 # ---- TR-064 -------------------------------------------------------------------------------------------------------------------------------
