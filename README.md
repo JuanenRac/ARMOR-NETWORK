@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-265%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-290%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.7-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**Honesty check - what runs today:** The scanner, the inventory that tells what changed, the internet check, the public-address look-up, the orders from Studio and the sealed logins are tested on a computer against a scripted network (265 tests; every message is accepted by ARMOR-COMMON's contract), and the program runs as a service on the CM5 test bench, watching the real network the bench is on (a router, the phones and nodes of the house). It has not watched a whole house for weeks, it only asks the router and never configures it, and what a device is (its kind, its system, its maker) is a guess. It does not capture packets: it cannot see who talks to whom, and traffic per device and intrusion detection in the strict sense need the router's counters or a mirror port, which is a later step.
+**Honesty check - what runs today:** The scanner, the inventory that tells what changed, the internet check, the public-address look-up, the orders from Studio and the sealed logins are tested on a computer against a scripted network (290 tests; every message is accepted by ARMOR-COMMON's contract), and the program runs as a service on the CM5 test bench, watching the real network the bench is on (a router, the phones and nodes of the house). It has not watched a whole house for weeks, it only asks the router and never configures it, and what a device is (its kind, its system, its maker) is a guess. It does not capture packets: it cannot see who talks to whom, and traffic per device and intrusion detection in the strict sense need the router's counters or a mirror port, which is a later step.
 
 ---
 
@@ -40,8 +40,8 @@
 | Maturity | Established |
 | Role | Local network node: what is on the network, what changed, the internet, orders from Studio |
 | Stack | Python 3.11+, standard library only |
-| Tests | 265 (`python -m unittest discover -s tests`) |
-| Contract | Message `armor/network/<node>/state`, 111 conformance vectors (messages and orders) |
+| Tests | 290 (`python -m unittest discover -s tests`) |
+| Contract | Message `armor/network/<node>/state`, 118 conformance vectors (messages and orders) |
 | Runs on | A machine of the network to be watched (Linux, Windows or macOS); the CM5 test bench as a service |
 | On real hardware | Runs as a service on the CM5 test bench, watching its real network (a router, the phones and nodes of the house) |
 | License | GPL-3.0-or-later |
@@ -57,7 +57,7 @@ Each line is one part of this repository and the light says how far it is today.
 | Area | State | What it means here |
 |---|---|---|
 | Software | 🟢 | The scanner, the inventory that tells what changed, the internet check, the public-address look-up and the orders from Studio run as a service on the CM5 test bench. |
-| Tests | 🟢 | 265 tests pass against a scripted network, and every message is accepted by the contract of ARMOR-COMMON. |
+| Tests | 🟢 | 290 tests pass against a scripted network, and every message is accepted by the contract of ARMOR-COMMON. |
 | Protocols and data | 🟡 | What a device is (its kind, its system, its maker) is a guess, and nothing captures packets: traffic per device and intrusion detection in the strict sense are not done. |
 | Hardware | 🟡 | It watches the real network of the CM5 test bench (a router, the phones and nodes of the house) but has not watched a whole house for weeks. |
 | Security | 🟡 | It only asks the router and never configures it; the sealed logins are tested on the host, and there has been no independent review. |
@@ -103,6 +103,7 @@ ARMOR-NETWORK is the family's eye on the local network. It runs on a machine of 
 |---|---|
 | Scanning outside the house or another network | Only private ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) and never more than 1024 addresses (a /22); `--cidr` is always private; the guard is `check_scan_range`, not an option |
 | Breaking something fragile | A skip list (`--skip IP`, repeatable); nothing is sent to a device that is not a question; never a login, never an exploit; 12 connections at a time reading a few hundred bytes |
+| A question on the network that nobody asked for | `--rogue-dhcp` is off by default; when on, it sends one DHCP question on the broadcast address every ten minutes and never asks for an address, so nothing is leased; without permission to use the DHCP client port it stays silent and says so; `--router-igd` only reads counters, with no login |
 | Risky open ports go unnoticed | They are marked: 21, 23, 3389, 5900, 6379, 3306, 5432, 7547 and 445 |
 | Orders from the server that inject commands | A closed list: `scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http`, `inspect`; at most 4 at a time; an order id of letters, digits, `_` and `-` (32 at most); output cut at 2000; MAC checked; nothing is run through a shell; orders arrive in the answer to the node's own message, never as a connection made to the node |
 | The login of an inspection leaks | It travels sealed for this node alone, only over Digest or HTTPS (never Basic over plain HTTP), only to the device whose HTTPS certificate was seen the first time, and is never repeated in an answer; the factory logins it tries come from a fixed list |
@@ -120,7 +121,7 @@ ARMOR-NETWORK is the family's eye on the local network. It runs on a machine of 
 | `python -m armor_network demo [--count N]` | - | a made-up house (a device joins, a camera opens Telnet, the internet falls): nothing on any network is touched |
 | `python -m armor_network internet`  `oui <mac>` | - | one round of the internet check; who made a network card |
 
-The orders from Studio (`scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http`, `inspect`) are queued by the routes `/api/v1/network/...` of ARMOR-SERVER and reach the node in the answer to its message; the contract of the message and of the orders is in ARMOR-COMMON (111 conformance vectors). See [docs/MESSAGES.md](docs/MESSAGES.md) and [docs/USAGE.md](docs/USAGE.md).
+The orders from Studio (`scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http`, `inspect`) are queued by the routes `/api/v1/network/...` of ARMOR-SERVER and reach the node in the answer to its message; the contract of the message and of the orders is in ARMOR-COMMON (118 conformance vectors). See [docs/MESSAGES.md](docs/MESSAGES.md) and [docs/USAGE.md](docs/USAGE.md).
 
 ## ⚙️ Configuration
 
@@ -132,6 +133,7 @@ The orders from Studio (`scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http
 | `--scan-every`  `--internet-every` | 60 s  5 s | seconds between sweeps and between internet checks |
 | `--server-url`  `--ingest-token`  `--mqtt-url`  `--mqtt-user` | - | where it tells; the token of this node (Studio shows it) or the shared ingest token, never written to a file |
 | `--data-dir` | armor-network-data | where the inventory and the outages are kept between runs |
+| `--rogue-dhcp`  `--allow-dhcp IP`  `--router-igd` | off | look for a second DHCP server (one DHCP question on the broadcast address every ten minutes, nothing is leased; needs permission to use the DHCP client port), a DHCP server that belongs on the network besides the router (repeatable), and read the traffic counters of the router over UPnP without a login; the first and the last are off |
 | `--validate`  `--no-public-info`  `--public-info-url`  `--dns-name` | - | check each message against ARMOR-COMMON; the public-address look-up (off, its address, the name to check) |
 
 All of it is set by command-line flags (see [docs/USAGE.md](docs/USAGE.md), which also shows the systemd unit that keeps it running). An outage is called after three failed rounds and ended after two good ones; the first three sweeps only learn what is there.
@@ -141,7 +143,7 @@ All of it is set by command-line flags (see [docs/USAGE.md](docs/USAGE.md), whic
 **Requirements:** Python 3.11+ (standard library only) and a machine on the network to be watched (Linux, Windows or macOS).
 
 ```powershell
-python -m unittest discover -s tests                                                  # 265 tests: parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
+python -m unittest discover -s tests                                                  # 290 tests: parsers with real samples, the guard on what may be probed, the inventory, the internet, the whole agent against a scripted house
 python -m armor_network scan                                                          # look at the network once and print it (only the private network of this machine)
 python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # keep watching and tell ARMOR-SERVER
 python -m armor_network demo --count 3                                                # a made-up house: nothing on any network is touched
@@ -153,7 +155,7 @@ See the [usage](docs/USAGE.md) and the [design](docs/DESIGN.md).
 ## 🧪 Testing
 
 ```powershell
-python -m unittest discover -s tests  # 265 tests
+python -m unittest discover -s tests  # 290 tests
 python -I tools/armor_ci_validate.py
 ```
 
@@ -202,7 +204,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    orders from Studio; sealed logins
 │   ├── cli.py __main__.py                   scan, watch and demo
 │   └── data/                                oui.tsv.gz, the IEEE register
-├── tests/                                   265 tests in 9 modules
+├── tests/                                   290 tests in 9 modules
 ├── docs/                                    DESIGN, SAFETY, USAGE, MESSAGES
 ├── tools/                                   fetch_oui.py refreshes the register of makers; the shared CI checks and launcher
 ├── images/                                  banner, icon and the pictures of the README

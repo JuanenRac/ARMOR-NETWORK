@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 oder neuer">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Sprache">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-265%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-290%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.7-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Reifegrad">
 </p>
 
 ---
 
-**Ehrlichkeitsprüfung - was heute läuft:** Der Scanner, das Inventar, das sagt, was sich geändert hat, die Internetprüfung, die Abfrage der öffentlichen Adresse, die Aufträge aus Studio und die versiegelten Logins werden auf einem Computer gegen ein geskriptetes Netz getestet (265 Tests; jede Nachricht wird vom Vertrag von ARMOR-COMMON akzeptiert), und das Programm läuft als Dienst am CM5-Testaufbau und beobachtet das echte Netz, in dem der Aufbau steht (ein Router, die Telefone und Knoten des Hauses). Es hat noch kein ganzes Haus wochenlang beobachtet, es fragt nur den Router und konfiguriert ihn nie, und was ein Gerät ist (Art, System, Hersteller), ist eine Vermutung. Es fängt keine Pakete ab: Es sieht nicht, wer mit wem spricht, und Verkehr pro Gerät und Einbruchserkennung im strengen Sinn brauchen die Zähler des Routers oder einen Mirror-Port, was ein späterer Schritt ist.
+**Ehrlichkeitsprüfung - was heute läuft:** Der Scanner, das Inventar, das sagt, was sich geändert hat, die Internetprüfung, die Abfrage der öffentlichen Adresse, die Aufträge aus Studio und die versiegelten Logins werden auf einem Computer gegen ein geskriptetes Netz getestet (290 Tests; jede Nachricht wird vom Vertrag von ARMOR-COMMON akzeptiert), und das Programm läuft als Dienst am CM5-Testaufbau und beobachtet das echte Netz, in dem der Aufbau steht (ein Router, die Telefone und Knoten des Hauses). Es hat noch kein ganzes Haus wochenlang beobachtet, es fragt nur den Router und konfiguriert ihn nie, und was ein Gerät ist (Art, System, Hersteller), ist eine Vermutung. Es fängt keine Pakete ab: Es sieht nicht, wer mit wem spricht, und Verkehr pro Gerät und Einbruchserkennung im strengen Sinn brauchen die Zähler des Routers oder einen Mirror-Port, was ein späterer Schritt ist.
 
 ---
 
@@ -40,8 +40,8 @@
 | Reifegrad | Etabliert |
 | Rolle | Knoten für das lokale Netz: was im Netz ist, was sich änderte, das Internet, Aufträge aus Studio |
 | Technik | Python 3.11+, nur Standardbibliothek |
-| Tests | 265 (`python -m unittest discover -s tests`) |
-| Vertrag | Nachricht `armor/network/<Knoten>/state`, 111 Konformitätsvektoren (Nachrichten und Aufträge) |
+| Tests | 290 (`python -m unittest discover -s tests`) |
+| Vertrag | Nachricht `armor/network/<Knoten>/state`, 118 Konformitätsvektoren (Nachrichten und Aufträge) |
 | Läuft auf | Ein Rechner des überwachten Netzes (Linux, Windows oder macOS); der CM5-Prüfstand als Dienst |
 | Auf echter Hardware | Läuft als Dienst am CM5-Testaufbau und beobachtet sein echtes Netz (einen Router, die Telefone und Knoten des Hauses) |
 | Lizenz | GPL-3.0-or-later |
@@ -57,7 +57,7 @@ Jede Zeile ist ein Teil dieses Repositorys, und die Ampel sagt, wie weit er heut
 | Bereich | Stand | Was das hier bedeutet |
 |---|---|---|
 | Software | 🟢 | Der Scanner, das Inventar, das sagt, was sich geändert hat, die Internetprüfung, die Abfrage der öffentlichen Adresse und die Befehle von Studio laufen als Dienst auf dem CM5-Prüfstand. |
-| Tests | 🟢 | 265 Tests bestehen gegen ein geskriptetes Netz, und jede Nachricht wird vom Vertrag von ARMOR-COMMON akzeptiert. |
+| Tests | 🟢 | 290 Tests bestehen gegen ein geskriptetes Netz, und jede Nachricht wird vom Vertrag von ARMOR-COMMON akzeptiert. |
 | Protokolle und Daten | 🟡 | Was ein Gerät ist (Art, System, Hersteller), ist eine Vermutung, und nichts fängt Pakete ab: Verkehr pro Gerät und Einbruchserkennung im strengen Sinn gibt es nicht. |
 | Hardware | 🟡 | Er überwacht das echte Netz des CM5-Prüfstands (ein Router, die Telefone und Knoten des Hauses), hat aber noch nie wochenlang ein ganzes Haus überwacht. |
 | Sicherheit | 🟡 | Er fragt den Router nur ab und konfiguriert ihn nie; die versiegelten Zugangsdaten sind auf dem Host getestet, und es gab keine unabhängige Prüfung. |
@@ -103,6 +103,7 @@ ARMOR-NETWORK ist das Auge der Familie auf das lokale Netz. Es läuft auf einem 
 |---|---|
 | Scannen außerhalb des Hauses oder fremder Netze | Nur private Bereiche (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) und nie mehr als 1024 Adressen (ein /22); `--cidr` ist immer privat; die Sperre ist `check_scan_range`, keine Option |
 | Etwas Empfindliches stören | Eine Ausschlussliste (`--skip IP`, wiederholbar); an ein Gerät wird nichts gesendet, was keine Frage ist; nie ein Login, nie ein Exploit; 12 Verbindungen gleichzeitig, die wenige hundert Bytes lesen |
+| Eine Frage im Netz, die niemand gestellt hat | `--rogue-dhcp` ist standardmäßig aus; eingeschaltet sendet es alle zehn Minuten eine DHCP-Frage an die Broadcast-Adresse und fordert nie eine Adresse an, es wird also nichts vergeben; ohne Erlaubnis für den DHCP-Client-Port bleibt es stumm und sagt es; `--router-igd` liest nur Zähler, ohne Login |
 | Riskante offene Ports bleiben unbemerkt | Sie werden markiert: 21, 23, 3389, 5900, 6379, 3306, 5432, 7547 und 445 |
 | Aufträge vom Server, die Befehle einschleusen | Eine geschlossene Liste: `scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http`, `inspect`; höchstens 4 gleichzeitig; eine Auftrags-ID aus Buchstaben, Ziffern, `_` und `-` (höchstens 32); Ausgabe bei 2000 gekappt; MAC geprüft; nichts läuft über eine Shell; Aufträge kommen in der Antwort auf die eigene Nachricht des Knotens, nie als Verbindung zum Knoten |
 | Das Login einer Inspektion gelangt nach außen | Es reist nur für diesen Knoten versiegelt, nur über Digest oder HTTPS (nie Basic über einfaches HTTP), nur zum Gerät, dessen HTTPS-Zertifikat beim ersten Mal gesehen wurde, und wird nie in einer Antwort wiederholt; die Werkslogins, die es probiert, stammen aus einer festen Liste |
@@ -120,7 +121,7 @@ ARMOR-NETWORK ist das Auge der Familie auf das lokale Netz. Es läuft auf einem 
 | `python -m armor_network demo [--count N]` | - | ein erfundenes Haus (ein Gerät tritt bei, eine Kamera öffnet Telnet, das Internet fällt aus): kein Netz wird berührt |
 | `python -m armor_network internet`  `oui <mac>` | - | eine Runde der Internetprüfung; wer eine Netzwerkkarte gebaut hat |
 
-Die Aufträge aus Studio (`scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http`, `inspect`) reiht der Server über die Routen `/api/v1/network/...` von ARMOR-SERVER ein; sie erreichen den Knoten in der Antwort auf seine Nachricht; der Vertrag der Nachricht und der Aufträge liegt in ARMOR-COMMON (111 Konformitätsvektoren). Siehe [docs/MESSAGES.md](docs/MESSAGES.md) und [docs/USAGE.md](docs/USAGE.md).
+Die Aufträge aus Studio (`scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http`, `inspect`) reiht der Server über die Routen `/api/v1/network/...` von ARMOR-SERVER ein; sie erreichen den Knoten in der Antwort auf seine Nachricht; der Vertrag der Nachricht und der Aufträge liegt in ARMOR-COMMON (118 Konformitätsvektoren). Siehe [docs/MESSAGES.md](docs/MESSAGES.md) und [docs/USAGE.md](docs/USAGE.md).
 
 ## ⚙️ Konfiguration
 
@@ -132,6 +133,7 @@ Die Aufträge aus Studio (`scan_now`, `ping`, `traceroute`, `wake`, `ports`, `ht
 | `--scan-every`  `--internet-every` | 60 s  5 s | Sekunden zwischen Durchläufen und Internetprüfungen |
 | `--server-url`  `--ingest-token`  `--mqtt-url`  `--mqtt-user` | - | wohin gemeldet wird; das Token dieses Knotens (Studio zeigt es) oder das gemeinsame Ingest-Token, nie in eine Datei geschrieben |
 | `--data-dir` | armor-network-data | wo Inventar und Ausfälle zwischen Läufen liegen |
+| `--rogue-dhcp`  `--allow-dhcp IP`  `--router-igd` | off | sucht einen zweiten DHCP-Server (alle zehn Minuten eine DHCP-Frage an die Broadcast-Adresse, es wird nichts vergeben; braucht die Erlaubnis, den DHCP-Client-Port zu nutzen), einen DHCP-Server, der neben dem Router ins Netz gehört (wiederholbar), und liest die Verkehrszähler des Routers über UPnP ohne Login; der erste und der letzte sind aus |
 | `--validate`  `--no-public-info`  `--public-info-url`  `--dns-name` | - | jede Nachricht gegen ARMOR-COMMON prüfen; die Abfrage der öffentlichen Adresse (abschalten, ihre Adresse, der zu prüfende Name) |
 
 Alles wird mit Kommandozeilenoptionen gesetzt (siehe [docs/USAGE.md](docs/USAGE.md), das auch die systemd-Einheit zeigt, die es am Laufen hält). Ein Ausfall wird nach drei fehlgeschlagenen Runden festgestellt und nach zwei guten beendet; die ersten drei Durchläufe lernen nur, was da ist.
@@ -141,7 +143,7 @@ Alles wird mit Kommandozeilenoptionen gesetzt (siehe [docs/USAGE.md](docs/USAGE.
 **Voraussetzungen:** Python 3.11+ (nur Standardbibliothek) und ein Rechner im zu überwachenden Netz (Linux, Windows oder macOS).
 
 ```powershell
-python -m unittest discover -s tests                                                  # 265 Tests: Parser mit echten Proben, die Sperre dessen, was geprüft werden darf, das Inventar, das Internet, der ganze Agent gegen ein geskriptetes Haus
+python -m unittest discover -s tests                                                  # 290 Tests: Parser mit echten Proben, die Sperre dessen, was geprüft werden darf, das Inventar, das Internet, der ganze Agent gegen ein geskriptetes Haus
 python -m armor_network scan                                                          # das Netz einmal ansehen und ausgeben (nur das private Netz dieses Rechners)
 python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # weiter beobachten und ARMOR-SERVER melden
 python -m armor_network demo --count 3                                                # ein erfundenes Haus: kein Netz wird berührt
@@ -153,7 +155,7 @@ Siehe die [Benutzung](docs/USAGE.md) und den [Entwurf](docs/DESIGN.md).
 ## 🧪 Tests
 
 ```powershell
-python -m unittest discover -s tests  # 265 Tests
+python -m unittest discover -s tests  # 290 Tests
 python -I tools/armor_ci_validate.py
 ```
 
@@ -202,7 +204,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    Aufträge aus Studio; versiegelte Logins
 │   ├── cli.py __main__.py                   scan, watch und demo
 │   └── data/                                oui.tsv.gz, das IEEE-Register
-├── tests/                                   265 Tests in 9 Modulen
+├── tests/                                   290 Tests in 9 Modulen
 ├── docs/                                    DESIGN, SAFETY, USAGE, MESSAGES
 ├── tools/                                   fetch_oui.py erneuert das Herstellerregister; die gemeinsamen CI-Prüfungen und der Starter
 ├── images/                                  Banner, Symbol und die Bilder des READMEs

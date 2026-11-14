@@ -21,14 +21,14 @@
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL 3.0 or later">
   <img src="https://img.shields.io/badge/Language-Python%203.11%2B-3776ab.svg" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-none-2ea44f.svg" alt="Dependencies">
-  <img src="https://img.shields.io/badge/Tests-265%20passing-2ea44f.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-290%20passing-2ea44f.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.1.7-0f6cbd.svg" alt="Version">
   <img src="https://img.shields.io/badge/Maturity-established-2EA44F.svg" alt="Maturity">
 </p>
 
 ---
 
-**Verificação de honestidade - o que funciona hoje:** O scanner, o inventário que diz o que mudou, a verificação da internet, a consulta do endereço público, as ordens do Studio e os acessos selados são testados num computador contra uma rede guionizada (265 testes; cada mensagem é aceite pelo contrato do ARMOR-COMMON), e o programa corre como serviço na bancada de testes do CM5, vigiando a rede real em que a bancada está (um router, os telemóveis e os nós da casa). Não vigiou uma casa inteira durante semanas, só pergunta ao router e nunca o configura, e o que é um dispositivo (o tipo, o sistema, o fabricante) é um palpite. Não captura pacotes: não pode ver quem fala com quem, e o tráfego por dispositivo e a deteção de intrusos em sentido estrito precisam dos contadores do router ou de uma porta espelho, que é um passo posterior.
+**Verificação de honestidade - o que funciona hoje:** O scanner, o inventário que diz o que mudou, a verificação da internet, a consulta do endereço público, as ordens do Studio e os acessos selados são testados num computador contra uma rede guionizada (290 testes; cada mensagem é aceite pelo contrato do ARMOR-COMMON), e o programa corre como serviço na bancada de testes do CM5, vigiando a rede real em que a bancada está (um router, os telemóveis e os nós da casa). Não vigiou uma casa inteira durante semanas, só pergunta ao router e nunca o configura, e o que é um dispositivo (o tipo, o sistema, o fabricante) é um palpite. Não captura pacotes: não pode ver quem fala com quem, e o tráfego por dispositivo e a deteção de intrusos em sentido estrito precisam dos contadores do router ou de uma porta espelho, que é um passo posterior.
 
 ---
 
@@ -40,8 +40,8 @@
 | Maturidade | Estabelecido |
 | Função | Nó da rede local: o que há na rede, o que mudou, a internet, ordens do Studio |
 | Tecnologia | Python 3.11+, só biblioteca padrão |
-| Testes | 265 (`python -m unittest discover -s tests`) |
-| Contrato | Mensagem `armor/network/<nó>/state`, 111 vetores de conformidade (mensagens e ordens) |
+| Testes | 290 (`python -m unittest discover -s tests`) |
+| Contrato | Mensagem `armor/network/<nó>/state`, 118 vetores de conformidade (mensagens e ordens) |
 | Funciona em | Uma máquina da rede a vigiar (Linux, Windows ou macOS); a bancada do CM5 como serviço |
 | Em hardware real | Corre como serviço na bancada de testes do CM5, vigiando a sua rede real (um router, os telemóveis e os nós da casa) |
 | Licença | GPL-3.0-or-later |
@@ -57,7 +57,7 @@ Cada linha é uma parte deste repositório e a luz diz até onde chega hoje. É 
 | Área | Estado | O que significa aqui |
 |---|---|---|
 | Software | 🟢 | O leitor da rede, o inventário que diz o que mudou, a verificação da internet, a consulta do endereço público e as ordens do Studio funcionam como serviço na bancada de testes CM5. |
-| Testes | 🟢 | Passam 265 testes contra uma rede com guião, e cada mensagem é aceite pelo contrato do ARMOR-COMMON. |
+| Testes | 🟢 | Passam 290 testes contra uma rede com guião, e cada mensagem é aceite pelo contrato do ARMOR-COMMON. |
 | Protocolos e dados | 🟡 | O que um dispositivo é (o tipo, o sistema, o fabricante) é um palpite, e nada captura pacotes: o tráfego por dispositivo e a deteção de intrusões em sentido estrito não estão feitos. |
 | Hardware | 🟡 | Vigia a rede real da bancada de testes CM5 (um router, os telemóveis e os nós da casa), mas não vigiou uma casa inteira durante semanas. |
 | Segurança | 🟡 | Só pergunta ao router e nunca o configura; os acessos selados estão testados no anfitrião e não houve revisão independente. |
@@ -103,6 +103,7 @@ O ARMOR-NETWORK é o olho da família sobre a rede local. Corre numa máquina da
 |---|---|
 | Varrer fora de casa ou uma rede alheia | Só intervalos privados (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) e nunca mais de 1024 endereços (um /22); `--cidr` é sempre privado; a guarda é `check_scan_range`, não uma opção |
 | Estragar algo frágil | Uma lista de exclusão (`--skip IP`, repetível); nada é enviado a um equipamento que não seja uma pergunta; nunca um login, nunca um exploit; 12 ligações de cada vez a ler umas centenas de bytes |
+| Uma pergunta na rede que ninguém pediu | `--rogue-dhcp` está desligado por predefinição; ligado, envia uma pergunta DHCP ao endereço de difusão a cada dez minutos e nunca pede um endereço, pelo que nada é atribuído; sem permissão para usar a porta cliente DHCP fica calado e di-lo; `--router-igd` só lê contadores, sem credenciais |
 | Portas abertas de risco passam despercebidas | São assinaladas: 21, 23, 3389, 5900, 6379, 3306, 5432, 7547 e 445 |
 | Ordens do servidor que injetam comandos | Uma lista fechada: `scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http`, `inspect`; no máximo 4 de cada vez; um id de ordem de letras, dígitos, `_` e `-` (32 no máximo); saída cortada em 2000; MAC verificado; nada passa por uma shell; as ordens chegam na resposta à mensagem do próprio nó, nunca como uma ligação feita ao nó |
 | O login de uma inspeção vaza | Viaja selado só para este nó, apenas por Digest ou HTTPS (nunca Basic em HTTP simples), só para o equipamento cujo certificado HTTPS foi visto da primeira vez, e nunca se repete numa resposta; os logins de fábrica que tenta vêm de uma lista fixa |
@@ -120,7 +121,7 @@ O ARMOR-NETWORK é o olho da família sobre a rede local. Corre numa máquina da
 | `python -m armor_network demo [--count N]` | - | uma casa inventada (entra um equipamento, uma câmara abre Telnet, cai a internet): nenhuma rede é tocada |
 | `python -m armor_network internet`  `oui <mac>` | - | uma ronda da verificação da internet; quem fabricou uma placa de rede |
 
-As ordens do Studio (`scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http`, `inspect`) são postas em fila pelas rotas `/api/v1/network/...` do ARMOR-SERVER e chegam ao nó na resposta à sua mensagem; o contrato da mensagem e das ordens está no ARMOR-COMMON (111 vetores de conformidade). Veja [docs/MESSAGES.md](docs/MESSAGES.md) e [docs/USAGE.md](docs/USAGE.md).
+As ordens do Studio (`scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http`, `inspect`) são postas em fila pelas rotas `/api/v1/network/...` do ARMOR-SERVER e chegam ao nó na resposta à sua mensagem; o contrato da mensagem e das ordens está no ARMOR-COMMON (118 vetores de conformidade). Veja [docs/MESSAGES.md](docs/MESSAGES.md) e [docs/USAGE.md](docs/USAGE.md).
 
 ## ⚙️ Configuração
 
@@ -132,6 +133,7 @@ As ordens do Studio (`scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http`, 
 | `--scan-every`  `--internet-every` | 60 s  5 s | segundos entre varrimentos e verificações da internet |
 | `--server-url`  `--ingest-token`  `--mqtt-url`  `--mqtt-user` | - | para onde informa; o token deste nó (o Studio mostra-o) ou o token de ingestão partilhado, nunca escrito num ficheiro |
 | `--data-dir` | armor-network-data | onde o inventário e as quedas ficam entre execuções |
+| `--rogue-dhcp`  `--allow-dhcp IP`  `--router-igd` | off | procura um segundo servidor DHCP (uma pergunta DHCP ao endereço de difusão a cada dez minutos, nada é atribuído; requer permissão para usar a porta cliente DHCP), um servidor DHCP que pertence à rede além do router (repetível), e lê os contadores de tráfego do router por UPnP sem credenciais; o primeiro e o último estão desligados |
 | `--validate`  `--no-public-info`  `--public-info-url`  `--dns-name` | - | verifica cada mensagem com o ARMOR-COMMON; a consulta do endereço público (desligá-la, o seu endereço, o nome a verificar) |
 
 Tudo se define com opções da linha de comandos (veja [docs/USAGE.md](docs/USAGE.md), que mostra também a unidade systemd que o mantém a correr). Uma queda declara-se após três rondas falhadas e termina após duas boas; os três primeiros varrimentos só aprendem o que lá está.
@@ -141,7 +143,7 @@ Tudo se define com opções da linha de comandos (veja [docs/USAGE.md](docs/USAG
 **Requisitos:** Python 3.11+ (só biblioteca padrão) e uma máquina na rede a vigiar (Linux, Windows ou macOS).
 
 ```powershell
-python -m unittest discover -s tests                                                  # 265 testes: analisadores com amostras reais, a guarda do que se pode sondar, o inventário, a internet, o agente completo contra uma casa com guião
+python -m unittest discover -s tests                                                  # 290 testes: analisadores com amostras reais, a guarda do que se pode sondar, o inventário, a internet, o agente completo contra uma casa com guião
 python -m armor_network scan                                                          # olha para a rede uma vez e imprime-a (só a rede privada desta máquina)
 python -m armor_network watch --server-url http://127.0.0.1:18080 --ingest-token ...  # continua a vigiar e informa o ARMOR-SERVER
 python -m armor_network demo --count 3                                                # uma casa inventada: nenhuma rede é tocada
@@ -153,7 +155,7 @@ Consulte a [utilização](docs/USAGE.md) e o [desenho](docs/DESIGN.md).
 ## 🧪 Testes
 
 ```powershell
-python -m unittest discover -s tests  # 265 testes
+python -m unittest discover -s tests  # 290 testes
 python -I tools/armor_ci_validate.py
 ```
 
@@ -202,7 +204,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    ordens do Studio; credenciais seladas
 │   ├── cli.py __main__.py                   scan, watch e demo
 │   └── data/                                oui.tsv.gz, o registo IEEE
-├── tests/                                   265 testes em 9 módulos
+├── tests/                                   290 testes em 9 módulos
 ├── docs/                                    DESIGN, SAFETY, USAGE, MESSAGES
 ├── tools/                                   fetch_oui.py renova o registo de fabricantes; as verificações de CI e o lançador
 ├── images/                                  faixa, ícone e as imagens do README
