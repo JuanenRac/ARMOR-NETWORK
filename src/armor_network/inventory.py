@@ -111,7 +111,8 @@ class EventLog:
         self.counter = counter
         self.events: list[dict] = list(events or [])
 
-    def add(self, kind: str, at_ms: int, *, device_id: str | None = None, port: int | None = None, outage_s: int | None = None, detail: str | None = None) -> dict:
+    def add(self, kind: str, at_ms: int, *, device_id: str | None = None, port: int | None = None, outage_s: int | None = None, detail: str | None = None,
+            server: str | None = None, recommendation: str | None = None) -> dict:
         self.counter += 1
         event: dict = {"id": f"e{self.counter:x}", "kind": kind, "at_ms": at_ms}
         if device_id:
@@ -120,6 +121,10 @@ class EventLog:
             event["port"] = port
         if outage_s is not None:
             event["outage_s"] = outage_s
+        if server:
+            event["server"] = server
+        if recommendation:
+            event["recommendation"] = recommendation
         if detail:
             event["detail"] = detail[:120]
         self.events.append(event)

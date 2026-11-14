@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import concurrent.futures
 import ipaddress
+import os
 import socket
 import subprocess
 import sys
@@ -20,7 +21,7 @@ import time
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
-from . import dnswire, parsers
+from . import dnswire, igd, parsers, rogue_dhcp
 from .internet import ProbeResult
 from .ipnet import MAX_HOSTS, check_scan_range, hosts_of, is_private_address, network_of
 from .neighbors import in_network, parse_arp_windows, parse_ip_neigh, parse_proc_net_arp
@@ -91,6 +92,7 @@ class SystemIO:
         self._interface_ip = interface_ip
         self._info: dict | None = None
         self._info_at = 0.0
+        self._locations: dict[str, str] = {}   # the UPnP description each device announced (the router's is where its counters are asked)
 
     # ---- the clock and the interface ---------------------------------------------------------------------------------------------------------
     def now_ms(self) -> int:
@@ -268,6 +270,7 @@ class SystemIO:
                         entry(ip)["services"].append(ssdp_name)
                     if headers.get("LOCATION", "").startswith(f"http://{ip}:"):
                         locations.setdefault(ip, headers["LOCATION"])
+                        self._locations.setdefault(ip, headers["LOCATION"])
         finally:
             sock.close()
         for ip, location in list(locations.items())[:20]:      # the description of a UPnP device names it (a TV says "Living room TV")
@@ -381,6 +384,62 @@ class SystemIO:
         return inspect_web(ip, port, user, password)
 
     # ---- how much goes through -------------------------------------------------------------------------------------------------------------------
+    def dhcp_offers(self, listen_s: float = 4.0) -> list[dict]:
+        """One DHCPDISCOVER on the broadcast address and the offers that come back. It binds the DHCP client port, which needs permission on most systems (and is taken while a DHCP
+        client runs): when it cannot, the answer is an empty list, never an error. The offers are never answered with a request, so no address is leased."""
+        mac = normalize_mac(str(self.interface().get("mac") or ""))
+        if not mac:
+            return []
+        xid = int.from_bytes(os.urandom(4), "big")
+        try:
+            packet = rogue_dhcp.build_discover(bytes.fromhex(mac.replace(":", "")), xid)
+        except ValueError:
+            return []
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        offers: list[dict] = []
+        try:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.settimeout(0.5)
+            sock.bind(("", rogue_dhcp.CLIENT_PORT))
+            sock.sendto(packet, ("255.255.255.255", rogue_dhcp.SERVER_PORT))
+            end = time.monotonic() + listen_s
+            while time.monotonic() < end and len(offers) < rogue_dhcp.MAX_OFFERS:
+                try:
+                    data, _ = sock.recvfrom(2048)
+                except socket.timeout:
+                    continue
+                offer = rogue_dhcp.parse_offer(data, xid)
+                if offer is not None and is_private_address(offer["server"]):
+                    offers.append(offer)
+        except OSError:
+            return offers
+        finally:
+            sock.close()
+        return offers
+
+    def igd_totals(self, gateway: str) -> tuple[int, int] | None:
+        """(received, sent) bytes the router has carried, asked of it as a UPnP Internet Gateway Device (no login). None when it has no such service or does not answer."""
+        location = self._locations.get(gateway)
+        if not location or not is_private_address(gateway):
+            return None
+        try:
+            with _open(location, None, None, None, 1.5) as response:
+                description = response.read(65536).decode("utf-8", "replace")
+        except (OSError, URLError, ValueError):
+            return None
+        url = igd.control_url(description, location)
+        if url is None:
+            return None
+
+        def ask(target: str, body: bytes, headers: dict[str, str]) -> str | None:
+            try:
+                with urlopen(Request(target, data=body, headers=headers, method="POST"), timeout=2.0) as response:   # noqa: S310 - a private http address, checked by control_url
+                    return response.read(16384).decode("utf-8", "replace")
+            except (OSError, URLError, ValueError):
+                return None
+        return igd.read_totals(url, ask)
+
     def traffic(self) -> tuple[int, int] | None:
         """(received, sent) bytes counted by the system: this interface's on Linux, the sum of the interfaces on Windows (`netstat -e`)."""
         if WINDOWS:

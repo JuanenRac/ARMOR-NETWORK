@@ -167,6 +167,9 @@ def main(argv: list[str] | None = None) -> int:
         watch.add_argument("--validate", action="store_true", help="check every message against ARMOR-COMMON before it is sent")
         watch.add_argument("--no-public-info", action="store_true", help="do not ask a public service for the public address (the one request this program makes that leaves the house)")
         watch.add_argument("--dns-name", default="", help="the name the house is reached by from outside (the dynamic DNS name): it is resolved each time the public address is asked for and the message says whether it points to it")
+        watch.add_argument("--rogue-dhcp", action="store_true", help="look for a second DHCP server: one DHCP question on the broadcast address every ten minutes, nothing is leased (off by default; needs permission to use the DHCP client port)")
+        watch.add_argument("--allow-dhcp", action="append", default=[], metavar="IP", help="a DHCP server that belongs on the network besides the router; repeatable")
+        watch.add_argument("--router-igd", action="store_true", help="read the traffic counters of the router over UPnP (no login, read only; off by default)")
         watch.add_argument("--mqtt-url", default="", help="also publish every message to this MQTT broker (mqtt:// or mqtts://, on armor/network/<node>/state); the manual orders do not travel this way. The password is read from ARMOR_NETWORK_MQTT_PASSWORD")
         watch.add_argument("--mqtt-user", default="", help="the user name for --mqtt-url (the account of a network node, e.g. network-node-network-1)")
         watch.add_argument("--public-info-url", default=DEFAULT_PUBLIC_URL, help="the https service that tells the public address (default: ipinfo.io)")
@@ -219,7 +222,15 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
+        allowed_dhcp = set(args.allow_dhcp)
+        for address in allowed_dhcp:
+            try:
+                ipaddress.ip_address(address)
+            except ValueError:
+                print(f"--allow-dhcp {address!r} is not an address", file=sys.stderr)
+                return 2
         config = Config(node_id=args.node_id, profile=args.profile, no_ports=args.no_ports, skip=skip, data_dir=args.data_dir, scan_every_s=args.scan_every,
+                        rogue_dhcp=args.rogue_dhcp, dhcp_allowed=allowed_dhcp, router_igd=args.router_igd,
                         internet_every_s=args.internet_every, public_info=not args.no_public_info, public_url=public_url, dns_name=dns_name)
         loop_io: NetworkIO
         if args.command == "demo":
