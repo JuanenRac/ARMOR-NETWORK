@@ -4,7 +4,8 @@ Copyright (C) 2026 JuanenRac (Electro Hobby 3D). GPL-3.0-or-later.
 
 Everything the program sends is listed here, and none of it is an attack: an ICMP echo and a TCP connection to a handful of ports of the devices of the private network it
 watches, a UDP datagram to the discard port to make the system resolve their addresses, the multicast questions of mDNS and SSDP, a NetBIOS name request, and, for the internet
-check, a TCP connection, two DNS questions and one web request to well-known public addresses. It never sends a password and never tries a login by itself (only an `inspect` order from an administrator carries one, in orders.py), never leaves the private
+check, a TCP connection, two DNS questions and one web request to well-known public addresses. It never sends a password and never tries a login by itself (only an `inspect` order from an administrator carries one, in orders.py, and the opt-in login to the router of
+router_login.py, off by default and read only), never leaves the private
 range for anything but that check (`check_scan_range`), and reads at most a few hundred bytes of what answers.
 """
 
@@ -18,10 +19,10 @@ import subprocess
 import sys
 import threading
 import time
-from urllib.error import URLError
-from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
+from urllib.request import HTTPDigestAuthHandler, HTTPPasswordMgrWithDefaultRealm, Request, build_opener, urlopen
 
-from . import dnswire, igd, parsers, rogue_dhcp
+from . import dnswire, igd, parsers, rogue_dhcp, router_login
 from .internet import ProbeResult
 from .ipnet import MAX_HOSTS, check_scan_range, hosts_of, is_private_address, network_of
 from .neighbors import in_network, parse_arp_windows, parse_ip_neigh, parse_proc_net_arp
@@ -83,12 +84,29 @@ def run(command: list[str], timeout: float = 6.0) -> str:
     return done.stdout.decode("oem" if WINDOWS else "utf-8", "replace")
 
 
+def _router_http(url: str, body: bytes, headers: dict[str, str], user: str | None, password: str | None) -> tuple[int, str]:
+    """One POST to the router; (0, "") when it does not answer. With a user the login is HTTP digest (TR-064), which does not send the password. Answers are cut at 64 KiB."""
+    opener = build_opener()
+    if user is not None and password is not None:
+        manager = HTTPPasswordMgrWithDefaultRealm()
+        manager.add_password(None, url, user, password)
+        opener = build_opener(HTTPDigestAuthHandler(manager))
+    try:
+        with opener.open(Request(url, data=body, headers=headers, method="POST"), timeout=3.0) as response:   # noqa: S310 - a private address, checked by read_names
+            return int(response.status), response.read(65536).decode("utf-8", "replace")
+    except HTTPError as error:
+        return int(error.code), ""
+    except (OSError, URLError, ValueError):
+        return 0, ""
+
+
 class SystemIO:
     """The `NetworkIO` of the real machine (see agent.py)."""
 
     settle_s = 1.5      # how long the system gets to learn the neighbours after they were poked
 
-    def __init__(self, cidr: str | None = None, interface_ip: str | None = None, dhcp_local: str | None = None) -> None:
+    def __init__(self, cidr: str | None = None, interface_ip: str | None = None, dhcp_local: str | None = None, router: router_login.RouterLogin | None = None) -> None:
+        self._router = router                  # the login to the router (opt-in); None: the names are not asked of it
         self._cidr_override = cidr
         self._interface_ip = interface_ip
         self._dhcp_local = dhcp_local          # the address of this machine the DHCP question is bound to (default: the one of the interface the default route leaves by)
@@ -456,6 +474,15 @@ class SystemIO:
             except (OSError, URLError, ValueError):
                 return None
         return igd.read_totals(url, ask)
+
+    def router_names(self, gateway: str) -> dict[str, str] | None:
+        """{address: name} of the devices the router lists, asked WITH the login the owner gave (TR-064 or OpenWrt); None when none was given or the router does not answer."""
+        login = self._router
+        if login is None or not is_private_address(gateway):
+            return None
+        if not login.url:
+            login = router_login.RouterLogin(login.kind, router_login.default_url(login.kind, gateway), login.user, login.password, login.allow_plain_http)
+        return router_login.read_names(login, _router_http)
 
     def traffic(self) -> tuple[int, int] | None:
         """(received, sent) bytes counted by the system: this interface's on Linux, the sum of the interfaces on Windows (`netstat -e`)."""

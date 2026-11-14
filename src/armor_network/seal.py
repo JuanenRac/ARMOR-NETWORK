@@ -8,6 +8,7 @@ import base64
 import binascii
 import hashlib
 import hmac
+import os
 
 
 def _sub_key(token: str, label: str) -> bytes:
@@ -21,6 +22,15 @@ def _stream(key: bytes, nonce: bytes, length: int) -> bytes:
         out += hmac.new(key, nonce + counter.to_bytes(4, "big"), hashlib.sha256).digest()
         counter += 1
     return out[:length]
+
+
+def seal_text(token: str, text: str, nonce: bytes | None = None) -> str:
+    """The same construction as `open_sealed` reads (and as the server's): a fresh random nonce unless a fixed one is given for a test."""
+    nonce = os.urandom(16) if nonce is None else nonce
+    data = text.encode("utf-8")
+    cipher = bytes(a ^ b for a, b in zip(data, _stream(_sub_key(token, "enc"), nonce, len(data)), strict=False))
+    tag = hmac.new(_sub_key(token, "mac"), nonce + cipher, hashlib.sha256).digest()
+    return base64.b64encode(nonce + cipher + tag).decode("ascii")
 
 
 def open_sealed(token: str, sealed: str) -> str | None:

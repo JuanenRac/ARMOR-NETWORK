@@ -78,6 +78,8 @@ class Config:
     rogue_dhcp_every_s: int = 600
     dhcp_allowed: set[str] = field(default_factory=set)   # the DHCP servers that belong (the router is always one)
     router_igd: bool = False                 # OPT-IN: read the traffic counters of the router over UPnP (no login, read only)
+    router_login: bool = False               # OPT-IN: ask the router, WITH the login the owner gave, the names of its devices (read only; see router_login.py)
+    router_every_s: int = 300
     data_dir: Path | None = None
 
 
@@ -89,7 +91,8 @@ class Agent:
         self.log = EventLog()
         self.inventory = Inventory(directory / "inventory.json" if directory else None, offline_after_s=self.config.offline_after_s, log=self.log)
         self.monitor = InternetMonitor(directory / "internet.json" if directory else None, log=self.log)
-        self._next = {"internet": 0, "scan": 0, "discovery": 0, "publish": 0, "traffic": 0, "public": 0, "dhcp": 0}
+        self._next = {"internet": 0, "scan": 0, "discovery": 0, "publish": 0, "traffic": 0, "public": 0, "dhcp": 0, "router": 0}
+        self._router_names: dict[str, str] = {}   # address -> name, as the router lists them (only when the login is on)
         self._reported_findings: set[str] = set()
         self._last_rogue: list[dict] = []
         self._dns_addresses: list[str] | None = None
@@ -232,11 +235,19 @@ class Agent:
             own_name = None
         observations.append(Observation(ip=own_ip, mac=info.get("mac"), latency_ms=0.0, hostname=own_name))
         names_left, ports_left = self.config.max_names_per_step, self.config.max_ports_per_step
+        if self.config.router_login and gateway and now >= self._next["router"]:
+            self._next["router"] = now + self.config.router_every_s * 1000
+            asker = getattr(self.io, "router_names", None)
+            listed = asker(gateway) if asker is not None else None
+            if listed is not None:
+                self._router_names = listed
         for obs in observations:
             note = self._announced.get(obs.ip)
             if note:
                 obs.hostname = obs.hostname or note.get("hostname")
                 obs.services = list(note.get("services", []))
+            if not obs.hostname and self._router_names:
+                obs.hostname = self._router_names.get(obs.ip)
             device = self.inventory.find_by_ip(obs.ip)
             if not obs.hostname and not (device and device.hostname) and names_left > 0 and obs.ip != own_ip and now - self._names_tried.get(obs.ip, -10**15) > 3_600_000:
                 names_left -= 1
