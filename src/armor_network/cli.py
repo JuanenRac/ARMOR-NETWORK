@@ -152,14 +152,21 @@ def _ask_password() -> str:
     return getpass.getpass("Router password: ")
 
 
-def _router_from_settings(settings: config_file.FileSettings, token: str) -> tuple[router_login.RouterLogin | None, str]:
-    """The login to the router from the settings, or (None, why not). The password is never stored in clear text (see router_login.py)."""
+def _router_from_settings(settings: config_file.FileSettings, token: str) -> router_login.RouterLogin | None:
+    """The login to the router from the settings, or None. The password is never stored in clear text (see router_login.py)."""
     if not settings.router_user:
-        return None, "router_user is not set in the config file"
+        return None
     password, _ = router_login.resolve_password(settings.router_credential, settings.router_credential_sealed, token, dict(os.environ), _ask_password)
     if not password:
-        return None, router_login.missing_password_reason(settings.router_credential, settings.router_credential_sealed, token)
-    return router_login.RouterLogin(settings.router_kind, settings.router_url, settings.router_user, password, settings.router_allow_plain_http), ""
+        return None
+    return router_login.RouterLogin(settings.router_kind, settings.router_url, settings.router_user, password, settings.router_allow_plain_http)
+
+
+def _router_login_problem(settings: config_file.FileSettings, token: str) -> str:
+    """Why there is no login to the router. Worked out from the settings alone, apart from the login itself, so the text can be shown."""
+    if not settings.router_user:
+        return "router_user is not set in the config file"
+    return router_login.missing_password_reason(settings.router_credential, settings.router_credential_sealed, token)
 
 
 def _router_seal(token: str) -> int:
@@ -274,9 +281,10 @@ def main(argv: list[str] | None = None) -> int:
         login_wanted = args.router_login or settings.router_login
         router: router_login.RouterLogin | None = None
         if login_wanted:
-            router, why = _router_from_settings(settings, args.ingest_token or os.environ.get("ARMOR_INGEST_TOKEN", ""))
+            ingest_token = args.ingest_token or os.environ.get("ARMOR_INGEST_TOKEN", "")
+            router = _router_from_settings(settings, ingest_token)
             if router is None:
-                print(f"router login: {why}; the names are not asked of the router", file=sys.stderr)
+                print(f"router login: {_router_login_problem(settings, ingest_token)}; the names are not asked of the router", file=sys.stderr)
         allowed_dhcp = set(args.allow_dhcp or settings.allow_dhcp)
         rogue_dhcp, router_igd = args.rogue_dhcp or settings.rogue_dhcp, args.router_igd or settings.router_igd
         for address in allowed_dhcp:
