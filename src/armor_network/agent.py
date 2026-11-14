@@ -18,9 +18,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Protocol, cast
 
+from .findings import risky_port_findings, rogue_dhcp_findings
 from .internet import InternetMonitor, ProbeResult
 from .inventory import EventLog, Inventory, Observation
 from .orders import DEFAULT_PUBLIC_URL, OUTPUT_LIMIT, Order, PublicTracker, target_allowed
+from .rogue_dhcp import judge
 from .services import PROFILES
 
 #: The version of the network contract this node speaks. It goes in every message, so that the server can tell a node older than itself from a current one.
@@ -43,6 +45,8 @@ class NetworkIO(Protocol):
     def probe_gateway(self, gateway: str) -> bool: ...
     def probe_internet(self) -> list[ProbeResult]: ...
     def traffic(self) -> tuple[int, int] | None: ...
+    def dhcp_offers(self) -> list[dict]: ...
+    def igd_totals(self, gateway: str) -> tuple[int, int] | None: ...
     def public_info(self, url: str) -> dict | None: ...
     def resolve_name(self, name: str) -> list[str]: ...
     def traceroute(self, ip: str) -> str: ...
@@ -70,6 +74,10 @@ class Config:
     public_every_s: int = 600
     dns_name: str = ""                       # the name the house is reached by from outside: checked against the public address each time it is asked for
     skip: set[str] = field(default_factory=set)
+    rogue_dhcp: bool = False                 # OPT-IN: one DHCP question on the broadcast address now and then, to find a second DHCP server (nothing is leased)
+    rogue_dhcp_every_s: int = 600
+    dhcp_allowed: set[str] = field(default_factory=set)   # the DHCP servers that belong (the router is always one)
+    router_igd: bool = False                 # OPT-IN: read the traffic counters of the router over UPnP (no login, read only)
     data_dir: Path | None = None
 
 
@@ -81,7 +89,9 @@ class Agent:
         self.log = EventLog()
         self.inventory = Inventory(directory / "inventory.json" if directory else None, offline_after_s=self.config.offline_after_s, log=self.log)
         self.monitor = InternetMonitor(directory / "internet.json" if directory else None, log=self.log)
-        self._next = {"internet": 0, "scan": 0, "discovery": 0, "publish": 0, "traffic": 0, "public": 0}
+        self._next = {"internet": 0, "scan": 0, "discovery": 0, "publish": 0, "traffic": 0, "public": 0, "dhcp": 0}
+        self._reported_findings: set[str] = set()
+        self._last_rogue: list[dict] = []
         self._dns_addresses: list[str] | None = None
         self._public = PublicTracker(directory / "public.json" if directory else None)
         self._orders: list[Order] = []
@@ -117,8 +127,9 @@ class Agent:
         if now >= self._next["scan"]:
             events += self._scan(now, info)
             self._next["scan"] = now + self.config.scan_every_s * 1000
+        events += self._findings(now, info)
         if now >= self._next["traffic"]:
-            self._traffic(now)
+            self._traffic(now, info)
             self._next["traffic"] = now + self.config.traffic_every_s * 1000
         if events or now >= self._next["publish"]:
             self._next["publish"] = now + self.config.publish_every_s * 1000
@@ -243,8 +254,38 @@ class Agent:
         self._scan_info = {"last_ms": now, "hosts": min(len(hosts), 1024), "duration_ms": max(0, self.io.now_ms() - started)}
         return events
 
-    def _traffic(self, now: int) -> None:
-        counters = self.io.traffic()
+    def _findings(self, now: int, info: dict) -> list[dict]:
+        """The risky ports that are open and the DHCP servers that should not be there, each told ONCE as an event while it lasts (a finding that goes and comes back is told again).
+        A finding is a statement, never an action: nothing is closed or blocked."""
+        rogue: list[dict] = []
+        if self.config.rogue_dhcp and now >= self._next["dhcp"]:
+            self._next["dhcp"] = now + self.config.rogue_dhcp_every_s * 1000
+            allowed = set(self.config.dhcp_allowed) | ({info["gateway"]} if info.get("gateway") else set())
+            rogue = rogue_dhcp_findings(judge(self.io.dhcp_offers(), allowed))
+        elif self.config.rogue_dhcp:
+            rogue = [f for f in self._last_rogue]
+        self._last_rogue = rogue
+        found = risky_port_findings(self.inventory.snapshot()) + rogue
+        current = {f["id"] for f in found}
+        events: list[dict] = []
+        for finding in found:
+            if finding["id"] in self._reported_findings:
+                continue
+            if finding["kind"] == "risky_port":
+                service = finding.get("service") or "port"
+                events.append(self.log.add("risky_port", now, device_id=finding["device_id"], port=finding["port"], recommendation=finding["recommendation"], detail=f"{service} ({finding['port']}) is open"))
+            else:
+                events.append(self.log.add("rogue_dhcp", now, server=finding["server"], recommendation=finding["recommendation"], detail=f"{finding['server']} offers {finding.get('offered') or 'an address'}"))
+        self._reported_findings = current
+        return events
+
+    def _traffic(self, now: int, info: dict | None = None) -> None:
+        counters = None
+        gateway = info.get("gateway") if info else None
+        if gateway and self.config.router_igd:
+            counters = self.io.igd_totals(gateway)
+        if counters is None:
+            counters = self.io.traffic()
         if counters is None:
             return
         if self._counters is not None:

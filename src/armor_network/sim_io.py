@@ -69,6 +69,8 @@ class SimIO:
         self.cidr = cidr
         self.outage, self.lan_outage, self.conflict_at = outage, lan_outage, conflict_at
         self._counter = 0
+        self.dhcp_servers: list[dict] = []                 # the DHCP offers a scan of the broadcast address would bring back
+        self.igd_answer: tuple[int, int] | None = None    # bytes per call the made-up router counts, or None when it has no such service
 
     # ---- the script -------------------------------------------------------------------------------------------------------------------------
     @property
@@ -188,6 +190,17 @@ class SimIO:
         if (user, password) != ("admin", "admin"):
             return {"ok": False, "output": f"http://{ip}:{port or 80}/ -> HTTP 401\nlogin: refused"}
         return {"ok": True, "output": f"http://{ip}:{port or 80}/ -> HTTP 200\nlogin: accepted (Digest) - it is a factory login: change it\ntitle: {device.hostname or ip}\nmodel: DS-2CD2043\nfirmware: V5.5.3"}
+
+    #: a made-up second DHCP server and the counters of a made-up router, for the tests and the demo
+
+    def dhcp_offers(self) -> list[dict]:
+        return [dict(offer) for offer in self.dhcp_servers]
+
+    def igd_totals(self, gateway: str) -> tuple[int, int] | None:
+        if self.igd_answer is None:
+            return None
+        self._igd_calls = getattr(self, "_igd_calls", 0) + 1
+        return (self.igd_answer[0] * self._igd_calls, self.igd_answer[1] * self._igd_calls)
 
     def traffic(self) -> tuple[int, int] | None:
         self._counter += 1
