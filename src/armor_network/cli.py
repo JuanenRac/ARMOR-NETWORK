@@ -162,11 +162,11 @@ def _router_from_settings(settings: config_file.FileSettings, token: str) -> rou
     return router_login.RouterLogin(settings.router_kind, settings.router_url, settings.router_user, password, settings.router_allow_plain_http)
 
 
-def _router_login_problem(settings: config_file.FileSettings, token: str) -> str:
+def _router_login_problem(settings: config_file.FileSettings, token_present: bool) -> str:
     """Why there is no login to the router. Worked out from the settings alone, apart from the login itself, so the text can be shown."""
     if not settings.router_user:
         return "router_user is not set in the config file"
-    return router_login.missing_password_reason(settings.router_credential, settings.router_credential_sealed, token)
+    return router_login.missing_password_reason(settings.router_credential == "sealed", settings.router_credential_sealed != "", token_present)
 
 
 def _router_seal(token: str) -> int:
@@ -284,7 +284,8 @@ def main(argv: list[str] | None = None) -> int:
             ingest_token = args.ingest_token or os.environ.get("ARMOR_INGEST_TOKEN", "")
             router = _router_from_settings(settings, ingest_token)
             if router is None:
-                print(f"router login: {_router_login_problem(settings, ingest_token)}; the names are not asked of the router", file=sys.stderr)
+                problem = _router_login_problem(settings, ingest_token != "")
+                print(f"router login: {problem}; the names are not asked of the router", file=sys.stderr)
         allowed_dhcp = set(args.allow_dhcp or settings.allow_dhcp)
         rogue_dhcp, router_igd = args.rogue_dhcp or settings.rogue_dhcp, args.router_igd or settings.router_igd
         for address in allowed_dhcp:

@@ -208,6 +208,12 @@ class SystemDhcp(unittest.TestCase):
         with mock.patch.object(system_io.socket, "socket", side_effect=AssertionError("no socket")):
             self.assertEqual(io.dhcp_offers(), [])
 
+    def test_an_address_that_is_not_one_asks_nothing(self):
+        io = SystemIO(dhcp_local="192.168.0")
+        io.interface = self.io().interface
+        with mock.patch.object(system_io.socket, "socket", side_effect=AssertionError("no socket")):
+            self.assertEqual(io.dhcp_offers(), [])
+
     def test_without_permission_the_answer_is_an_empty_list(self):
         fake = FakeDhcpSocket([], bind_error=PermissionError("not allowed"))
         with mock.patch.object(system_io.socket, "socket", return_value=fake):
