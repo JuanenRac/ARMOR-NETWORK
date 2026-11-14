@@ -22,12 +22,13 @@ import sys
 import time
 from pathlib import Path
 
-from . import __version__, config_file, oui
+from . import __version__, config_file, oui, router_login
 from .agent import Agent, Config, NetworkIO
 from .ipnet import ScanRefused, check_scan_range, is_private_address
 from .mqtt_out import NODE_ID, MqttError, check_mqtt_url, publish as mqtt_publish
 from .orders import DEFAULT_PUBLIC_URL, check_dns_name, check_public_url
 from .publisher import DeliveryError, check_server_url, deliver
+from .seal import seal_text
 from .services import PROFILES
 from .sim_io import SimIO
 from .system_io import SystemIO
@@ -143,6 +144,36 @@ def _run_loop(agent: Agent, args: argparse.Namespace, *, forever: bool) -> int:
         return 0
 
 
+def _ask_password() -> str:
+    """The password typed by someone at the keyboard (not echoed); empty when nobody is there."""
+    if not sys.stdin or not sys.stdin.isatty():
+        return ""
+    import getpass
+    return getpass.getpass("Router password: ")
+
+
+def _router_from_settings(settings: config_file.FileSettings, token: str) -> tuple[router_login.RouterLogin | None, str]:
+    """The login to the router from the settings, or (None, why not). The password is never stored in clear text (see router_login.py)."""
+    if not settings.router_user:
+        return None, "router_user is not set in the config file"
+    password, why = router_login.resolve_password(settings.router_credential, settings.router_credential_sealed, token, dict(os.environ), _ask_password)
+    if not password:
+        return None, why
+    return router_login.RouterLogin(settings.router_kind, settings.router_url, settings.router_user, password, settings.router_allow_plain_http), ""
+
+
+def _router_seal(token: str) -> int:
+    if not token:
+        print("router-seal needs this node's token (--ingest-token or ARMOR_INGEST_TOKEN)", file=sys.stderr)
+        return 2
+    password = os.environ.get(router_login.PASSWORD_ENV, "") or _ask_password()
+    if not password:
+        print(f"the password is read from {router_login.PASSWORD_ENV} or typed at the keyboard", file=sys.stderr)
+        return 2
+    print(seal_text(token, password))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="armor-network", description="Look at the local network: the devices on it, whether the internet is there, what changes.")
     parser.add_argument("--version", action="version", version=f"armor-network {__version__}")
@@ -172,6 +203,7 @@ def main(argv: list[str] | None = None) -> int:
         watch.add_argument("--allow-dhcp", action="append", default=[], metavar="IP", help="a DHCP server that belongs on the network besides the router; repeatable")
         watch.add_argument("--config", type=Path, default=None, metavar="FILE", help="the file with the settings of the checks that are off by default (default: config.json in --data-dir, when it exists); a flag on the command line wins over the file")
         watch.add_argument("--router-igd", action="store_true", help="read the traffic counters of the router over UPnP (no login, read only; off by default)")
+        watch.add_argument("--router-login", action="store_true", help="ask the router, WITH a login, the names of its devices (TR-064 or OpenWrt; read only; off by default; the settings and how the password is kept are in the config file, see router_login.py)")
         watch.add_argument("--mqtt-url", default="", help="also publish every message to this MQTT broker (mqtt:// or mqtts://, on armor/network/<node>/state); the manual orders do not travel this way. The password is read from ARMOR_NETWORK_MQTT_PASSWORD")
         watch.add_argument("--mqtt-user", default="", help="the user name for --mqtt-url (the account of a network node, e.g. network-node-network-1)")
         watch.add_argument("--public-info-url", default=DEFAULT_PUBLIC_URL, help="the https service that tells the public address (default: ipinfo.io)")
@@ -181,7 +213,12 @@ def main(argv: list[str] | None = None) -> int:
     lookup = sub.add_parser("oui", help="who made a network card")
     lookup.add_argument("mac")
 
+    sealer = sub.add_parser("router-seal", help="seal the password of the router with this node's token, to put in the config file (the password is read from ARMOR_ROUTER_PASSWORD or asked for, never printed)")
+    sealer.add_argument("--ingest-token", help="this node's own token (or ARMOR_INGEST_TOKEN)")
+
     args = parser.parse_args(argv)
+    if args.command == "router-seal":
+        return _router_seal(args.ingest_token or os.environ.get("ARMOR_INGEST_TOKEN", ""))
     if args.command == "oui":
         mac = oui.normalize_mac(args.mac)
         if mac is None:
@@ -234,6 +271,12 @@ def main(argv: list[str] | None = None) -> int:
             if not is_private_address(dhcp_interface):
                 print(f"--dhcp-interface {dhcp_interface!r} is not a private address", file=sys.stderr)
                 return 2
+        login_wanted = args.router_login or settings.router_login
+        router: router_login.RouterLogin | None = None
+        if login_wanted:
+            router, why = _router_from_settings(settings, args.ingest_token or os.environ.get("ARMOR_INGEST_TOKEN", ""))
+            if router is None:
+                print(f"router login: {why}; the names are not asked of the router", file=sys.stderr)
         allowed_dhcp = set(args.allow_dhcp or settings.allow_dhcp)
         rogue_dhcp, router_igd = args.rogue_dhcp or settings.rogue_dhcp, args.router_igd or settings.router_igd
         for address in allowed_dhcp:
@@ -243,7 +286,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"--allow-dhcp {address!r} is not an address", file=sys.stderr)
                 return 2
         config = Config(node_id=args.node_id, profile=args.profile, no_ports=args.no_ports, skip=skip, data_dir=args.data_dir, scan_every_s=args.scan_every,
-                        rogue_dhcp=rogue_dhcp, dhcp_allowed=allowed_dhcp, router_igd=router_igd,
+                        rogue_dhcp=rogue_dhcp, dhcp_allowed=allowed_dhcp, router_igd=router_igd, router_login=router is not None,
                         internet_every_s=args.internet_every, public_info=not args.no_public_info, public_url=public_url, dns_name=dns_name)
         loop_io: NetworkIO
         if args.command == "demo":
@@ -251,7 +294,7 @@ def main(argv: list[str] | None = None) -> int:
             config.scan_every_s, config.internet_every_s, config.publish_every_s = args.tick_s, max(2, args.tick_s // 2), max(2, args.tick_s // 2)
             config.offline_after_s = args.tick_s * 3
         else:
-            loop_io = SystemIO(cidr=args.cidr, dhcp_local=dhcp_interface or None)
+            loop_io = SystemIO(cidr=args.cidr, dhcp_local=dhcp_interface or None) if router is None else SystemIO(cidr=args.cidr, dhcp_local=dhcp_interface or None, router=router)
         return _run_loop(Agent(loop_io, config), args, forever=True)
     except ScanRefused as error:
         print(f"refused: {error}", file=sys.stderr)

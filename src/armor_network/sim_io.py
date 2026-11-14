@@ -71,6 +71,7 @@ class SimIO:
         self._counter = 0
         self.dhcp_servers: list[dict] = []                 # the DHCP offers a scan of the broadcast address would bring back
         self.igd_answer: tuple[int, int] | None = None    # bytes per call the made-up router counts, or None when it has no such service
+        self.router_answer: dict[str, str] | None = None  # the names the made-up router lists when it is asked with a login, or None when it does not answer
 
     # ---- the script -------------------------------------------------------------------------------------------------------------------------
     @property
@@ -201,6 +202,10 @@ class SimIO:
             return None
         self._igd_calls = getattr(self, "_igd_calls", 0) + 1
         return (self.igd_answer[0] * self._igd_calls, self.igd_answer[1] * self._igd_calls)
+
+    def router_names(self, gateway: str) -> dict[str, str] | None:
+        """The names a made-up router lists (set `router_answer` to turn it on)."""
+        return dict(self.router_answer) if self.router_answer is not None else None
 
     def traffic(self) -> tuple[int, int] | None:
         self._counter += 1
