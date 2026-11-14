@@ -24,7 +24,7 @@ from pathlib import Path
 
 from . import __version__, oui
 from .agent import Agent, Config, NetworkIO
-from .ipnet import ScanRefused, check_scan_range
+from .ipnet import ScanRefused, check_scan_range, is_private_address
 from .mqtt_out import NODE_ID, MqttError, check_mqtt_url, publish as mqtt_publish
 from .orders import DEFAULT_PUBLIC_URL, check_dns_name, check_public_url
 from .publisher import DeliveryError, check_server_url, deliver
@@ -168,6 +168,7 @@ def main(argv: list[str] | None = None) -> int:
         watch.add_argument("--no-public-info", action="store_true", help="do not ask a public service for the public address (the one request this program makes that leaves the house)")
         watch.add_argument("--dns-name", default="", help="the name the house is reached by from outside (the dynamic DNS name): it is resolved each time the public address is asked for and the message says whether it points to it")
         watch.add_argument("--rogue-dhcp", action="store_true", help="look for a second DHCP server: one DHCP question on the broadcast address every ten minutes, nothing is leased (off by default; needs permission to use the DHCP client port)")
+        watch.add_argument("--dhcp-interface", metavar="IP", default="", help="the address of this machine, on the interface to look from, that the DHCP question is bound to (default: the address of the interface the default route leaves by); a private address only")
         watch.add_argument("--allow-dhcp", action="append", default=[], metavar="IP", help="a DHCP server that belongs on the network besides the router; repeatable")
         watch.add_argument("--router-igd", action="store_true", help="read the traffic counters of the router over UPnP (no login, read only; off by default)")
         watch.add_argument("--mqtt-url", default="", help="also publish every message to this MQTT broker (mqtt:// or mqtts://, on armor/network/<node>/state); the manual orders do not travel this way. The password is read from ARMOR_NETWORK_MQTT_PASSWORD")
@@ -222,6 +223,10 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
+        if args.dhcp_interface:
+            if not is_private_address(args.dhcp_interface):
+                print(f"--dhcp-interface {args.dhcp_interface!r} is not a private address", file=sys.stderr)
+                return 2
         allowed_dhcp = set(args.allow_dhcp)
         for address in allowed_dhcp:
             try:
@@ -238,7 +243,7 @@ def main(argv: list[str] | None = None) -> int:
             config.scan_every_s, config.internet_every_s, config.publish_every_s = args.tick_s, max(2, args.tick_s // 2), max(2, args.tick_s // 2)
             config.offline_after_s = args.tick_s * 3
         else:
-            loop_io = SystemIO(cidr=args.cidr)
+            loop_io = SystemIO(cidr=args.cidr, dhcp_local=args.dhcp_interface or None)
         return _run_loop(Agent(loop_io, config), args, forever=True)
     except ScanRefused as error:
         print(f"refused: {error}", file=sys.stderr)
