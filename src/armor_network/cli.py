@@ -102,6 +102,9 @@ def _run_loop(agent: Agent, args: argparse.Namespace, *, forever: bool) -> int:
     if bool(server) != bool(token):
         print("--server-url and --ingest-token (or ARMOR_INGEST_TOKEN) must be supplied together", file=sys.stderr)
         return 2
+    if server and server.startswith("http://") and not _is_local(server) and (getattr(args, "require_tls", False) or os.environ.get("ARMOR_NETWORK_REQUIRE_TLS") == "1"):
+        print("--require-tls (or ARMOR_NETWORK_REQUIRE_TLS=1): the server is on another machine and its address is plain http, so the token would cross the network in the clear; use an https:// address", file=sys.stderr)
+        return 2
     if server and server.startswith("http://") and not _is_local(server):
         # The ingest token and the results of an inspection travel with the message: over plain HTTP anyone on the path reads them. HTTPS, or a server on this same machine, is the way.
         print("warning: the server is spoken to over plain HTTP: the ingest token and what the node finds cross the network in the clear (use an https:// address)", file=sys.stderr)
@@ -197,6 +200,7 @@ def main(argv: list[str] | None = None) -> int:
         watch = sub.add_parser(name, help=text)
         _common_arguments(watch)
         watch.add_argument("--server-url", help="an ARMOR-SERVER, for example http://127.0.0.1:18080; without it the messages are printed")
+        watch.add_argument("--require-tls", action="store_true", help="refuse to start when the server is on another machine and its address is plain http (ARMOR_NETWORK_REQUIRE_TLS=1 does the same; off by default, when it only warns)")
         watch.add_argument("--ingest-token", help="this node's own token (Studio shows it), or the server's shared ingest token, which cannot open a saved login for `inspect`; never write it to a file (ARMOR_INGEST_TOKEN also works)")
         watch.add_argument("--data-dir", type=Path, default=Path("armor-network-data"), help="where the inventory and the outages are kept between runs")
         watch.add_argument("--scan-every", type=int, default=60, help="seconds between sweeps of the network")

@@ -24,6 +24,7 @@ armor-network demo --count 3 --validate  # a made-up house; --validate checks ev
 | `--skip IP` | never probe this address (repeatable) |
 | `--data-dir` | where the inventory and the outages are kept between runs (default `armor-network-data`) |
 | `--scan-every`, `--internet-every` | seconds between sweeps (60) and internet checks (5) |
+| `--require-tls` | refuse to start (exit 2) when the server is on another machine and its address is plain `http://`, instead of only warning; `ARMOR_NETWORK_REQUIRE_TLS=1` does the same. Off by default; `https://` and a server on this same machine are always accepted |
 | `--count N` | stop after N messages (0: never) |
 | `--no-public-info` | do not ask a public service for the public address |
 | `--mqtt-url URL` and `--mqtt-user NAME` | also publish every message to this MQTT broker (`mqtt://` or `mqtts://`, on `armor/network/<node>/state`, one short connection per message, QoS 0); the password is read from `ARMOR_NETWORK_MQTT_PASSWORD`, never from an argument. The manual orders of Studio travel in the answer of the server's route and not over MQTT, so a node that publishes only here does not receive them |

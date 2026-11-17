@@ -107,6 +107,16 @@ class WatchTests(unittest.TestCase):
             self.assertEqual("crosses" in err or "cross the network in the clear" in err, warned, url)
             self.assertIn("UNDELIVERED", err)                                         # a server that is down does not stop the watch
 
+    def test_require_tls_turns_the_plain_http_warning_into_a_refusal(self):
+        for url, flag, env, refused in (("http://192.168.0.5:8080", True, None, True), ("http://192.168.0.5:8080", False, {"ARMOR_NETWORK_REQUIRE_TLS": "1"}, True),
+                                        ("http://192.168.0.5:8080", False, {"ARMOR_NETWORK_REQUIRE_TLS": "0"}, False), ("http://127.0.0.1:1", True, None, False),
+                                        ("http://localhost:1", True, None, False), ("https://armor.example", True, None, False)):
+            extra = ["--require-tls"] if flag else []
+            with mock.patch.object(cli, "deliver", side_effect=DeliveryError("down")), tempfile.TemporaryDirectory() as folder:
+                code, _out, err = run_cli("demo", "--count", "1", "--tick-s", "2", "--data-dir", folder, "--server-url", url, "--ingest-token", "tok", "--no-public-info", *extra, env=env)
+            self.assertEqual(code, 2 if refused else 0, (url, flag, env))
+            self.assertEqual("--require-tls" in err, refused, (url, flag, env))
+
     def test_is_local(self):
         for local in ("http://localhost:8080", "http://127.0.0.1", "http://127.1.2.3:9", "http://[::1]:80", "http://LOCALHOST"):
             self.assertTrue(cli._is_local(local), local)

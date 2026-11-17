@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The node can refuse to talk to another machine over plain http:** `--require-tls` (or `ARMOR_NETWORK_REQUIRE_TLS=1`) turns the warning about a server reached over plain `http://` on another machine into an error at start (exit code 2). It is off by default, when only the warning is given; `https://` and a server on this same machine are always accepted. Tests for each case.
+
 - **The delivery to the server no longer follows a redirect:** the token travels in the request, so an answer that sends it to another address ends the delivery with a clear error instead of passing the token on. The server never redirects this route, so nothing changes for a normal installation. A test with a local server that answers 302 and a second server that must not be called.
 
 ## [0.1.8] - Router names, findings of the network, safer DHCP question and wider tests
