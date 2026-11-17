@@ -668,6 +668,34 @@ class PublisherTests(unittest.TestCase):
             with self.subTest(bad), self.assertRaises(ValueError):
                 check_server_url(bad)
 
+    def test_a_redirect_is_not_followed_and_the_token_is_not_sent_on(self):
+        Handler.seen = []
+        elsewhere = HTTPServer(("127.0.0.1", 0), Handler)
+        target = f"http://127.0.0.1:{elsewhere.server_address[1]}/steal"
+
+        class Redirecting(BaseHTTPRequestHandler):
+            def do_POST(self):
+                self.rfile.read(int(self.headers.get("Content-Length", "0")))
+                self.send_response(302)
+                self.send_header("Location", target)
+                self.end_headers()
+
+            def log_message(self, *args):
+                pass
+
+        origin = HTTPServer(("127.0.0.1", 0), Redirecting)
+        for server in (elsewhere, origin):
+            threading.Thread(target=server.serve_forever, daemon=True).start()
+        try:
+            with self.assertRaises(DeliveryError) as raised:
+                post(f"http://127.0.0.1:{origin.server_address[1]}", "tok", {}, attempts=3, pause_s=0)
+            self.assertIn("redirected", str(raised.exception))
+            self.assertEqual(Handler.seen, [])                           # the other server was never called
+        finally:
+            for server in (elsewhere, origin):
+                server.shutdown()
+                server.server_close()
+
     def test_a_delivery(self):
         Handler.seen, Handler.codes = [], []
         server = HTTPServer(("127.0.0.1", 0), Handler)

@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The delivery to the server no longer follows a redirect:** the token travels in the request, so an answer that sends it to another address ends the delivery with a clear error instead of passing the token on. The server never redirects this route, so nothing changes for a normal installation. A test with a local server that answers 302 and a second server that must not be called.
+
 ## [0.1.8] - Router names, findings of the network, safer DHCP question and wider tests
 
 - **The DHCP question only ever ties its socket to a parsed private address:** the address of the interface is parsed before the socket is bound, so an empty or malformed text can never mean every interface of the machine; nothing changes for a normal network, and the question stays off unless `--rogue-dhcp` is given.
