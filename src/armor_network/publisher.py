@@ -10,7 +10,7 @@ import json
 import time
 from urllib.error import HTTPError
 from urllib.parse import urlparse
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from .orders import Order, parse_orders
 
@@ -19,6 +19,21 @@ ROUTE = "/api/v1/network/state"
 
 class DeliveryError(RuntimeError):
     """The server refused or could not be reached."""
+
+
+class _NoRedirects(HTTPRedirectHandler):
+    """The token travels in the request: an answer that sends it somewhere else is refused instead of followed."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: ANN001 - the signature of the standard library
+        raise DeliveryError("server redirected")
+
+
+_OPENER = build_opener(_NoRedirects())
+
+
+def urlopen(request: Request, timeout: float):  # noqa: ANN201 - the response object of the standard library
+    """What `_send` opens the request with: the standard opener, but with no redirect followed."""
+    return _OPENER.open(request, timeout=timeout)
 
 
 def check_server_url(server_url: str) -> str:
