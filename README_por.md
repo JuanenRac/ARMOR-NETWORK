@@ -136,6 +136,7 @@ As ordens do Studio (`scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http`, 
 | `--rogue-dhcp`  `--allow-dhcp IP`  `--router-igd` | off | procura um segundo servidor DHCP (uma pergunta DHCP ao endereço de difusão a cada dez minutos, nada é atribuído; requer permissão para usar a porta cliente DHCP), um servidor DHCP que pertence à rede além do router (repetível), e lê os contadores de tráfego do router por UPnP sem credenciais; o primeiro e o último estão desligados |
 | `--config FILE`  `--dhcp-interface IP` | `config.json` in `--data-dir` | um ficheiro com `rogue_dhcp`, `allow_dhcp`, `router_igd` e `dhcp_interface` (há um exemplo em `docs/config.example.json`); tudo está desligado se nada disser e uma bandeira prevalece sobre o ficheiro; o endereço privado desta máquina a que a pergunta DHCP fica ligada |
 | `--validate`  `--no-public-info`  `--public-info-url`  `--dns-name` | - | verifica cada mensagem com o ARMOR-COMMON; a consulta do endereço público (desligá-la, o seu endereço, o nome a verificar) |
+| `--require-tls` | off | recusar arrancar (saída 2) quando o servidor está noutra máquina e o seu endereço é `http://` simples, em vez de apenas avisar; `ARMOR_NETWORK_REQUIRE_TLS=1` faz o mesmo; `https://` e um servidor nesta mesma máquina são sempre aceites |
 
 Tudo se define com opções da linha de comandos (veja [docs/USAGE.md](docs/USAGE.md), que mostra também a unidade systemd que o mantém a correr). Uma queda declara-se após três rondas falhadas e termina após duas boas; os três primeiros varrimentos só aprendem o que lá está.
 

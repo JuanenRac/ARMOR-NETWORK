@@ -136,6 +136,7 @@ Studio からのオーダー（`scan_now`、`ping`、`traceroute`、`wake`、`po
 | `--rogue-dhcp`  `--allow-dhcp IP`  `--router-igd` | off | 2 台目の DHCP サーバーを探し（10 分ごとにブロードキャストアドレスへ DHCP の問い合わせを 1 回送るだけで何も割り当てません。DHCP クライアントポートの使用許可が必要）、ルーター以外にネットワークに属する DHCP サーバーを指定し（複数指定可）、ログインなしで UPnP からルーターのトラフィックカウンターを読みます。最初と最後は既定でオフです |
 | `--config FILE`  `--dhcp-interface IP` | `config.json` in `--data-dir` | `rogue_dhcp`、`allow_dhcp`、`router_igd`、`dhcp_interface` を書くファイル（例は `docs/config.example.json`）。何も書かなければすべてオフで、コマンドラインのフラグがファイルより優先されます。DHCP の問い合わせを結び付けるこのマシンのプライベートアドレス |
 | `--validate`  `--no-public-info`  `--public-info-url`  `--dns-name` | - | 各メッセージを ARMOR-COMMON で検査、公開アドレスの照会（無効化、そのアドレス、確認する名前） |
+| `--require-tls` | off | サーバーが別のマシンにあり、そのアドレスが暗号化なしの `http://` の場合、警告だけでなく起動を拒否します（終了コード 2）。`ARMOR_NETWORK_REQUIRE_TLS=1` でも同じです。`https://` と同じマシン上のサーバーは常に受け入れます |
 
 設定はすべてコマンドラインオプションで行います（常駐させる systemd ユニットも示す [docs/USAGE.md](docs/USAGE.md) を参照）。障害は 3 回連続の失敗で判定し、2 回の成功で終了とします。最初の 3 回のスイープは何があるかを学ぶだけです。
 
