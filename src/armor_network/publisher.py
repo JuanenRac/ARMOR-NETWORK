@@ -31,6 +31,11 @@ class _NoRedirects(HTTPRedirectHandler):
 _OPENER = build_opener(_NoRedirects())
 
 
+def urlopen(request: Request, timeout: float):  # noqa: ANN201 - the response object of the standard library
+    """What `_send` opens the request with: the standard opener, but with no redirect followed."""
+    return _OPENER.open(request, timeout=timeout)
+
+
 def check_server_url(server_url: str) -> str:
     """Only a plain http(s) origin is accepted: no credentials, path or query in the URL."""
     parsed = urlparse(server_url)
@@ -45,7 +50,7 @@ def _send(server_url: str, token: str, payload: dict, timeout: float, attempts: 
     last = "no attempt was made"
     for attempt in range(attempts):
         try:
-            with _OPENER.open(request, timeout=timeout) as response:  # noqa: S310 - the scheme is checked by check_server_url
+            with urlopen(request, timeout=timeout) as response:  # noqa: S310 - the scheme is checked by check_server_url
                 if response.status != 202:
                     raise DeliveryError(f"server returned {response.status}")
                 try:
