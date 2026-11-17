@@ -136,6 +136,7 @@ ARMOR-NETWORK 是家族观察本地网络的眼睛。它运行在网络中的一
 | `--rogue-dhcp`  `--allow-dhcp IP`  `--router-igd` | off | 查找第二台 DHCP 服务器（每十分钟向广播地址发一次 DHCP 询问，不分配任何地址；需要使用 DHCP 客户端端口的权限）、除路由器外属于该网络的 DHCP 服务器（可重复），并通过 UPnP 无需登录读取路由器的流量计数器；第一项和最后一项默认关闭 |
 | `--config FILE`  `--dhcp-interface IP` | `config.json` in `--data-dir` | 包含 `rogue_dhcp`、`allow_dhcp`、`router_igd` 和 `dhcp_interface` 的文件（示例见 `docs/config.example.json`）；未写内容时全部关闭，命令行选项优先于文件；DHCP 询问所绑定的本机私有地址 |
 | `--validate`  `--no-public-info`  `--public-info-url`  `--dns-name` | - | 用 ARMOR-COMMON 检查每条消息；公网地址查询（关闭、其地址、要检查的名称） |
+| `--require-tls` | off | 当服务器在另一台机器上且地址是未加密的 `http://` 时，拒绝启动（退出码 2），而不只是警告；`ARMOR_NETWORK_REQUIRE_TLS=1` 效果相同；`https://` 和本机上的服务器始终被接受 |
 
 全部通过命令行选项设置（见 [docs/USAGE.md](docs/USAGE.md)，其中也给出让它常驻运行的 systemd 单元）。连续三轮失败才判定为中断，连续两轮成功才算结束；前三次扫描只用来了解有什么。
 

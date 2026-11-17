@@ -136,6 +136,7 @@ The orders from Studio (`scan_now`, `ping`, `traceroute`, `wake`, `ports`, `http
 | `--rogue-dhcp`  `--allow-dhcp IP`  `--router-igd` | off | look for a second DHCP server (one DHCP question on the broadcast address every ten minutes, nothing is leased; needs permission to use the DHCP client port), a DHCP server that belongs on the network besides the router (repeatable), and read the traffic counters of the router over UPnP without a login; the first and the last are off |
 | `--config FILE`  `--dhcp-interface IP` | `config.json` in `--data-dir` | a file with `rogue_dhcp`, `allow_dhcp`, `router_igd` and `dhcp_interface` (an example is in `docs/config.example.json`); everything is off when it says nothing and a flag wins over the file; the private address of this machine the DHCP question is bound to |
 | `--validate`  `--no-public-info`  `--public-info-url`  `--dns-name` | - | check each message against ARMOR-COMMON; the public-address look-up (off, its address, the name to check) |
+| `--require-tls` | off | refuse to start (exit 2) when the server is on another machine and its address is plain `http://`, instead of only warning; `ARMOR_NETWORK_REQUIRE_TLS=1` does the same; `https://` and a server on this same machine are always accepted |
 
 All of it is set by command-line flags (see [docs/USAGE.md](docs/USAGE.md), which also shows the systemd unit that keeps it running). An outage is called after three failed rounds and ended after two good ones; the first three sweeps only learn what is there.
 
