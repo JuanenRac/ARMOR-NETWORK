@@ -188,7 +188,7 @@ GitHub Actions は push と pull request のたびに A.R.M.O.R. の基本検査
 ## 📂 リポジトリの構成
 
 <p align="center">
-  <img src="images/repository-structure.svg" alt="Repository structure of ARMOR-NETWORK" width="100%">
+  <img src="images/repository-structure.svg" alt="ARMOR-NETWORK のリポジトリ構造" width="100%">
 </p>
 
 <details>

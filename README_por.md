@@ -188,7 +188,7 @@ O GitHub Actions executa a base do A.R.M.O.R. em cada push e pull request: a val
 ## 📂 Estrutura do repositório
 
 <p align="center">
-  <img src="images/repository-structure.svg" alt="Repository structure of ARMOR-NETWORK" width="100%">
+  <img src="images/repository-structure.svg" alt="Estrutura do repositório de ARMOR-NETWORK" width="100%">
 </p>
 
 <details>
