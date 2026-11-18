@@ -4,6 +4,8 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The shared tools of the manifest and the status lights gain an opt-in strict check of the evidence:** `sync_manifests.py` and `status_lights.py` take `--strict-evidence` (off by default; `ARMOR_STRICT_EVIDENCE=1` switches it on for `armor_ci_validate.py`).
+- **The manifest says simulator evidence until the record of a test on real hardware is kept:** it said bench with no record, so the Hardware and Integration lights go down to orange in the eight READMEs (a person raises them again with the record).
 - **The node can refuse to talk to another machine over plain http:** `--require-tls` (or `ARMOR_NETWORK_REQUIRE_TLS=1`) turns the warning about a server reached over plain `http://` on another machine into an error at start (exit code 2). It is off by default, when only the warning is given; `https://` and a server on this same machine are always accepted. Tests for each case.
 
 - **The delivery to the server no longer follows a redirect:** the token travels in the request, so an answer that sends it to another address ends the delivery with a clear error instead of passing the token on. The server never redirects this route, so nothing changes for a normal installation. A test with a local server that answers 302 and a second server that must not be called.

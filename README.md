@@ -59,9 +59,9 @@ Each line is one part of this repository and the light says how far it is today.
 | Software | 🟢 | The scanner, the inventory that tells what changed, the internet check, the public-address look-up and the orders from Studio run as a service on the CM5 test bench. |
 | Tests | 🟢 | 334 tests pass against a scripted network, and every message is accepted by the contract of ARMOR-COMMON. |
 | Protocols and data | 🟡 | What a device is (its kind, its system, its maker) is a guess, and nothing captures packets: traffic per device and intrusion detection in the strict sense are not done. |
-| Hardware | 🟡 | It watches the real network of the CM5 test bench (a router, the phones and nodes of the house) but has not watched a whole house for weeks. |
+| Hardware | 🟠 | It watches the real network of the CM5 test bench (a router, the phones and nodes of the house) but has not watched a whole house for weeks. |
 | Security | 🟡 | It only asks the router and never configures it; the sealed logins are tested on the host, and there has been no independent review. |
-| Integration | 🟡 | Its messages reach the CM5 test bench server and Studio; the commands from Studio are tested against a scripted network. |
+| Integration | 🟠 | Its messages reach the CM5 test bench server and Studio; the commands from Studio are tested against a scripted network. |
 | Documentation | 🟢 | Eight languages and the changelog are up to date. |
 
 ## 🎯 Overview
