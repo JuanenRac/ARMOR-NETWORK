@@ -188,7 +188,7 @@ C'est du Python pur : rien à compiler. La version se trouve dans `pyproject.tom
 ## 📂 Structure du dépôt
 
 <p align="center">
-  <img src="images/repository-structure.svg" alt="Repository structure of ARMOR-NETWORK" width="100%">
+  <img src="images/repository-structure.svg" alt="Structure du dépôt de ARMOR-NETWORK" width="100%">
 </p>
 
 <details>

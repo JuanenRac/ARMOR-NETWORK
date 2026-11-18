@@ -188,7 +188,7 @@ GitHub Actions 在每次推送和拉取请求时运行 A.R.M.O.R. 基线：清�
 ## 📂 仓库结构
 
 <p align="center">
-  <img src="images/repository-structure.svg" alt="Repository structure of ARMOR-NETWORK" width="100%">
+  <img src="images/repository-structure.svg" alt="ARMOR-NETWORK 的仓库结构" width="100%">
 </p>
 
 <details>
