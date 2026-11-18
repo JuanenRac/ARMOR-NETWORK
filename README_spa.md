@@ -59,9 +59,9 @@ Cada línea es una parte de este repositorio y la luz dice hasta dónde llega ho
 | Software | 🟢 | El escáner, el inventario que dice qué cambió, la comprobación de internet, la consulta de la dirección pública y las órdenes de Studio funcionan como servicio en el banco de pruebas CM5. |
 | Pruebas | 🟢 | Pasan 334 pruebas contra una red guionizada, y cada mensaje lo acepta el contrato de ARMOR-COMMON. |
 | Protocolos y datos | 🟡 | Qué es un dispositivo (su tipo, su sistema, su fabricante) es una suposición, y nada captura paquetes: el tráfico por dispositivo y la detección de intrusiones en sentido estricto no están hechos. |
-| Hardware | 🟡 | Vigila la red real del banco de pruebas CM5 (un router, los móviles y nodos de la casa) pero no ha vigilado una casa entera durante semanas. |
+| Hardware | 🟠 | Vigila la red real del banco de pruebas CM5 (un router, los móviles y nodos de la casa) pero no ha vigilado una casa entera durante semanas. |
 | Seguridad | 🟡 | Solo pregunta al router y nunca lo configura; los accesos sellados están probados en el host y no ha habido una revisión independiente. |
-| Integración | 🟡 | Sus mensajes llegan al servidor del banco de pruebas CM5 y a Studio; las órdenes de Studio se prueban contra una red guionizada. |
+| Integración | 🟠 | Sus mensajes llegan al servidor del banco de pruebas CM5 y a Studio; las órdenes de Studio se prueban contra una red guionizada. |
 | Documentación | 🟢 | Ocho idiomas y el historial de cambios están al día. |
 
 ## 🎯 Resumen

@@ -59,9 +59,9 @@ Cada linha é uma parte deste repositório e a luz diz até onde chega hoje. É 
 | Software | 🟢 | O leitor da rede, o inventário que diz o que mudou, a verificação da internet, a consulta do endereço público e as ordens do Studio funcionam como serviço na bancada de testes CM5. |
 | Testes | 🟢 | Passam 334 testes contra uma rede com guião, e cada mensagem é aceite pelo contrato do ARMOR-COMMON. |
 | Protocolos e dados | 🟡 | O que um dispositivo é (o tipo, o sistema, o fabricante) é um palpite, e nada captura pacotes: o tráfego por dispositivo e a deteção de intrusões em sentido estrito não estão feitos. |
-| Hardware | 🟡 | Vigia a rede real da bancada de testes CM5 (um router, os telemóveis e os nós da casa), mas não vigiou uma casa inteira durante semanas. |
+| Hardware | 🟠 | Vigia a rede real da bancada de testes CM5 (um router, os telemóveis e os nós da casa), mas não vigiou uma casa inteira durante semanas. |
 | Segurança | 🟡 | Só pergunta ao router e nunca o configura; os acessos selados estão testados no anfitrião e não houve revisão independente. |
-| Integração | 🟡 | As suas mensagens chegam ao servidor da bancada de testes CM5 e ao Studio; as ordens do Studio são testadas contra uma rede com guião. |
+| Integração | 🟠 | As suas mensagens chegam ao servidor da bancada de testes CM5 e ao Studio; as ordens do Studio são testadas contra uma rede com guião. |
 | Documentação | 🟢 | Oito idiomas e o registo de alterações estão atualizados. |
 
 ## 🎯 Visão geral
