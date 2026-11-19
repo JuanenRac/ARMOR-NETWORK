@@ -206,7 +206,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    ordini da Studio; accessi sigillati
 │   ├── cli.py __main__.py                   scan, watch e demo
 │   └── data/                                oui.tsv.gz, il registro IEEE
-├── tests/                                   334 test in 9 moduli
+├── tests/                                   334 test in 19 moduli
 ├── docs/                                    DESIGN, SAFETY, USAGE, MESSAGES
 ├── tools/                                   fetch_oui.py aggiorna il registro dei produttori; i controlli CI e l'avviatore
 ├── images/                                  banner, icona e immagini del README

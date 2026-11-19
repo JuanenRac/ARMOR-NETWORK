@@ -206,7 +206,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    来自 Studio 的指令；密封凭据
 │   ├── cli.py __main__.py                   scan、watch 和 demo
 │   └── data/                                oui.tsv.gz（IEEE 注册表）
-├── tests/                                   9 个模块 334 项测试
+├── tests/                                   19 个模块 334 项测试
 ├── docs/                                    DESIGN、SAFETY、USAGE、MESSAGES
 ├── tools/                                   fetch_oui.py 刷新厂商注册表；共用的 CI 检查与启动器
 ├── images/                                  横幅图、图标和 README 的图片
