@@ -206,7 +206,7 @@ ARMOR-NETWORK/
 │   ├── orders.py seal.py                    Studio からのオーダーと封印した認証情報
 │   ├── cli.py __main__.py                   scan・watch・demo
 │   └── data/                                oui.tsv.gz（IEEE 登録簿）
-├── tests/                                   9 モジュール 334 件
+├── tests/                                   19 モジュール 334 件
 ├── docs/                                    DESIGN、SAFETY、USAGE、MESSAGES
 ├── tools/                                   fetch_oui.py がメーカー登録簿を更新、共通の CI 検査とランチャー
 ├── images/                                  バナー、アイコン、README の画像
