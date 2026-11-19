@@ -60,7 +60,7 @@ Chaque ligne est une partie de ce dépôt et le feu dit où elle en est aujourd'
 | Tests | 🟢 | 334 tests réussissent contre un réseau scénarisé, et chaque message est accepté par le contrat d'ARMOR-COMMON. |
 | Protocoles et données | 🟡 | Ce qu'est un appareil (son type, son système, son fabricant) est une supposition, et rien ne capture de paquets : le trafic par appareil et la détection d'intrusion au sens strict ne sont pas faits. |
 | Matériel | 🟠 | Il surveille le réseau réel du banc d'essai CM5 (un routeur, les téléphones et les nœuds de la maison) mais n'a pas surveillé une maison entière pendant des semaines. |
-| Sécurité | 🟡 | Il ne fait qu'interroger le routeur et ne le configure jamais ; les identifiants scellés sont testés sur l'hôte et il n'y a pas eu de revue indépendante. |
+| Sécurité | 🟠 | Il ne fait qu'interroger le routeur et ne le configure jamais ; les identifiants scellés sont testés sur l'hôte et il n'y a pas eu de revue indépendante. |
 | Intégration | 🟠 | Ses messages arrivent au serveur du banc d'essai CM5 et à Studio ; les ordres de Studio sont testés contre un réseau scénarisé. |
 | Documentation | 🟢 | Huit langues et le journal des modifications sont à jour. |
 

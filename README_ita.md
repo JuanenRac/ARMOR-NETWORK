@@ -60,7 +60,7 @@ Ogni riga è una parte di questo repository e il semaforo dice a che punto è og
 | Test | 🟢 | Superano 334 test contro una rete simulata da script, e ogni messaggio è accettato dal contratto di ARMOR-COMMON. |
 | Protocolli e dati | 🟡 | Cosa sia un dispositivo (tipo, sistema, produttore) è un'ipotesi, e nulla cattura pacchetti: il traffico per dispositivo e il rilevamento di intrusioni in senso stretto non sono fatti. |
 | Hardware | 🟠 | Sorveglia la rete reale del banco di prova CM5 (un router, i telefoni e i nodi di casa) ma non ha sorvegliato un'intera casa per settimane. |
-| Sicurezza | 🟡 | Interroga soltanto il router e non lo configura mai; gli accessi sigillati sono testati sull'host e non c'è stata una revisione indipendente. |
+| Sicurezza | 🟠 | Interroga soltanto il router e non lo configura mai; gli accessi sigillati sono testati sull'host e non c'è stata una revisione indipendente. |
 | Integrazione | 🟠 | I suoi messaggi arrivano al server del banco di prova CM5 e a Studio; gli ordini di Studio sono provati contro una rete simulata da script. |
 | Documentazione | 🟢 | Otto lingue e il registro delle modifiche sono aggiornati. |
 
