@@ -173,14 +173,14 @@
     {
      "name": "tests/",
      "desc": {
-      "en": "334 tests in 19 modules",
-      "es": "334 pruebas en 19 módulos",
-      "de": "334 Tests in 19 Modulen",
-      "fr": "334 tests en 19 modules",
-      "it": "334 test in 19 moduli",
-      "ja": "19 モジュール 334 件",
-      "zh": "19 个模块 334 项测试",
-      "pt": "334 testes em 19 módulos"
+      "en": "{{fact:tests:ARMOR-NETWORK|334}} tests in {{fact:test_modules:ARMOR-NETWORK|19}} modules",
+      "es": "{{fact:tests:ARMOR-NETWORK|334}} pruebas en {{fact:test_modules:ARMOR-NETWORK|19}} módulos",
+      "de": "{{fact:tests:ARMOR-NETWORK|334}} Tests in {{fact:test_modules:ARMOR-NETWORK|19}} Modulen",
+      "fr": "{{fact:tests:ARMOR-NETWORK|334}} tests en {{fact:test_modules:ARMOR-NETWORK|19}} modules",
+      "it": "{{fact:tests:ARMOR-NETWORK|334}} test in {{fact:test_modules:ARMOR-NETWORK|19}} moduli",
+      "ja": "{{fact:test_modules:ARMOR-NETWORK|19}} モジュール {{fact:tests:ARMOR-NETWORK|334}} 件",
+      "zh": "{{fact:test_modules:ARMOR-NETWORK|19}} 个模块 {{fact:tests:ARMOR-NETWORK|334}} 项测试",
+      "pt": "{{fact:tests:ARMOR-NETWORK|334}} testes em {{fact:test_modules:ARMOR-NETWORK|19}} módulos"
      }
     },
     {
