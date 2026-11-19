@@ -4,16 +4,16 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [0.1.9] - An optional TLS requirement, no redirects on delivery, simulator evidence and generated file trees
+
 - **The structure generator can write a figure read from the code:** `tools/make_structure.py` resolves `{{fact:NAME|LAST}}` in the descriptions of `docs/structure.json` where the documentation tools are next to the repository, and writes LAST (the figure it had when last written) everywhere else, so a repository still builds on its own.
 - **The test counts of the repository structure are read from the code:** the tests, test modules, JSON Schemas and conformance payloads that `docs/structure.json` states are `{{fact:...}}` markers now, so the tree and the picture follow the tests instead of a number typed by hand.
 - **The Security and Updates lights of the Project status table follow the evidence ceiling:** they cannot be above what the Hardware row may show for the evidence of the manifest, and Security is never green; the rows that were higher are now orange in the eight READMEs, and `tools/status_lights.py` is the new shared copy.
-
 - **The file tree of the README is drawn from the structure source:** the text tree in the eight READMEs is generated from `docs/structure.json`, the file that also draws the picture, so the two cannot disagree; it states the current count of 334 tests.
 - **The Architecture picture rounds its coordinates to two decimals:** the legend positions no longer carry floating-point noise such as 399.9999999999999, so `make_architecture.py --check` gives the same answer on every machine; the shared tool is the one of ARMOR-COMMON.
 - **The shared tools of the manifest and the status lights gain an opt-in strict check of the evidence:** `sync_manifests.py` and `status_lights.py` take `--strict-evidence` (off by default; `ARMOR_STRICT_EVIDENCE=1` switches it on for `armor_ci_validate.py`).
 - **The manifest says simulator evidence until the record of a test on real hardware is kept:** it said bench with no record, so the Hardware and Integration lights go down to orange in the eight READMEs (a person raises them again with the record).
 - **The node can refuse to talk to another machine over plain http:** `--require-tls` (or `ARMOR_NETWORK_REQUIRE_TLS=1`) turns the warning about a server reached over plain `http://` on another machine into an error at start (exit code 2). It is off by default, when only the warning is given; `https://` and a server on this same machine are always accepted. Tests for each case.
-
 - **The delivery to the server no longer follows a redirect:** the token travels in the request, so an answer that sends it to another address ends the delivery with a clear error instead of passing the token on. The server never redirects this route, so nothing changes for a normal installation. A test with a local server that answers 302 and a second server that must not be called.
 
 ## [0.1.8] - Router names, findings of the network, safer DHCP question and wider tests
