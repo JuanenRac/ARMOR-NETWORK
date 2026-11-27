@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **The shared tools read the output of processes as UTF-8:** `tools/status_lights.py`, `tools/sync_manifests.py` and `tools/universal_readme_check.py` are the current copies; on Windows a character outside the code page no longer breaks a check.
 - **An answer cut in the middle, or that is not HTTP, no longer ends the watch:** a server answer is treated like an unreachable server and sent again, and a device, a router or the public address service that answers garbage counts as no answer.
 - **The shared project tool is the current one:** the copy follows the shared repository, which now knows the new solar panel node.
 
