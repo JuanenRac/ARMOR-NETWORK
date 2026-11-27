@@ -173,14 +173,14 @@
     {
      "name": "tests/",
      "desc": {
-      "en": "{{fact:tests:ARMOR-NETWORK|334}} tests in {{fact:test_modules:ARMOR-NETWORK|19}} modules",
-      "es": "{{fact:tests:ARMOR-NETWORK|334}} pruebas en {{fact:test_modules:ARMOR-NETWORK|19}} módulos",
-      "de": "{{fact:tests:ARMOR-NETWORK|334}} Tests in {{fact:test_modules:ARMOR-NETWORK|19}} Modulen",
-      "fr": "{{fact:tests:ARMOR-NETWORK|334}} tests en {{fact:test_modules:ARMOR-NETWORK|19}} modules",
-      "it": "{{fact:tests:ARMOR-NETWORK|334}} test in {{fact:test_modules:ARMOR-NETWORK|19}} moduli",
-      "ja": "{{fact:test_modules:ARMOR-NETWORK|19}} モジュール {{fact:tests:ARMOR-NETWORK|334}} 件",
-      "zh": "{{fact:test_modules:ARMOR-NETWORK|19}} 个模块 {{fact:tests:ARMOR-NETWORK|334}} 项测试",
-      "pt": "{{fact:tests:ARMOR-NETWORK|334}} testes em {{fact:test_modules:ARMOR-NETWORK|19}} módulos"
+      "en": "{{fact:tests:ARMOR-NETWORK|337}} tests in {{fact:test_modules:ARMOR-NETWORK|20}} modules",
+      "es": "{{fact:tests:ARMOR-NETWORK|337}} pruebas en {{fact:test_modules:ARMOR-NETWORK|20}} módulos",
+      "de": "{{fact:tests:ARMOR-NETWORK|337}} Tests in {{fact:test_modules:ARMOR-NETWORK|20}} Modulen",
+      "fr": "{{fact:tests:ARMOR-NETWORK|337}} tests en {{fact:test_modules:ARMOR-NETWORK|20}} modules",
+      "it": "{{fact:tests:ARMOR-NETWORK|337}} test in {{fact:test_modules:ARMOR-NETWORK|20}} moduli",
+      "ja": "{{fact:test_modules:ARMOR-NETWORK|20}} モジュール {{fact:tests:ARMOR-NETWORK|337}} 件",
+      "zh": "{{fact:test_modules:ARMOR-NETWORK|20}} 个模块 {{fact:tests:ARMOR-NETWORK|337}} 项测试",
+      "pt": "{{fact:tests:ARMOR-NETWORK|337}} testes em {{fact:test_modules:ARMOR-NETWORK|20}} módulos"
      }
     },
     {
