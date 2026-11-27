@@ -12,6 +12,7 @@ range for anything but that check (`check_scan_range`), and reads at most a few 
 from __future__ import annotations
 
 import concurrent.futures
+import http.client
 import ipaddress
 import os
 import socket
@@ -96,7 +97,7 @@ def _router_http(url: str, body: bytes, headers: dict[str, str], user: str | Non
             return int(response.status), response.read(65536).decode("utf-8", "replace")
     except HTTPError as error:
         return int(error.code), ""
-    except (OSError, URLError, ValueError):
+    except (OSError, URLError, ValueError, http.client.HTTPException):
         return 0, ""
 
 
@@ -297,7 +298,7 @@ class SystemIO:
             try:
                 with _open(location, None, None, None, 1.5) as response:   # a redirect is followed only to another private address
                     info = parsers.upnp_device_info(response.read(16384).decode("utf-8", "replace"))
-            except (OSError, URLError, ValueError):
+            except (OSError, URLError, ValueError, http.client.HTTPException):
                 continue
             if info.get("friendlyName") and not entry(ip)["hostname"]:
                 entry(ip)["hostname"] = info["friendlyName"][:63]
@@ -369,7 +370,7 @@ class SystemIO:
                 with urlopen(request, timeout=timeout + 1) as response:  # noqa: S310 - a fixed address
                     ok = response.status in (200, 204)
                 return ProbeResult("connectivitycheck.gstatic.com", "http", ok, (time.perf_counter() - start) * 1000 if ok else None)
-            except (OSError, URLError, ValueError):
+            except (OSError, URLError, ValueError, http.client.HTTPException):
                 return ProbeResult("connectivitycheck.gstatic.com", "http", False)
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
             jobs = [pool.submit(tcp), pool.submit(dns, "1.1.1.1", "cloudflare.com"), pool.submit(dns, "8.8.8.8", "google.com"), pool.submit(web)]
@@ -465,7 +466,7 @@ class SystemIO:
         try:
             with _open(location, None, None, None, 1.5) as response:
                 description = response.read(65536).decode("utf-8", "replace")
-        except (OSError, URLError, ValueError):
+        except (OSError, URLError, ValueError, http.client.HTTPException):
             return None
         url = igd.control_url(description, location)
         if url is None:
@@ -475,7 +476,7 @@ class SystemIO:
             try:
                 with urlopen(Request(target, data=body, headers=headers, method="POST"), timeout=2.0) as response:   # noqa: S310 - a private http address, checked by control_url
                     return response.read(16384).decode("utf-8", "replace")
-            except (OSError, URLError, ValueError):
+            except (OSError, URLError, ValueError, http.client.HTTPException):
                 return None
         return igd.read_totals(url, ask)
 
