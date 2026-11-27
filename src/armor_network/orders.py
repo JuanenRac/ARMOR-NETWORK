@@ -13,6 +13,7 @@ Two things that are not about the house's own devices:
 
 from __future__ import annotations
 
+import http.client
 import os
 import ipaddress
 import json
@@ -78,7 +79,7 @@ def fetch_public_info(url: str = DEFAULT_PUBLIC_URL, timeout: float = 6.0) -> di
         request = Request(check_public_url(url), headers={"User-Agent": "armor-network", "Accept": "application/json"})
         with urlopen(request, timeout=timeout) as response:  # noqa: S310 - https, checked by check_public_url
             data = json.loads(response.read(8192).decode("utf-8", "replace"))
-    except (OSError, URLError, ValueError):
+    except (OSError, URLError, ValueError, http.client.HTTPException):
         return None
     return clean_public_info(data)
 
@@ -223,7 +224,7 @@ def http_look(ip: str, port: int, timeout: float = 3.0) -> dict:
         with _open(f"{scheme}://{ip}:{port}/", None, None, context if scheme == "https" else None, timeout) as response:
             status, server = response.status, response.headers.get("Server", "")
             body = response.read(16_384).decode("utf-8", "replace")
-    except OSError as error:
+    except (OSError, http.client.HTTPException) as error:   # HTTPException: the device answered something that is not HTTP, or cut it
         return {"ok": False, "output": f"no answer: {error}"[:200]}
     match = re.search(r"<title[^>]*>(.*?)</title>", body, re.I | re.S)
     title = re.sub(r"\s+", " ", match.group(1)).strip()[:120] if match else ""
@@ -384,10 +385,12 @@ def _inspect_one(ip: str, port: int, user: str | None, password: str | None, tim
         needs = error.code == 401
         try:
             raw = error.read(16_384) if error.fp else b""
+        except (OSError, http.client.HTTPException):
+            raw = b""                         # a cut body: what the status and the headers said still holds
         finally:
             error.close()                     # an answer that was read is closed: a connection is never left open by a refusal
         body = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else str(raw)
-    except OSError:
+    except (OSError, http.client.HTTPException):
         return None
     login = "not required"
     if needs:
@@ -413,7 +416,7 @@ def _inspect_one(ip: str, port: int, user: str | None, password: str | None, tim
                 login = "refused" if error.code == 401 else f"refused (HTTP {error.code})"
             except PinChanged as error:
                 login = f"not sent: the HTTPS certificate of this device is not the one seen the first time ({error}); remove its line from {pin_file()} if the change is expected"
-            except OSError as error:
+            except (OSError, http.client.HTTPException) as error:
                 login = f"not tried: {error}"[:80]
         if realm:
             login += f"; realm: {realm.group(1)}"

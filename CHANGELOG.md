@@ -4,6 +4,7 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+- **An answer cut in the middle, or that is not HTTP, no longer ends the watch:** a server answer is treated like an unreachable server and sent again, and a device, a router or the public address service that answers garbage counts as no answer.
 - **The shared project tool is the current one:** the copy follows the shared repository, which now knows the new solar panel node.
 
 - **The copy of the shared validator is current:** `tools/armor_ci_validate.py` now also checks with `node --check` that the scripts served to a browser parse, in a repository that has them under `panel/` or `public/`.

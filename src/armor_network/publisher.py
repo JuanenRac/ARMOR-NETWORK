@@ -5,6 +5,7 @@ Copyright (C) 2026 JuanenRac (Electro Hobby 3D). GPL-3.0-or-later.
 
 from __future__ import annotations
 
+import http.client
 import ipaddress
 import json
 import time
@@ -63,7 +64,7 @@ def _send(server_url: str, token: str, payload: dict, timeout: float, attempts: 
             if error.code < 500:
                 raise DeliveryError(f"server rejected the network state: HTTP {error.code} {body}") from error
             last = f"HTTP {error.code}"
-        except OSError:      # includes URLError and a server that accepts the connection and never answers (a timeout)
+        except (OSError, http.client.HTTPException):      # includes URLError, a server that accepts the connection and never answers (a timeout) and an answer cut or garbled
             last = "server is unreachable"
         if attempt + 1 < attempts:
             time.sleep(pause_s)
